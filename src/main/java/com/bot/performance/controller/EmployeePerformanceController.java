@@ -32,6 +32,7 @@ public class EmployeePerformanceController {
         names.add("America");
         names.add("Turkey");
         names.add("Japan");
+        names.add("Russia");
 
 //        String msg = restTemplate.getForObject("http://PERFORMANCE-DATA-SERVICE/data/sample", String.class);
 //        if(msg != null) {
