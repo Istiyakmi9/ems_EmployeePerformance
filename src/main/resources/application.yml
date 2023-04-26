@@ -13,8 +13,8 @@ spring:
       discovery:
         all-namespaces: true
 
-#  config:
-#    import: configserver:http://localhost:8083
+  config:
+    import: optional:configserver:http://config-service:8083
 
 #eureka:
 #  client:
