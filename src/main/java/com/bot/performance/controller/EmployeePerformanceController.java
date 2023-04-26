@@ -23,7 +23,8 @@ public class EmployeePerformanceController {
     @Autowired
     RestTemplate restTemplate;
 
-    @Value("${file.folder}")
+    // @Value("${file.folder:na}")
+    @Value("${file.folder:#{null}}")
     private String targetFolder;
 
     Logger logger = LoggerFactory.getLogger(EmployeePerformanceController.class);
