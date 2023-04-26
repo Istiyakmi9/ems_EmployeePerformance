@@ -4,6 +4,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,10 @@ public class EmployeePerformanceController {
     @Autowired
     RestTemplate restTemplate;
 
+    // @Value("${file.folder:na}")
+    @Value("${file.folder:#{null}}")
+    private String targetFolder;
+
     Logger logger = LoggerFactory.getLogger(EmployeePerformanceController.class);
 
     @GetMapping("get")
@@ -33,6 +38,7 @@ public class EmployeePerformanceController {
         names.add("Turkey");
         names.add("Japan");
         names.add("Russia");
+        names.add(targetFolder);
 
 //        String msg = restTemplate.getForObject("http://PERFORMANCE-DATA-SERVICE/data/sample", String.class);
 //        if(msg != null) {
