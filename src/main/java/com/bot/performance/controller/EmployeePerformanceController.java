@@ -1,5 +1,6 @@
 package com.bot.performance.controller;
 
+import com.bot.performance.model.CurrentUserDetail;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,9 @@ public class EmployeePerformanceController {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    CurrentUserDetail userDetail;
+
     // @Value("${file.folder:na}")
     @Value("${file.folder:#{null}}")
     private String targetFolder;
@@ -32,6 +36,7 @@ public class EmployeePerformanceController {
     @GetMapping("get")
     @CircuitBreaker(name = "countryList", fallbackMethod = "handleOnNoService")
     public ResponseEntity<List<String>> getDetail() {
+        logger.info(userDetail.getEmail());
         List<String> names = new ArrayList<>();
         names.add("India");
         names.add("America");
