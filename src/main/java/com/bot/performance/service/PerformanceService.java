@@ -1,9 +1,6 @@
 package com.bot.performance.service;
 
-import com.bot.performance.model.EmployeePerformance;
-import com.bot.performance.model.FilterModel;
-import com.bot.performance.model.PerfomanceObjective;
-import com.bot.performance.model.PerformanceDetail;
+import com.bot.performance.model.*;
 import com.bot.performance.repository.PerformanceObjectiveRepository;
 import com.bot.performance.repository.PerformanceRepository;
 import com.bot.performance.serviceinterface.IPerformanceService;
@@ -31,6 +28,8 @@ public class PerformanceService implements IPerformanceService {
     ObjectMapper objectMapper;
     @Autowired
     PerformanceObjectiveRepository performanceObjectiveRepository;
+    @Autowired
+    CurrentSession currentUserDetail;
 
     public List<EmployeePerformance> GetAllEmpPerformanceService() {
         var result = performanceRepository.findAll();
@@ -56,7 +55,7 @@ public class PerformanceService implements IPerformanceService {
         objectives.forEach(x -> {
             if (!x.getTag().isEmpty() &&x.getTag() != null) {
                 var isObjSee = true;
-                if (x.isObjSeeType())
+                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
                     isObjSee = false;
 
                 if (isObjSee) {
