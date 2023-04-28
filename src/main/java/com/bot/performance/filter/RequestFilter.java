@@ -1,6 +1,8 @@
 package com.bot.performance.filter;
 
-import com.bot.performance.model.CurrentUserDetail;
+import com.bot.performance.model.CurrentSession;
+import com.bot.performance.model.UserDetail;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -21,8 +23,9 @@ import java.nio.charset.StandardCharsets;
 public class RequestFilter implements Filter {
 
     @Autowired
-    CurrentUserDetail userDetail;
-
+    CurrentSession userDetail;
+    @Autowired
+    ObjectMapper objectMapper;
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
@@ -42,10 +45,43 @@ public class RequestFilter implements Filter {
                     .parseClaimsJws(headerToken)
                     .getBody();
 
-            String email = claims.get("email", String.class);
             String sid = claims.get("sid", String.class);
-            userDetail.setEmail(email);
-            userDetail.setUserId(Long.parseLong(sid));
+            String user = claims.get("JBot", String.class);
+            var userData = objectMapper.readValue(user, UserDetail.class);
+            userDetail.setUserDetail(userData);
+            var roleName = claims.get("role", String.class);
+            switch (roleName) {
+                case "Admin":
+                    userDetail.getUserDetail().setRoleId(1);
+                    break;
+                case "Employee":
+                    userDetail.getUserDetail().setRoleId(2);
+                    break;
+                case "Candidate":
+                    userDetail.getUserDetail().setRoleId(3);
+                    break;
+                case "Client":
+                    userDetail.getUserDetail().setRoleId(4);
+                    break;
+                default:
+                    userDetail.getUserDetail().setRoleId(5);
+                    break;
+            }
+
+            if (userDetail.getUserDetail() == null)
+                throw new Exception("Invalid token found. Please contact to admin.");
+
+            if (userDetail.getUserDetail().getOrganizationId() <= 0
+                    || userDetail.getUserDetail().getCompanyId() <= 0)
+                throw new Exception("Invalid Organization id or Company id. Please contact to admin.");
+
+            if (sid == null)
+                throw new Exception("Invalid employee id used. Please contact to admin.");
+
+            userDetail.getUserDetail().setFullName(userDetail.getUserDetail().getFirstName() + " " +
+                                                    userDetail.getUserDetail().getLastName());
+            userDetail.getUserDetail().setUserId(Long.parseLong(sid));
+
         } catch (ExpiredJwtException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Your session got expired");
         } catch (Exception ex) {
