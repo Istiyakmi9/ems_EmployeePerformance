@@ -4,7 +4,7 @@ import com.bot.performance.model.EmployeePerformance;
 import com.bot.performance.model.FilterModel;
 import com.bot.performance.model.PerfomanceObjective;
 import com.bot.performance.service.PerformanceService;
-import com.bot.performance.model.CurrentUserDetail;
+import com.bot.performance.model.CurrentSession;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class EmployeePerformanceController {
     RestTemplate restTemplate;
 
     @Autowired
-    CurrentUserDetail userDetail;
+    CurrentSession userDetail;
 
     @Autowired
     PerformanceService performanceService;
@@ -39,7 +39,7 @@ public class EmployeePerformanceController {
     @GetMapping("get")
     @CircuitBreaker(name = "countryList", fallbackMethod = "handleOnNoService")
     public ResponseEntity<List<String>> getDetail() {
-        logger.info(userDetail.getEmail());
+        System.out.println(userDetail.getUserDetail().toString());
         List<String> names = new ArrayList<>();
         names.add("India");
         names.add("America");

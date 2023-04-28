@@ -1,148 +1,164 @@
 package com.bot.performance.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserDetail {
-    Long EmployeeId;
-    Long UserId;
-    int OrganizationId;
-    int CompanyId;
-    String FirstName;
-    String LastName;
-    String FullName;
-    String ManagerName;
-    String Mobile;
-    String Email;
-    int RoleId;
-    String Password;
-    Long ReportingManagerId;
-    int AdminId;
+    @JsonProperty("EmployeeId")
+    Long employeeId;
+    @JsonProperty("UserId")
+    Long userId;
+    @JsonProperty("OrganizationId")
+    int organizationId;
+    @JsonProperty("CompanyId")
+    int companyId;
+    @JsonProperty("FirstName")
+    String firstName;
+    @JsonProperty("LastName")
+    String lastName;
+    @JsonProperty("FullName")
+    String fullName;
+    @JsonProperty("ManagerName")
+    String managerName;
+    @JsonProperty("Mobile")
+    String mobile;
+    @JsonProperty("Email")
+    String email;
+    @JsonProperty("RoleId")
+    int roleId;
+    @JsonProperty("Password")
+    String password;
+    @JsonProperty("ReportingManagerId")
+    Long reportingManagerId;
+    @JsonProperty("AdminId")
+    int adminId;
 
     public Long getEmployeeId() {
-        return EmployeeId;
+        return employeeId;
     }
 
     public void setEmployeeId(Long employeeId) {
-        EmployeeId = employeeId;
+        this.employeeId = employeeId;
     }
 
     public Long getUserId() {
-        return UserId;
+        return userId;
     }
 
     public void setUserId(Long userId) {
-        UserId = userId;
+        this.userId = userId;
     }
 
     public int getOrganizationId() {
-        return OrganizationId;
+        return organizationId;
     }
 
     public void setOrganizationId(int organizationId) {
-        OrganizationId = organizationId;
+        this.organizationId = organizationId;
     }
 
     public int getCompanyId() {
-        return CompanyId;
+        return companyId;
     }
 
     public void setCompanyId(int companyId) {
-        CompanyId = companyId;
+        this.companyId = companyId;
     }
 
     public String getFirstName() {
-        return FirstName;
+        return firstName;
     }
 
     public void setFirstName(String firstName) {
-        FirstName = firstName;
+        this.firstName = firstName;
     }
 
     public String getLastName() {
-        return LastName;
+        return lastName;
     }
 
     public void setLastName(String lastName) {
-        LastName = lastName;
+        this.lastName = lastName;
     }
 
     public String getFullName() {
-        return FullName;
+        return fullName;
     }
 
     public void setFullName(String fullName) {
-        FullName = fullName;
+        this.fullName = fullName;
     }
 
     public String getManagerName() {
-        return ManagerName;
+        return managerName;
     }
 
     public void setManagerName(String managerName) {
-        ManagerName = managerName;
+        this.managerName = managerName;
     }
 
     public String getMobile() {
-        return Mobile;
+        return mobile;
     }
 
     public void setMobile(String mobile) {
-        Mobile = mobile;
+        this.mobile = mobile;
     }
 
     public String getEmail() {
-        return Email;
+        return email;
     }
 
     public void setEmail(String email) {
-        Email = email;
+        this.email = email;
     }
 
     public int getRoleId() {
-        return RoleId;
+        return roleId;
     }
 
     public void setRoleId(int roleId) {
-        RoleId = roleId;
+        this.roleId = roleId;
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
 
     public void setPassword(String password) {
-        Password = password;
+        this.password = password;
     }
 
     public Long getReportingManagerId() {
-        return ReportingManagerId;
+        return reportingManagerId;
     }
 
     public void setReportingManagerId(Long reportingManagerId) {
-        ReportingManagerId = reportingManagerId;
+        this.reportingManagerId = reportingManagerId;
     }
 
     public int getAdminId() {
-        return AdminId;
+        return adminId;
     }
 
     public void setAdminId(int adminId) {
-        AdminId = adminId;
+        this.adminId = adminId;
     }
 
     public UserDetail(Long employeeId, Long userId, int organizationId, int companyId, String firstName, String lastName, String fullName, String managerName, String mobile, String email, int roleId, String password, Long reportingManagerId, int adminId) {
-        EmployeeId = employeeId;
-        UserId = userId;
-        OrganizationId = organizationId;
-        CompanyId = companyId;
-        FirstName = firstName;
-        LastName = lastName;
-        FullName = fullName;
-        ManagerName = managerName;
-        Mobile = mobile;
-        Email = email;
-        RoleId = roleId;
-        Password = password;
-        ReportingManagerId = reportingManagerId;
-        AdminId = adminId;
+        this.employeeId = employeeId;
+        this.userId = userId;
+        this.organizationId = organizationId;
+        this.companyId = companyId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.fullName = fullName;
+        this.managerName = managerName;
+        this.mobile = mobile;
+        this.email = email;
+        this.roleId = roleId;
+        this.password = password;
+        this.reportingManagerId = reportingManagerId;
+        this.adminId = adminId;
     }
 
     public UserDetail() {}
@@ -150,20 +166,20 @@ public class UserDetail {
     @Override
     public String toString() {
         return "UserDetail{" +
-                "EmployeeId=" + EmployeeId +
-                ", UserId=" + UserId +
-                ", OrganizationId=" + OrganizationId +
-                ", CompanyId=" + CompanyId +
-                ", FirstName='" + FirstName + '\'' +
-                ", LastName='" + LastName + '\'' +
-                ", FullName='" + FullName + '\'' +
-                ", ManagerName='" + ManagerName + '\'' +
-                ", Mobile='" + Mobile + '\'' +
-                ", Email='" + Email + '\'' +
-                ", RoleId=" + RoleId +
-                ", Password='" + Password + '\'' +
-                ", ReportingManagerId=" + ReportingManagerId +
-                ", AdminId=" + AdminId +
+                "employeeId=" + employeeId +
+                ", userId=" + userId +
+                ", organizationId=" + organizationId +
+                ", companyId=" + companyId +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", managerName='" + managerName + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", email='" + email + '\'' +
+                ", roleId=" + roleId +
+                ", password='" + password + '\'' +
+                ", reportingManagerId=" + reportingManagerId +
+                ", adminId=" + adminId +
                 '}';
     }
 }
