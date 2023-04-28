@@ -14,11 +14,12 @@ spring:
         all-namespaces: true
 
   config:
-#    discovery:
-#      enabled: true
-#      service-id: config-service
-#      port: 8083
     import: optional:configserver:http://configserver-service:8083
+    # import: configserver:http://localhost:8083
+
+eureka:
+  client:
+    enabled: false
 
 #eureka:
 #  client:
