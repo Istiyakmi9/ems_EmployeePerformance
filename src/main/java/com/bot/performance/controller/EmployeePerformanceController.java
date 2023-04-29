@@ -1,6 +1,10 @@
 package com.bot.performance.controller;
 
-import com.bot.performance.model.CurrentUserDetail;
+import com.bot.performance.model.EmployeePerformance;
+import com.bot.performance.model.FilterModel;
+import com.bot.performance.model.PerfomanceObjective;
+import com.bot.performance.service.PerformanceService;
+import com.bot.performance.model.CurrentSession;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,12 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +26,10 @@ public class EmployeePerformanceController {
     RestTemplate restTemplate;
 
     @Autowired
-    CurrentUserDetail userDetail;
+    CurrentSession userDetail;
 
+    @Autowired
+    PerformanceService performanceService;
     // @Value("${file.folder:na}")
     @Value("${file.folder:#{null}}")
     private String targetFolder;
@@ -36,7 +39,7 @@ public class EmployeePerformanceController {
     @GetMapping("get")
     @CircuitBreaker(name = "countryList", fallbackMethod = "handleOnNoService")
     public ResponseEntity<List<String>> getDetail() {
-        logger.info(userDetail.getEmail());
+        System.out.println(userDetail.getUserDetail().toString());
         List<String> names = new ArrayList<>();
         names.add("India");
         names.add("America");
@@ -51,6 +54,38 @@ public class EmployeePerformanceController {
 //        }
 
         return ResponseEntity.ok(names);
+    }
+
+    @GetMapping("getall")
+    public ResponseEntity<List<EmployeePerformance>> getallEmpPerformance() {
+        var result = performanceService.GetAllEmpPerformanceService();
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("updateEmployeeObjective")
+    public  ResponseEntity<EmployeePerformance> updateEmployeeObjective(@RequestBody EmployeePerformance employeePerformance) throws Exception {
+        var result = performanceService.UpdateEmployeeObjectiveService(employeePerformance);
+        return  ResponseEntity.ok(result);
+    }
+
+    @GetMapping("getEmployeeObjective/{designationId}/{companyId}/{employeeId}")
+    public  ResponseEntity<List<PerfomanceObjective>> getEmployeeObjective(@PathVariable("designationId") int designationId,
+                                                                           @PathVariable("companyId") int companyId,
+                                                                           @PathVariable("employeeId") long employeeId) throws Exception {
+        var result = performanceService.GetEmployeeObjectiveService(designationId, companyId, employeeId);
+        return  ResponseEntity.ok(result);
+    }
+
+    @PostMapping("getPerformanceObjective")
+    public  ResponseEntity<List<PerfomanceObjective>> getPerformanceObjective(@RequestBody FilterModel filterModel) throws Exception {
+        var result = performanceService.GetPerformanceObjectiveService(filterModel);
+        return  ResponseEntity.ok(result);
+    }
+
+    @PostMapping("objectiveInsertUpdate")
+    public  ResponseEntity<List<PerfomanceObjective>> objectiveInsertUpdate(@RequestBody PerfomanceObjective perfomanceObjective) throws Exception {
+        var result = performanceService.ObjectiveInsertUpdateService(perfomanceObjective);
+        return  ResponseEntity.ok(result);
     }
 
     public ResponseEntity<List<String>> handleOnNoService(Exception ex) {
