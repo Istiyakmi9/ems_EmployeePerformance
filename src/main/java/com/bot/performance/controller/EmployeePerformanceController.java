@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/performance/")
+@RequestMapping("/api/eps/performance/")
 public class EmployeePerformanceController {
 
     @Autowired
