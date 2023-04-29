@@ -12,12 +12,20 @@ spring:
       discovery:
         all-namespaces: true
 
+
+
 ---
 spring:
   config:
     activate:
       on-profile: default
     import: optional:configserver:http://localhost:8083
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.0.101:3306/onlinedatabuilder
+    username: istiyak
+    password: live@Bottomhalf_001
 
 ---
 spring:
@@ -26,7 +34,25 @@ spring:
       on-profile: dev
     import: optional:configserver:http://configserver-service:8083
 
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://194.233.76.48:3306/onlinedatabuilder
+    username: istiyak
+    password: live@Bottomhalf_011
+
 ---
+
+spring:
+  jpa:
+    hibernate.ddl-auto: none
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+
+
 management:
   health:
     circuitbreakers:
