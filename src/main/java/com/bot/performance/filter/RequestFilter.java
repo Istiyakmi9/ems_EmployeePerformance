@@ -28,7 +28,9 @@ public class RequestFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String headerToken = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         if(headerToken == null || !headerToken.startsWith("Bearer")) {
-            throw new RuntimeException("Invalid toke.");
+            // throw new RuntimeException("Invalid toke.");
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
         }
 
         headerToken = headerToken.substring(7);
