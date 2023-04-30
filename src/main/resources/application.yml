@@ -40,13 +40,17 @@ spring:
     username: istiyak
     password: live@Bottomhalf_011
 
+eureka:
+  client:
+    enabled: false
+
 ---
 
 spring:
   jpa:
-    hibernate.ddl-auto: none
     show-sql: true
     hibernate:
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   jackson:
