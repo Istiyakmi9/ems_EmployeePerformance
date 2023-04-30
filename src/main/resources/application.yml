@@ -36,7 +36,8 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://194.233.76.48:3306/onlinedatabuilder
+    # url: jdbc:mysql://194.233.76.48:3306/onlinedatabuilder
+    url: jdbc:mysql://192.168.0.101:3306/onlinedatabuilder
     username: istiyak
     password: live@Bottomhalf_011
 
