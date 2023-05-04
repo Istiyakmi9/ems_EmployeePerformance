@@ -1,9 +1,6 @@
 package com.bot.performance.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Date;
 
@@ -40,6 +37,9 @@ public class EmployeePerformance {
 
     @Column(name = "UpdatedOn")
     Date updatedOn;
+
+    @Transient
+    double targetValue;
 
     public Long getEmployeePerformanceId() {
         return employeePerformanceId;
@@ -138,6 +138,14 @@ public class EmployeePerformance {
     }
 
     public EmployeePerformance() {}
+
+    public double getTargetValue() {
+        return targetValue;
+    }
+
+    public void setTargetValue(double targetValue) {
+        this.targetValue = targetValue;
+    }
 
     public EmployeePerformance(Long employeePerformanceId, Long objectiveId, Long employeeId, int companyId, double currentValue, int status, String comments, String performanceDetail, Long updatedBy, Date updatedOn) {
         this.employeePerformanceId = employeePerformanceId;

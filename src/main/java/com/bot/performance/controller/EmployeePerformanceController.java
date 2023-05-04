@@ -1,10 +1,7 @@
 package com.bot.performance.controller;
 
-import com.bot.performance.model.EmployeePerformance;
-import com.bot.performance.model.FilterModel;
-import com.bot.performance.model.PerfomanceObjective;
+import com.bot.performance.model.*;
 import com.bot.performance.service.PerformanceService;
-import com.bot.performance.model.CurrentSession;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/eps/performance/")
-public class EmployeePerformanceController {
+public class EmployeePerformanceController extends BaseController {
 
     @Autowired
     RestTemplate restTemplate;
@@ -63,29 +60,29 @@ public class EmployeePerformanceController {
     }
 
     @PostMapping("updateEmployeeObjective")
-    public  ResponseEntity<EmployeePerformance> updateEmployeeObjective(@RequestBody EmployeePerformance employeePerformance) throws Exception {
+    public  ResponseEntity<ApiResponse> updateEmployeeObjective(@RequestBody EmployeePerformance employeePerformance) throws Exception {
         var result = performanceService.UpdateEmployeeObjectiveService(employeePerformance);
-        return  ResponseEntity.ok(result);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @GetMapping("getEmployeeObjective/{designationId}/{companyId}/{employeeId}")
-    public  ResponseEntity<List<PerfomanceObjective>> getEmployeeObjective(@PathVariable("designationId") int designationId,
+    public  ResponseEntity<ApiResponse> getEmployeeObjective(@PathVariable("designationId") int designationId,
                                                                            @PathVariable("companyId") int companyId,
                                                                            @PathVariable("employeeId") long employeeId) throws Exception {
         var result = performanceService.GetEmployeeObjectiveService(designationId, companyId, employeeId);
-        return  ResponseEntity.ok(result);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @PostMapping("getPerformanceObjective")
-    public  ResponseEntity<List<PerfomanceObjective>> getPerformanceObjective(@RequestBody FilterModel filterModel) throws Exception {
+    public  ResponseEntity<ApiResponse> getPerformanceObjective(@RequestBody FilterModel filterModel) throws Exception {
         var result = performanceService.GetPerformanceObjectiveService(filterModel);
-        return  ResponseEntity.ok(result);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @PostMapping("objectiveInsertUpdate")
-    public  ResponseEntity<List<PerfomanceObjective>> objectiveInsertUpdate(@RequestBody PerfomanceObjective perfomanceObjective) throws Exception {
+    public  ResponseEntity<ApiResponse> objectiveInsertUpdate(@RequestBody PerfomanceObjective perfomanceObjective) throws Exception {
         var result = performanceService.ObjectiveInsertUpdateService(perfomanceObjective);
-        return  ResponseEntity.ok(result);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     public ResponseEntity<List<String>> handleOnNoService(Exception ex) {
