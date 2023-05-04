@@ -54,6 +54,7 @@ public class MeetingService implements IMeetingService {
             existMeeting.setUpdatedOn(date);
             existMeeting.setUpdatedBy(currentSession.getUserDetail().getUserId());
         }
+
         existMeeting.setTalkingPoints(objectMapper.writeValueAsString(meeting.getTalkingPoints()));
         existMeeting.setOneToOneEmpMeeting(objectMapper.writeValueAsString(meeting.getEmployeesMeeting()));
         if (existMeeting.getMeetingDate().compareTo(date) < 0)
