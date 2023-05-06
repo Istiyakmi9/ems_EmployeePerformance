@@ -73,6 +73,8 @@ public class MeetingService implements IMeetingService {
         if (meetingId <= 0)
             throw new Exception("Invalid meeting selected. Please select a valid email");
 
+        java.util.Date utilDate = new java.util.Date();
+        var date = new java.sql.Timestamp(utilDate.getTime());
         var meetingData = meetingReppository.findById(meetingId);
         if (meetingData.isEmpty())
             throw new Exception("Meeting records not found");
@@ -85,6 +87,8 @@ public class MeetingService implements IMeetingService {
         else
             throw new Exception("Invalid status selected");
 
+        meeting.setUpdatedBy(currentSession.getUserDetail().getUserId());
+        meeting.setUpdatedOn(date);
         var result = meetingReppository.save(meeting);
         if (result == null)
             throw new Exception("Fail to insert/update meeting details");
