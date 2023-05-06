@@ -1,5 +1,6 @@
 package com.bot.performance.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -18,9 +19,11 @@ public class PerfomanceObjective {
     @Column(name = "Description")
     String description;
 
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "TimeFrameStart")
     Date timeFrameStart;
 
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "TimeFrmaeEnd")
     Date timeFrmaeEnd;
 
@@ -67,13 +70,49 @@ public class PerfomanceObjective {
     List<Integer> tagRole;
 
     @Transient
+    Long Total = 0L;
+
+    @Transient
     int status;
 
     @Transient
-    Long employeePerformanceId;
+    Long employeePerformanceId = 0l;
 
     @Transient
     List<PerformanceDetail> performanceDetail;
+
+    @Transient
+    int financialYear;
+
+    @Transient
+    int declarationStartMonth;
+
+    public int getFinancialYear() {
+        return financialYear;
+    }
+
+    public void setFinancialYear(int financialYear) {
+        this.financialYear = financialYear;
+    }
+
+    public int getDeclarationStartMonth() {
+        return declarationStartMonth;
+    }
+
+    public void setDeclarationStartMonth(int declarationStartMonth) {
+        this.declarationStartMonth = declarationStartMonth;
+    }
+
+    public int getDeclarationEndMonth() {
+        return declarationEndMonth;
+    }
+
+    public void setDeclarationEndMonth(int declarationEndMonth) {
+        this.declarationEndMonth = declarationEndMonth;
+    }
+
+    @Transient
+    int declarationEndMonth;
 
     public Long getObjectiveId() {
         return objectiveId;
@@ -249,6 +288,14 @@ public class PerfomanceObjective {
 
     public void setPerformanceDetail(List<PerformanceDetail> performanceDetail) {
         this.performanceDetail = performanceDetail;
+    }
+
+    public Long getTotal() {
+        return Total;
+    }
+
+    public void setTotal(Long total) {
+        Total = total;
     }
 
     @Override

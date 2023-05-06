@@ -1,14 +1,23 @@
 package com.bot.performance.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FilterModel {
+    @JsonProperty("IsActive")
     boolean isActive;
+    @JsonProperty("SearchString")
     String searchString;
+    @JsonProperty("PageIndex")
     int pageIndex = 1;
+    @JsonProperty("PageSize")
     int pageSize = 10;
+    @JsonProperty("SortBy")
     String sortBy;
     int companyId;;
     int offsetIndex;
     Long employeeId;
+    @JsonProperty("SortDirection")
+    String sortDirection;
 
     public String getSortDirection() {
         return sortDirection;
@@ -17,8 +26,6 @@ public class FilterModel {
     public void setSortDirection(String sortDirection) {
         this.sortDirection = sortDirection;
     }
-
-    String sortDirection;
 
     public boolean isActive() {
         return isActive;
