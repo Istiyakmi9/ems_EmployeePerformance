@@ -53,6 +53,12 @@ public class EmployeePerformanceController extends BaseController {
         return ResponseEntity.ok(names);
     }
 
+    @GetMapping("getemployeebymanagerid/{managerId}")
+    public ResponseEntity<List<?>> getallEmpPerformance(@PathVariable("managerId") long managerId) {
+        var result = performanceService.getEmployeeByManagerId(managerId);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("getall")
     public ResponseEntity<List<EmployeePerformance>> getallEmpPerformance() {
         var result = performanceService.GetAllEmpPerformanceService();

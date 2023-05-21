@@ -87,6 +87,17 @@ public class PerfomanceObjective {
     @Transient
     int declarationStartMonth;
 
+    @Transient
+    String comments;
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
     public int getFinancialYear() {
         return financialYear;
     }

@@ -40,6 +40,11 @@ public class PerformanceService implements IPerformanceService {
         return result;
     }
 
+    public List<?> getEmployeeByManagerId(long managerId) {
+        var apprisalEmployeeDetails = this.performanceRepository.getEmployeeByManagerId(managerId);
+        return apprisalEmployeeDetails;
+    }
+
     public List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception {
         var empObjective = new ArrayList<PerfomanceObjective>();
         if (designationId <= 0)
@@ -52,49 +57,55 @@ public class PerformanceService implements IPerformanceService {
             throw new Exception("Invalid employee. Please login again");
 
         var objectives = performanceObjectiveRepository.findAll();
-        if (objectives == null || objectives.size() <= 0)
+        if (objectives.size() == 0)
             throw new Exception("Performance objective not found");
 
         var empPerformanceObj = performanceRepository.getEmpPerformanceByEmpId(employeeId);
-        var companyDetail = companySettingRepository.findAll().stream().findFirst().get();
+        var companySettingDetail = companySettingRepository.findAll().stream().findFirst();
+        if(companySettingDetail.isEmpty()) {
+            throw new Exception("Company detail not found. Please contact to admin.");
+        }
+
+        var companyDetail  = companySettingDetail.get();
         objectives.forEach(x -> {
-            if (!x.getTag().isEmpty() &&x.getTag() != null) {
+            if (!x.getTag().isEmpty() && x.getTag() != null) {
                 x.setDeclarationEndMonth(companyDetail.getDeclarationEndMonth());
                 x.setDeclarationStartMonth(companyDetail.getDeclarationStartMonth());
                 x.setFinancialYear(companyDetail.getFinancialYear());
-                var isObjSee = true;
+                var canSeeObject = true;
 //                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
 //                    isObjSee = false;
 
-                if (isObjSee) {
-                    try {
-                        x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {}));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
+                try {
+                    x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>(){}));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
 
-                    var value = x.getTagRole().stream().filter(i -> i == designationId).collect(Collectors.toList());
-                    if (value.size() > 0)
-                        empObjective.add(x);
+                var value = x.getTagRole().stream().filter(i -> i == designationId).toList();
+                if (value.size() > 0)
+                    empObjective.add(x);
 
-                    if (empPerformanceObj != null && empPerformanceObj.size() > 0 && empObjective.size() > 0) {
-                        var objective = empPerformanceObj.stream().filter(i -> i.getObjectiveId() == x.getObjectiveId()).findFirst();
+                if (empPerformanceObj.size() > 0 && empObjective.size() > 0) {
+                    var objective = empPerformanceObj.stream()
+                            .filter(i -> i.getObjectiveId().equals(x.getObjectiveId()))
+                            .findFirst();
 
-                        if (!objective.isEmpty()) {
-                            var obj = objective.get();
-                            x.setCurrentValue(obj.getCurrentValue());
-                            x.setUpdatedOn(obj.getUpdatedOn());
-                            x.setStatus(obj.getStatus());
-                            x.setEmployeePerformanceId(obj.getEmployeePerformanceId());
-                            try {
-                                x.setPerformanceDetail(objectMapper.readValue(obj.getPerformanceDetail(), new TypeReference<ArrayList<PerformanceDetail>>(){}));
-                                Comparator<PerformanceDetail> reverseComparator = (c1, c2) -> {
-                                    return c2.getUpdatedOn().compareTo(c1.getUpdatedOn());
-                                };
-                                Collections.sort(x.getPerformanceDetail(), reverseComparator);
-                            } catch (JsonProcessingException e) {
-                                throw new RuntimeException(e);
-                            }
+                    if (objective.isPresent()) {
+                        var obj = objective.get();
+                        x.setCurrentValue(obj.getCurrentValue());
+                        x.setUpdatedOn(obj.getUpdatedOn());
+                        x.setStatus(obj.getStatus());
+                        x.setEmployeePerformanceId(obj.getEmployeePerformanceId());
+                        x.setComments(obj.getComments());
+                        try {
+                            x.setPerformanceDetail(objectMapper.readValue(obj.getPerformanceDetail(), new TypeReference<ArrayList<PerformanceDetail>>(){}));
+                            x.setPerformanceDetail(x.getPerformanceDetail().stream()
+                                    .sorted((a, b) -> {
+                                       return b.getUpdatedOn().compareTo(a.getUpdatedOn());
+                                    }).toList());
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 }
@@ -108,28 +119,28 @@ public class PerformanceService implements IPerformanceService {
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
 
-        PerformanceDetail performanceDetail = new PerformanceDetail();
-        var performanceDetails = new ArrayList<PerformanceDetail>();
-        Optional<EmployeePerformance> existEmpPerformanceData = performanceRepository.findById(employeePerformance.getEmployeePerformanceId());
         EmployeePerformance existEmpPerformance = null;
-        if (!existEmpPerformanceData.isEmpty())
+        var performanceDetails = new ArrayList<PerformanceDetail>();
+        PerformanceDetail performanceDetail = new PerformanceDetail();
+
+        Optional<EmployeePerformance> existEmpPerformanceData = performanceRepository.findById(employeePerformance.getEmployeePerformanceId());
+        if (existEmpPerformanceData.isPresent())
             existEmpPerformance =  existEmpPerformanceData.get();
 
         if (existEmpPerformance == null)
         {
-            existEmpPerformance = new EmployeePerformance();
             var lastPerformance = performanceRepository.getLastEmployeePerformance();
-            if (lastPerformance == null)
-                existEmpPerformance.setEmployeePerformanceId(1L);
-            else
-                existEmpPerformance.setEmployeePerformanceId(lastPerformance.getEmployeePerformanceId()+1);
-
             existEmpPerformance = employeePerformance;
+
+            if (lastPerformance == null) {
+                existEmpPerformance.setEmployeePerformanceId(1L);
+            }
+            else {
+                existEmpPerformance.setEmployeePerformanceId(lastPerformance.getEmployeePerformanceId()+1);
+            }
+
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(0);
-            performanceDetail.setStatus(employeePerformance.getStatus());
-            performanceDetail.setCurrentValue(employeePerformance.getCurrentValue());
-            performanceDetails.add(performanceDetail);
         }
         else
         {
@@ -141,10 +152,11 @@ public class PerformanceService implements IPerformanceService {
 
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(index);
-            performanceDetail.setStatus(employeePerformance.getStatus());
-            performanceDetail.setCurrentValue(employeePerformance.getCurrentValue());
-            performanceDetails.add(performanceDetail);
         }
+
+        performanceDetail.setStatus(employeePerformance.getStatus());
+        performanceDetail.setCurrentValue(employeePerformance.getCurrentValue());
+        performanceDetails.add(performanceDetail);
         existEmpPerformance.setPerformanceDetail(objectMapper.writeValueAsString(performanceDetails));
         existEmpPerformance.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         existEmpPerformance.setUpdatedOn(date);
@@ -161,9 +173,9 @@ public class PerformanceService implements IPerformanceService {
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
 
+        PerfomanceObjective objective;
         Optional<PerfomanceObjective> objectiveData = performanceObjectiveRepository.findById(objectiveDetail.getObjectiveId());
-        var objective = objectiveData.get();
-        if (objective == null) {
+        if(objectiveData.isEmpty()) {
             var lastObjective = performanceObjectiveRepository.getLastPerformanceObjective();
             objective = objectiveDetail;
             if (lastObjective == null)
@@ -176,6 +188,7 @@ public class PerformanceService implements IPerformanceService {
         }
         else
         {
+            objective = objectiveData.get();
             objective.setObjective(objectiveDetail.getObjective());
             objective.setStartValue(objectiveDetail.getStartValue());
             objective.setTargetValue(objectiveDetail.getTargetValue());
