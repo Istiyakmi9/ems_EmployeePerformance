@@ -1,16 +1,18 @@
 package com.bot.performance.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FilterModel {
     @JsonProperty("IsActive")
     boolean isActive;
     @JsonProperty("SearchString")
     String searchString;
     @JsonProperty("PageIndex")
-    int pageIndex = 1;
+    int pageIndex;
     @JsonProperty("PageSize")
-    int pageSize = 10;
+    int pageSize;
     @JsonProperty("SortBy")
     String sortBy;
     int companyId;;

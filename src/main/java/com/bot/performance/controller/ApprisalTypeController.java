@@ -2,12 +2,11 @@ package com.bot.performance.controller;
 
 import com.bot.performance.model.ApiResponse;
 import com.bot.performance.model.FilterModel;
+import com.bot.performance.model.ObjectiveCatagory;
 import com.bot.performance.service.ApprisalTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -17,8 +16,21 @@ public class ApprisalTypeController extends BaseController {
     ApprisalTypeService apprisalTypeService;
 
     @RequestMapping(value = "get", method = RequestMethod.POST)
-    public ResponseEntity<?> getApprisalTypeFilter(FilterModel filter) {
-        var result = this.apprisalTypeService.getApprisalTypeByFilter(filter);
+    public ResponseEntity<?> getAppraisalTypeFilter(@RequestBody FilterModel filter) {
+        var result = this.apprisalTypeService.getAppraisalTypeByFilter(filter);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @PostMapping("addApprisalType")
+    public ResponseEntity<ApiResponse> addUpdateAppraisalType(@RequestBody ObjectiveCatagory objectiveCatagory) throws Exception {
+        var result = this.apprisalTypeService.addAppraisalTypeService(objectiveCatagory);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @PutMapping("updateApprisalType/{objectiveCatagoryId}")
+    public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody ObjectiveCatagory objectiveCatagory,
+                                                          @PathVariable int objectiveCatagoryId) throws Exception {
+        var result = this.apprisalTypeService.updateAppraisalTypeService(objectiveCatagory, objectiveCatagoryId);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }
