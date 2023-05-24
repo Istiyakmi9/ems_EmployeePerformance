@@ -227,16 +227,18 @@ public class PerformanceService implements IPerformanceService {
         var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
         List<PerfomanceObjective> objectiveDetails = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
         List<EmployeeRole> empRole = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeeRole>>() {});
-        objectiveDetails.forEach(x -> {
-            if (x.getTag() != null && x.getTag() != "[]") {
-                try {
-                    x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {
-                    }));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+        if (objectiveDetails.size() > 0) {
+            objectiveDetails.forEach(x -> {
+                if (x.getTag() != null && x.getTag() != "[]") {
+                    try {
+                        x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {
+                        }));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-        });
+            });
+        }
         return new Pair<List<PerfomanceObjective>, List<EmployeeRole>>(objectiveDetails, empRole);
     }
 
