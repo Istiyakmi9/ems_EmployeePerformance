@@ -1,13 +1,19 @@
 package com.bot.performance.service;
 
 import com.bot.performance.model.CurrentSession;
+import com.bot.performance.model.DbParameters;
 import com.bot.performance.model.FilterModel;
 import com.bot.performance.model.ObjectiveCatagory;
 import com.bot.performance.repository.ApprisalTypeRepository;
+import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.serviceinterface.IApprisalTyeoService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,11 +23,21 @@ public class ApprisalTypeService implements IApprisalTyeoService {
     ApprisalTypeRepository apprisalTypeRepository;
     @Autowired
     CurrentSession currentUserDetail;
+    @Autowired
+    LowLevelExecution lowLevelExecution;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Override
     public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) {
-        return this.apprisalTypeRepository.getApprisalTypeQuery(filter.getSearchString(),
-                filter.getSortBy(), filter.getPageIndex(), filter.getPageSize());
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_searchString", filter.getSearchString(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_sortBy", filter.getSortBy(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_pageIndex", filter.getPageIndex(), Types.INTEGER));
+        dbParameters.add(new DbParameters("_pageSize", filter.getPageSize(), Types.INTEGER));
+
+        var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_filter", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
     }
 
     @Override

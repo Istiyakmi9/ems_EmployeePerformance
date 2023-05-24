@@ -21,13 +21,13 @@ public class ApprisalTypeController extends BaseController {
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
-    @PostMapping("addApprisalType")
-    public ResponseEntity<ApiResponse> addUpdateAppraisalType(@RequestBody ObjectiveCatagory objectiveCatagory) throws Exception {
+    @PostMapping("addAppraisalType")
+    public ResponseEntity<ApiResponse> addAppraisalType(@RequestBody ObjectiveCatagory objectiveCatagory) throws Exception {
         var result = this.apprisalTypeService.addAppraisalTypeService(objectiveCatagory);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
-    @PutMapping("updateApprisalType/{objectiveCatagoryId}")
+    @PutMapping("updateAppraisalType/{objectiveCatagoryId}")
     public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody ObjectiveCatagory objectiveCatagory,
                                                           @PathVariable int objectiveCatagoryId) throws Exception {
         var result = this.apprisalTypeService.updateAppraisalTypeService(objectiveCatagory, objectiveCatagoryId);
