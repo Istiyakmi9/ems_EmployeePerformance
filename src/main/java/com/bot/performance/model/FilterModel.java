@@ -8,11 +8,11 @@ public class FilterModel {
     @JsonProperty("IsActive")
     boolean isActive;
     @JsonProperty("SearchString")
-    String searchString = "1=1";
+    String searchString ;
     @JsonProperty("PageIndex")
-    int pageIndex = 1;
+    int pageIndex;
     @JsonProperty("PageSize")
-    int pageSize = 10;
+    int pageSize;
     @JsonProperty("SortBy")
     String sortBy;
     int companyId;;

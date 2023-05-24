@@ -1,10 +1,7 @@
 package com.bot.performance.service;
 
 import com.bot.performance.model.*;
-import com.bot.performance.repository.CompanySettingRepository;
-import com.bot.performance.repository.EmployeeRoleRepository;
-import com.bot.performance.repository.PerformanceObjectiveRepository;
-import com.bot.performance.repository.PerformanceRepository;
+import com.bot.performance.repository.*;
 import com.bot.performance.serviceinterface.IPerformanceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -18,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.sql.Types;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +33,8 @@ public class PerformanceService implements IPerformanceService {
     EmployeeRoleRepository employeeRoleRepository;
     @Autowired
     CompanySettingRepository companySettingRepository;
+    @Autowired
+    LowLevelExecution lowLevelExecution;
     public List<EmployeePerformance> GetAllEmpPerformanceService() {
         var result = performanceRepository.findAll();
         return result;
@@ -218,39 +218,27 @@ public class PerformanceService implements IPerformanceService {
         return this.GetPerformanceObjectiveService(filterModel);
     }
 
-    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(@NotNull FilterModel filterModel) throws Exception {
-        Pageable paging;
-        filterModel.setPageIndex(filterModel.getPageIndex()-1);
-        if (filterModel.getSortBy() == null || filterModel.getSortBy() == "")
-            paging = PageRequest.of(filterModel.getPageIndex(), filterModel.getPageSize());
-        else {
-            Sort sort = filterModel.getSortDirection().equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(filterModel.getSortBy()).ascending()
-                    : Sort.by(filterModel.getSortBy()).descending();
-            paging = PageRequest.of(filterModel.getPageIndex(), filterModel.getPageSize(), sort);
-        }
-
-        Page<PerfomanceObjective> page;
-        if (filterModel.getSearchString() == null || filterModel.getSearchString() == "") {
-            page = performanceObjectiveRepository.findAll(paging);
-        } else {
-            page = performanceObjectiveRepository.findByFilter(filterModel.getSearchString(), paging);
-        }
-        List<PerfomanceObjective> objectiveDetails = page.getContent();
-        objectiveDetails.forEach(x -> {
-            if (x.getTag() != null && x.getTag() != "[]") {
-                try {
-                    x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {
-                    }));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_pageIndex", filterModel.getPageIndex(), Types.INTEGER));
+        dbParameters.add(new DbParameters("_pageSize", filterModel.getPageSize(), Types.INTEGER));
+        var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
+        List<PerfomanceObjective> objectiveDetails = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
+        List<EmployeeRole> empRole = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeeRole>>() {});
+        if (objectiveDetails.size() > 0) {
+            objectiveDetails.forEach(x -> {
+                if (x.getTag() != null && x.getTag() != "[]") {
+                    try {
+                        x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {
+                        }));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-            x.setTotal(page.getTotalElements());
-        });
-        var empRole = employeeRoleRepository.findAll();
-        if (empRole == null || empRole.size() <= 0)
-            throw new Exception("Employee role not found. Please contact to admin");
-
+            });
+        }
         return new Pair<List<PerfomanceObjective>, List<EmployeeRole>>(objectiveDetails, empRole);
     }
 
