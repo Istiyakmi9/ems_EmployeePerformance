@@ -1,9 +1,6 @@
 package com.bot.performance.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +16,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class ObjectiveCatagory {
     @Id
+    @Column(name = "ObjectiveCatagoryId")
+    int objectiveCatagoryId;
     @Column(name = "ObjectiveCatagoryType")
     public String objectiveCatagoryType;
     @Column(name = "TypeDescription")
@@ -41,4 +40,8 @@ public class ObjectiveCatagory {
     public Date createdOn;
     @Column(name = "UpdatedOn")
     public Date updatedOn;
+    @Column(name = "Total", insertable = false)
+    int total;
+    @Column(name = "Index", insertable = false)
+    int index = 0;
 }
