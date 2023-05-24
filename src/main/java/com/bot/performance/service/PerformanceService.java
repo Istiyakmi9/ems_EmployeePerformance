@@ -192,12 +192,12 @@ public class PerformanceService implements IPerformanceService {
             objective.setObjective(objectiveDetail.getObjective());
             objective.setStartValue(objectiveDetail.getStartValue());
             objective.setTargetValue(objectiveDetail.getTargetValue());
-            objective.setObjSeeType(objectiveDetail.isObjSeeType());
+            objective.setCanManagerSee(objectiveDetail.isCanManagerSee());
             objective.setIncludeReview(objectiveDetail.isIncludeReview());
             objective.setProgressMeassureType(objectiveDetail.getProgressMeassureType());
             objective.setTimeFrameStart(objectiveDetail.getTimeFrameStart());
             objective.setTimeFrmaeEnd(objectiveDetail.getTimeFrmaeEnd());
-            objective.setObjectiveType(objectiveDetail.getObjectiveType());
+            objective.setObjectiveTypeId(objectiveDetail.getObjectiveTypeId());
             objective.setDescription(objectiveDetail.getDescription());
             objective.setTagRole(objectiveDetail.getTagRole());
             objective.setUpdatedOn(date);
@@ -267,7 +267,7 @@ public class PerformanceService implements IPerformanceService {
         if (objectiveDetail.getTimeFrmaeEnd() == null)
             throw new Exception("Invalid time frame end date selected");
 
-        if (objectiveDetail.getObjectiveType() == null || objectiveDetail.getObjectiveType().isEmpty())
+        if (objectiveDetail.getObjectiveTypeId() == 0)
             throw new Exception("Objective type is invalid");
 
         if (objectiveDetail.getProgressMeassureType() <= 0)

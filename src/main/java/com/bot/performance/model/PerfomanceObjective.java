@@ -27,11 +27,11 @@ public class PerfomanceObjective {
     @Column(name = "TimeFrmaeEnd")
     Date timeFrmaeEnd;
 
-    @Column(name = "ObjSeeType")
-    boolean objSeeType;
+    @Column(name = "CanManagerSee")
+    boolean canManagerSee;
 
-    @Column(name = "ObjectiveType")
-    String objectiveType;
+    @Column(name = "ObjectiveTypeId")
+    Integer objectiveTypeId;
 
     @Column(name = "Tag")
     String tag;
@@ -165,22 +165,6 @@ public class PerfomanceObjective {
         this.timeFrmaeEnd = timeFrmaeEnd;
     }
 
-    public boolean isObjSeeType() {
-        return objSeeType;
-    }
-
-    public void setObjSeeType(boolean objSeeType) {
-        this.objSeeType = objSeeType;
-    }
-
-    public String getObjectiveType() {
-        return objectiveType;
-    }
-
-    public void setObjectiveType(String objectiveType) {
-        this.objectiveType = objectiveType;
-    }
-
     public String getTag() {
         return tag;
     }
@@ -309,43 +293,32 @@ public class PerfomanceObjective {
         Total = total;
     }
 
-    @Override
-    public String toString() {
-        return "PerfomanceObjective{" +
-                "objectiveId=" + objectiveId +
-                ", objective='" + objective + '\'' +
-                ", description='" + description + '\'' +
-                ", timeFrameStart=" + timeFrameStart +
-                ", timeFrmaeEnd=" + timeFrmaeEnd +
-                ", objSeeType=" + objSeeType +
-                ", objectiveType='" + objectiveType + '\'' +
-                ", tag='" + tag + '\'' +
-                ", isIncludeReview=" + isIncludeReview +
-                ", progressMeassureType=" + progressMeassureType +
-                ", startValue=" + startValue +
-                ", targetValue=" + targetValue +
-                ", companyId=" + companyId +
-                ", updatedBy=" + updatedBy +
-                ", updatedOn=" + updatedOn +
-                ", CreatedBy=" + CreatedBy +
-                ", createdOn=" + createdOn +
-                ", currentValue=" + currentValue +
-                ", tagRole=" + tagRole +
-                ", status=" + status +
-                ", employeePerformanceId=" + employeePerformanceId +
-                ", performanceDetail=" + performanceDetail +
-                '}';
+    public boolean isCanManagerSee() {
+        return canManagerSee;
     }
 
-    public PerfomanceObjective() {}
-    public PerfomanceObjective(Long objectiveId, String objective, String description, Date timeFrameStart, Date timeFrmaeEnd, boolean objSeeType, String objectiveType, String tag, boolean isIncludeReview, int progressMeassureType, double startValue, double targetValue, int companyId, Long updatedBy, Date updatedOn, Long createdBy, Date createdOn, double currentValue, List<Integer> tagRole, int status, Long employeePerformanceId, List<PerformanceDetail> performanceDetail) {
+    public void setCanManagerSee(boolean canManagerSee) {
+        this.canManagerSee = canManagerSee;
+    }
+
+    public Integer getObjectiveTypeId() {
+        return objectiveTypeId;
+    }
+
+    public void setObjectiveTypeId(Integer objectiveTypeId) {
+        this.objectiveTypeId = objectiveTypeId;
+    }
+
+    public PerfomanceObjective() { }
+
+    public PerfomanceObjective(Long objectiveId, String objective, String description, Date timeFrameStart, Date timeFrmaeEnd, boolean canManagerSee, Integer objectiveTypeId, String tag, boolean isIncludeReview, int progressMeassureType, double startValue, double targetValue, int companyId, Long updatedBy, Date updatedOn, Long createdBy, Date createdOn, double currentValue, List<Integer> tagRole, Long total, int status, Long employeePerformanceId, List<PerformanceDetail> performanceDetail, int financialYear, int declarationStartMonth, String comments, int declarationEndMonth) {
         this.objectiveId = objectiveId;
         this.objective = objective;
         this.description = description;
         this.timeFrameStart = timeFrameStart;
         this.timeFrmaeEnd = timeFrmaeEnd;
-        this.objSeeType = objSeeType;
-        this.objectiveType = objectiveType;
+        this.canManagerSee = canManagerSee;
+        this.objectiveTypeId = objectiveTypeId;
         this.tag = tag;
         this.isIncludeReview = isIncludeReview;
         this.progressMeassureType = progressMeassureType;
@@ -358,8 +331,46 @@ public class PerfomanceObjective {
         this.createdOn = createdOn;
         this.currentValue = currentValue;
         this.tagRole = tagRole;
+        Total = total;
         this.status = status;
         this.employeePerformanceId = employeePerformanceId;
         this.performanceDetail = performanceDetail;
+        this.financialYear = financialYear;
+        this.declarationStartMonth = declarationStartMonth;
+        this.comments = comments;
+        this.declarationEndMonth = declarationEndMonth;
+    }
+
+    @Override
+    public String toString() {
+        return "PerfomanceObjective{" +
+                "objectiveId=" + objectiveId +
+                ", objective='" + objective + '\'' +
+                ", description='" + description + '\'' +
+                ", timeFrameStart=" + timeFrameStart +
+                ", timeFrmaeEnd=" + timeFrmaeEnd +
+                ", canManagerSee=" + canManagerSee +
+                ", objectiveTypeId=" + objectiveTypeId +
+                ", tag='" + tag + '\'' +
+                ", isIncludeReview=" + isIncludeReview +
+                ", progressMeassureType=" + progressMeassureType +
+                ", startValue=" + startValue +
+                ", targetValue=" + targetValue +
+                ", companyId=" + companyId +
+                ", updatedBy=" + updatedBy +
+                ", updatedOn=" + updatedOn +
+                ", CreatedBy=" + CreatedBy +
+                ", createdOn=" + createdOn +
+                ", currentValue=" + currentValue +
+                ", tagRole=" + tagRole +
+                ", Total=" + Total +
+                ", status=" + status +
+                ", employeePerformanceId=" + employeePerformanceId +
+                ", performanceDetail=" + performanceDetail +
+                ", financialYear=" + financialYear +
+                ", declarationStartMonth=" + declarationStartMonth +
+                ", comments='" + comments + '\'' +
+                ", declarationEndMonth=" + declarationEndMonth +
+                '}';
     }
 }
