@@ -27,6 +27,10 @@ spring:
     username: istiyak
     password: live@Bottomhalf_001
 
+eureka:
+  client:
+    enabled: false
+
 ---
 spring:
   config:
