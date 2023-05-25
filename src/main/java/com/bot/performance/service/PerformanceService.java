@@ -9,15 +9,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Types;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PerformanceService implements IPerformanceService {
@@ -30,19 +27,15 @@ public class PerformanceService implements IPerformanceService {
     @Autowired
     CurrentSession currentUserDetail;
     @Autowired
-    EmployeeRoleRepository employeeRoleRepository;
-    @Autowired
     CompanySettingRepository companySettingRepository;
     @Autowired
     LowLevelExecution lowLevelExecution;
     public List<EmployeePerformance> GetAllEmpPerformanceService() {
-        var result = performanceRepository.findAll();
-        return result;
+        return performanceRepository.findAll();
     }
 
     public List<?> getEmployeeByManagerId(long managerId) {
-        var apprisalEmployeeDetails = this.performanceRepository.getEmployeeByManagerId(managerId);
-        return apprisalEmployeeDetails;
+        return this.performanceRepository.getEmployeeByManagerId(managerId);
     }
 
     public List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception {
@@ -72,7 +65,7 @@ public class PerformanceService implements IPerformanceService {
                 x.setDeclarationEndMonth(companyDetail.getDeclarationEndMonth());
                 x.setDeclarationStartMonth(companyDetail.getDeclarationStartMonth());
                 x.setFinancialYear(companyDetail.getFinancialYear());
-                var canSeeObject = true;
+//                var canSeeObject = true;
 //                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
 //                    isObjSee = false;
 
@@ -214,11 +207,13 @@ public class PerformanceService implements IPerformanceService {
             throw new Exception("Fail to insert/update objective deatils");
 
         var filterModel = new FilterModel();
-        filterModel.setCompanyId(objective.getCompanyId());
+        filterModel.setSearchString(String.format("1=1 And ObjectiveTypeId = %d And CompanyId = %d", objective.getCompanyId(), objective.getObjectiveTypeId()));
+        filterModel.setPageSize(10);
+        filterModel.setPageIndex(1);
         return this.GetPerformanceObjectiveService(filterModel);
     }
 
-    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
+    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));

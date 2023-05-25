@@ -20,9 +20,6 @@ import java.util.List;
 public class EmployeePerformanceController extends BaseController {
 
     @Autowired
-    RestTemplate restTemplate;
-
-    @Autowired
     CurrentSession userDetail;
 
     @Autowired
@@ -80,7 +77,7 @@ public class EmployeePerformanceController extends BaseController {
     }
 
     @PostMapping("getPerformanceObjective")
-    public  ResponseEntity<ApiResponse> getPerformanceObjective(@RequestBody FilterModel filterModel) throws Exception {
+    public  ResponseEntity<ApiResponse> getPerformanceObjective(@RequestBody FilterModel filterModel) {
         var result = performanceService.GetPerformanceObjectiveService(filterModel);
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
