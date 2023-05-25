@@ -126,6 +126,4 @@ public class PerfomanceObjective {
     @Transient
     @JsonProperty("DeclarationEndMonth")
     int declarationEndMonth;
-
-
 }
