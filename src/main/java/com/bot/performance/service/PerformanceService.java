@@ -211,7 +211,7 @@ public class PerformanceService implements IPerformanceService {
         return this.GetPerformanceObjectiveService(filterModel);
     }
 
-    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) {
+    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));
