@@ -6,7 +6,7 @@ import com.bot.performance.model.FilterModel;
 import com.bot.performance.model.ObjectiveCatagory;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
-import com.bot.performance.serviceinterface.IApprisalTyeoService;
+import com.bot.performance.serviceinterface.IApprisalTyeService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ApprisalTypeService implements IApprisalTyeoService {
+public class ApprisalTypeService implements IApprisalTyeService {
 
     @Autowired
     ApprisalTypeRepository apprisalTypeRepository;
@@ -99,5 +99,28 @@ public class ApprisalTypeService implements IApprisalTyeoService {
 
         if (objectiveCatagory.getToDate() == null)
             throw new Exception("Please select a valid to date");
+    }
+
+    @Override
+    public String manageAppraisalCycleService(ObjectiveCatagory objectiveCatagory, int objectiveCatagoryId) throws Exception {
+        if (objectiveCatagoryId == 0)
+            throw new Exception("Invalid appraisal selected");
+
+        validateApprisalType(objectiveCatagory);
+        java.util.Date utilDate = new java.util.Date();
+        var date = new java.sql.Timestamp(utilDate.getTime());
+        var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
+        if (existObjectiveCatagoryData.isEmpty())
+            throw new Exception("Objective category not found");
+
+        ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
+        if(objectiveCatagory.status == null || objectiveCatagory.status.isEmpty()) {
+            throw new Exception("Invalid status value submitted");
+        }
+
+        existObjectiveCatagory.setStatus(objectiveCatagory.getStatus());
+        existObjectiveCatagory.setUpdatedOn(date);
+        apprisalTypeRepository.save(objectiveCatagory);
+        return "successful";
     }
 }

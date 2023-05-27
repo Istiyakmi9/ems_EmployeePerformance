@@ -65,7 +65,7 @@ public class PerformanceService implements IPerformanceService {
                 x.setDeclarationEndMonth(companyDetail.getDeclarationEndMonth());
                 x.setDeclarationStartMonth(companyDetail.getDeclarationStartMonth());
                 x.setFinancialYear(companyDetail.getFinancialYear());
-//                var canSeeObject = true;
+                var canSeeObject = true;
 //                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
 //                    isObjSee = false;
 
@@ -203,8 +203,6 @@ public class PerformanceService implements IPerformanceService {
             objective.setTag("[]");
 
         var result = performanceObjectiveRepository.save(objective);
-        if (result == null)
-            throw new Exception("Fail to insert/update objective deatils");
 
         var filterModel = new FilterModel();
         filterModel.setSearchString(String.format("1=1 And ObjectiveTypeId = %d And CompanyId = %d", objective.getCompanyId(), objective.getObjectiveTypeId()));
@@ -213,18 +211,20 @@ public class PerformanceService implements IPerformanceService {
         return this.GetPerformanceObjectiveService(filterModel);
     }
 
-    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) {
+    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_pageIndex", filterModel.getPageIndex(), Types.INTEGER));
         dbParameters.add(new DbParameters("_pageSize", filterModel.getPageSize(), Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
+        if (dataSet == null || dataSet.size() != 3)
+            throw new Exception("Fail to get objectives. Please contact to admin.");
         List<PerfomanceObjective> objectiveDetails = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
         List<EmployeeRole> empRole = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeeRole>>() {});
         if (objectiveDetails.size() > 0) {
             objectiveDetails.forEach(x -> {
-                if (x.getTag() != null && x.getTag() != "[]") {
+                if (x.getTag() != null && !x.getTag().equals("[]")) {
                     try {
                         x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {
                         }));

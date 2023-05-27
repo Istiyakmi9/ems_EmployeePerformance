@@ -59,6 +59,10 @@ public class ObjectiveCatagory {
     @JsonProperty("UpdatedOn")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     public Date updatedOn;
+
+    @Column(name = "Status")
+    @JsonProperty("Status")
+    public String status;
     @Transient
     @JsonProperty("Total")
     int total;

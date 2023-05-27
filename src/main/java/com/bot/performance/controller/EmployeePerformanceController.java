@@ -77,7 +77,7 @@ public class EmployeePerformanceController extends BaseController {
     }
 
     @PostMapping("getPerformanceObjective")
-    public  ResponseEntity<ApiResponse> getPerformanceObjective(@RequestBody FilterModel filterModel) {
+    public  ResponseEntity<ApiResponse> getPerformanceObjective(@RequestBody FilterModel filterModel) throws Exception {
         var result = performanceService.GetPerformanceObjectiveService(filterModel);
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
