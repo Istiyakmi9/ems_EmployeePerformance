@@ -49,61 +49,62 @@ public class PerformanceService implements IPerformanceService {
         if (employeeId <= 0)
             throw new Exception("Invalid employee. Please login again");
 
-        var objectives = performanceObjectiveRepository.findAll();
-        if (objectives.size() == 0)
-            throw new Exception("Performance objective not found");
+        empObjective = performanceObjectiveRepository.getObjectivesByEmployeeId(employeeId);
+        if (empObjective.size() == 0)
+            return new ArrayList<>();
 
-        var empPerformanceObj = performanceRepository.getEmpPerformanceByEmpId(employeeId);
-        var companySettingDetail = companySettingRepository.findAll().stream().findFirst();
-        if(companySettingDetail.isEmpty()) {
-            throw new Exception("Company detail not found. Please contact to admin.");
-        }
+//        var empPerformanceObj = performanceRepository.getEmpPerformanceByEmpId(employeeId);
+//        var companySettingDetail = companySettingRepository.findAll().stream().findFirst();
+//        if(companySettingDetail.isEmpty()) {
+//            throw new Exception("Company detail not found. Please contact to admin.");
+//        }
+//
+//        var companyDetail  = companySettingDetail.get();
+//        objectives.forEach(x -> {
+//            if (!x.getTag().isEmpty() && x.getTag() != null) {
+//                x.setDeclarationEndMonth(companyDetail.getDeclarationEndMonth());
+//                x.setDeclarationStartMonth(companyDetail.getDeclarationStartMonth());
+//                x.setFinancialYear(companyDetail.getFinancialYear());
+//                var canSeeObject = true;
+////                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
+////                    isObjSee = false;
+//
+//                try {
+//                    x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>(){}));
+//                } catch (JsonProcessingException e) {
+//                    throw new RuntimeException(e);
+//                }
+//
+//                var value = x.getTagRole().stream().filter(i -> i == designationId).toList();
+//                if (value.size() > 0)
+//                    empObjective.add(x);
+//
+//                if (empPerformanceObj.size() > 0 && empObjective.size() > 0) {
+//                    var objective = empPerformanceObj.stream()
+//                            .filter(i -> i.getObjectiveId().equals(x.getObjectiveId()))
+//                            .findFirst();
+//
+//                    if (objective.isPresent()) {
+//                        var obj = objective.get();
+//                        x.setCurrentValue(obj.getCurrentValue());
+//                        x.setUpdatedOn(obj.getUpdatedOn());
+//                        x.setStatus(obj.getStatus());
+//                        x.setEmployeePerformanceId(obj.getEmployeePerformanceId());
+//                        x.setComments(obj.getComments());
+//                        try {
+//                            x.setPerformanceDetail(objectMapper.readValue(obj.getPerformanceDetail(), new TypeReference<ArrayList<PerformanceDetail>>(){}));
+//                            x.setPerformanceDetail(x.getPerformanceDetail().stream()
+//                                    .sorted((a, b) -> {
+//                                       return b.getUpdatedOn().compareTo(a.getUpdatedOn());
+//                                    }).toList());
+//                        } catch (JsonProcessingException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    }
+//                }
+//            }
+//        });
 
-        var companyDetail  = companySettingDetail.get();
-        objectives.forEach(x -> {
-            if (!x.getTag().isEmpty() && x.getTag() != null) {
-                x.setDeclarationEndMonth(companyDetail.getDeclarationEndMonth());
-                x.setDeclarationStartMonth(companyDetail.getDeclarationStartMonth());
-                x.setFinancialYear(companyDetail.getFinancialYear());
-                var canSeeObject = true;
-//                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
-//                    isObjSee = false;
-
-                try {
-                    x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>(){}));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-
-                var value = x.getTagRole().stream().filter(i -> i == designationId).toList();
-                if (value.size() > 0)
-                    empObjective.add(x);
-
-                if (empPerformanceObj.size() > 0 && empObjective.size() > 0) {
-                    var objective = empPerformanceObj.stream()
-                            .filter(i -> i.getObjectiveId().equals(x.getObjectiveId()))
-                            .findFirst();
-
-                    if (objective.isPresent()) {
-                        var obj = objective.get();
-                        x.setCurrentValue(obj.getCurrentValue());
-                        x.setUpdatedOn(obj.getUpdatedOn());
-                        x.setStatus(obj.getStatus());
-                        x.setEmployeePerformanceId(obj.getEmployeePerformanceId());
-                        x.setComments(obj.getComments());
-                        try {
-                            x.setPerformanceDetail(objectMapper.readValue(obj.getPerformanceDetail(), new TypeReference<ArrayList<PerformanceDetail>>(){}));
-                            x.setPerformanceDetail(x.getPerformanceDetail().stream()
-                                    .sorted((a, b) -> {
-                                       return b.getUpdatedOn().compareTo(a.getUpdatedOn());
-                                    }).toList());
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }
-        });
         return empObjective;
     }
 
@@ -154,14 +155,10 @@ public class PerformanceService implements IPerformanceService {
         existEmpPerformance.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         existEmpPerformance.setUpdatedOn(date);
 
-        var result = performanceRepository.save(existEmpPerformance);
-        if (result == null)
-            throw new Exception("Fail to update employee objective");
-
-        return result;
+        return performanceRepository.save(existEmpPerformance);
     }
 
-    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> ObjectiveInsertUpdateService(PerfomanceObjective objectiveDetail) throws Exception {
+    public List<PerfomanceObjective> ObjectiveInsertUpdateService(PerfomanceObjective objectiveDetail) throws Exception {
         validateObjectiveDetail(objectiveDetail);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
@@ -188,53 +185,31 @@ public class PerformanceService implements IPerformanceService {
             objective.setCanManagerSee(objectiveDetail.isCanManagerSee());
             objective.setIncludeReview(objectiveDetail.isIncludeReview());
             objective.setProgressMeassureType(objectiveDetail.getProgressMeassureType());
-            objective.setTimeFrameStart(objectiveDetail.getTimeFrameStart());
-            objective.setTimeFrmaeEnd(objectiveDetail.getTimeFrmaeEnd());
-            objective.setObjectiveTypeId(objectiveDetail.getObjectiveTypeId());
             objective.setDescription(objectiveDetail.getDescription());
             objective.setTagRole(objectiveDetail.getTagRole());
             objective.setUpdatedOn(date);
             objective.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         }
 
-        if (objective.getTagRole() != null && objective.getTagRole().size() > 0)
-            objective.setTag(objectMapper.writeValueAsString(objective.getTagRole()));
-        else
-            objective.setTag("[]");
-
-        var result = performanceObjectiveRepository.save(objective);
+        performanceObjectiveRepository.save(objective);
 
         var filterModel = new FilterModel();
-        filterModel.setSearchString(String.format("1=1 And ObjectiveTypeId = %d And CompanyId = %d", objective.getCompanyId(), objective.getObjectiveTypeId()));
+        filterModel.setSearchString(String.format("1=1 And CompanyId = %d", objective.getCompanyId()));
         filterModel.setPageSize(10);
         filterModel.setPageIndex(1);
         return this.GetPerformanceObjectiveService(filterModel);
     }
 
-    public Pair<List<PerfomanceObjective>, List<EmployeeRole>> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
+    public List<PerfomanceObjective> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_pageIndex", filterModel.getPageIndex(), Types.INTEGER));
         dbParameters.add(new DbParameters("_pageSize", filterModel.getPageSize(), Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
-        if (dataSet == null || dataSet.size() != 3)
+        if (dataSet == null || dataSet.size() != 2)
             throw new Exception("Fail to get objectives. Please contact to admin.");
-        List<PerfomanceObjective> objectiveDetails = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
-        List<EmployeeRole> empRole = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeeRole>>() {});
-        if (objectiveDetails.size() > 0) {
-            objectiveDetails.forEach(x -> {
-                if (x.getTag() != null && !x.getTag().equals("[]")) {
-                    try {
-                        x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>() {
-                        }));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
-        }
-        return new Pair<List<PerfomanceObjective>, List<EmployeeRole>>(objectiveDetails, empRole);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
     }
 
     private void validateObjectiveDetail(@NotNull PerfomanceObjective objectiveDetail) throws Exception {
@@ -243,15 +218,6 @@ public class PerformanceService implements IPerformanceService {
 
         if (objectiveDetail.getObjective() == null || objectiveDetail.getObjective().isEmpty())
             throw new Exception("Objective is null or empty");
-
-        if (objectiveDetail.getTimeFrameStart() == null)
-            throw new Exception("Invalid time frame start date selected");
-
-        if (objectiveDetail.getTimeFrmaeEnd() == null)
-            throw new Exception("Invalid time frame end date selected");
-
-        if (objectiveDetail.getObjectiveTypeId() == 0)
-            throw new Exception("Objective type is invalid");
 
         if (objectiveDetail.getProgressMeassureType() <= 0)
             throw new Exception("Invalid progress measured type selected");
@@ -290,6 +256,4 @@ public class PerformanceService implements IPerformanceService {
         if (employeePerformance.getCurrentValue() > employeePerformance.getTargetValue())
             throw new Exception("New value is greater than targeted value");
     }
-
-
 }
