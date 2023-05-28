@@ -28,15 +28,18 @@ public class ObjectiveCatagory {
     @Column(name = "TypeDescription")
     @JsonProperty("TypeDescription")
     public String typeDescription;
+    @Column(name = "RolesId")
+    @JsonProperty("RolesId")
+    public String rolesId;
+    @Column(name = "ObjectivesId")
+    @JsonProperty("ObjectivesId")
+    public String objectivesId;
     @Column(name = "IsTagByRole")
     @JsonProperty("IsTagByRole")
     public boolean isTagByRole;
     @Column(name = "IsTagByDepartment")
     @JsonProperty("IsTagByDepartment")
     public boolean isTagByDepartment;
-    @Column(name = "TagIds")
-    @JsonProperty("TagIds")
-    public String tagIds;
     @Column(name = "FromDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty("FromDate")
@@ -59,7 +62,6 @@ public class ObjectiveCatagory {
     @JsonProperty("UpdatedOn")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     public Date updatedOn;
-
     @Column(name = "Status")
     @JsonProperty("Status")
     public String status;
