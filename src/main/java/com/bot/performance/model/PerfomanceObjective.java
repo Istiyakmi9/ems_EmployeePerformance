@@ -25,27 +25,9 @@ public class PerfomanceObjective {
     @JsonProperty("Description")
     String description;
 
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "TimeFrameStart")
-    @JsonProperty("TimeFrameStart")
-    Date timeFrameStart;
-
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "TimeFrmaeEnd")
-    @JsonProperty("TimeFrmaeEnd")
-    Date timeFrmaeEnd;
-
     @Column(name = "CanManagerSee")
     @JsonProperty("CanManagerSee")
     boolean canManagerSee;
-
-    @Column(name = "ObjectiveTypeId")
-    @JsonProperty("ObjectiveTypeId")
-    Integer objectiveTypeId;
-
-    @Column(name = "Tag")
-    @JsonProperty("Tag")
-    String tag;
 
     @Column(name = "IsIncludeReview")
     @JsonProperty("IsIncludeReview")

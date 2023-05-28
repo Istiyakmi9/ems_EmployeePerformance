@@ -2,6 +2,7 @@ package com.bot.performance.controller;
 
 import com.bot.performance.model.*;
 import com.bot.performance.service.PerformanceService;
+import com.bot.performance.serviceinterface.IPerformanceService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class EmployeePerformanceController extends BaseController {
     CurrentSession userDetail;
 
     @Autowired
-    PerformanceService performanceService;
+    IPerformanceService performanceService;
     // @Value("${file.folder:na}")
     @Value("${file.folder:#{null}}")
     private String targetFolder;
