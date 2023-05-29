@@ -52,9 +52,8 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setObjectiveCatagoryId(lastObjectiveCatagory.getObjectiveCatagoryId() + 1);
         objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
         objectiveCatagory.setCreatedOn(date);
-        var result = apprisalTypeRepository.save(objectiveCatagory);
-        if (result == null)
-            throw new Exception("Fail to insert appraisal category");
+        objectiveCatagory.setObjectivesId("[]");
+        apprisalTypeRepository.save(objectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
         return  this.getAppraisalTypeByFilter(filterModel);
@@ -79,9 +78,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
         existObjectiveCatagory.setToDate(objectiveCatagory.getToDate());
         existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         existObjectiveCatagory.setUpdatedOn(date);
-        var result = apprisalTypeRepository.save(objectiveCatagory);
-        if (result == null)
-            throw new Exception("Fail to update appraisal category");
+        apprisalTypeRepository.save(objectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
         return  this.getAppraisalTypeByFilter(filterModel);
@@ -119,8 +116,12 @@ public class ApprisalTypeService implements IApprisalTyeService {
         }
 
         existObjectiveCatagory.setStatus(objectiveCatagory.getStatus());
+        existObjectiveCatagory.setObjectivesId(objectMapper.writeValueAsString(objectiveCatagory.getObjectiveIds()));
         existObjectiveCatagory.setUpdatedOn(date);
-        apprisalTypeRepository.save(objectiveCatagory);
+        apprisalTypeRepository.save(existObjectiveCatagory);
         return "successful";
     }
+
+
+
 }
