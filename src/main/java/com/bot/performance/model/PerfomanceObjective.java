@@ -95,17 +95,20 @@ public class PerfomanceObjective {
     List<PerformanceDetail> performanceDetail;
 
     @Transient
-    @JsonProperty("FinancialYear")
-    int financialYear;
-
-    @Transient
-    @JsonProperty("DeclarationStartMonth")
-    int declarationStartMonth;
-
-    @Transient
     @JsonProperty("Comments")
     String comments;
     @Transient
-    @JsonProperty("DeclarationEndMonth")
-    int declarationEndMonth;
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty("FromDate")
+    Date fromDate;
+    @Transient
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty("ToDate")
+    Date toDate;
+    @Transient
+    @JsonProperty("Rating")
+    double rating;
+    @Transient
+    @JsonProperty("PerformanceStatus")
+    int performanceStatus;
 }

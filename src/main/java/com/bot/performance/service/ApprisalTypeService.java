@@ -1,9 +1,6 @@
 package com.bot.performance.service;
 
-import com.bot.performance.model.CurrentSession;
-import com.bot.performance.model.DbParameters;
-import com.bot.performance.model.FilterModel;
-import com.bot.performance.model.ObjectiveCatagory;
+import com.bot.performance.model.*;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
@@ -116,12 +113,23 @@ public class ApprisalTypeService implements IApprisalTyeService {
         }
 
         existObjectiveCatagory.setStatus(objectiveCatagory.getStatus());
-        existObjectiveCatagory.setObjectivesId(objectMapper.writeValueAsString(objectiveCatagory.getObjectiveIds()));
+        if (objectiveCatagory.getObjectiveIds() != null)
+            existObjectiveCatagory.setObjectivesId(objectMapper.writeValueAsString(objectiveCatagory.getObjectiveIds()));
+
         existObjectiveCatagory.setUpdatedOn(date);
         apprisalTypeRepository.save(existObjectiveCatagory);
         return "successful";
     }
 
+    public List<ObjectiveDetail> getObjectiveByCategoryIdService(int objectiveCategotyId) throws Exception {
+        if (objectiveCategotyId == 0)
+            throw new Exception("Invalid objective selected.");
+
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategotyId, Types.INTEGER));
+        var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_role", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveDetail>>() {});
+    }
 
 
 }

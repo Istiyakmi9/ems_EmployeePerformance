@@ -1,12 +1,14 @@
 package com.bot.performance.service;
 
 import com.bot.performance.model.*;
-import com.bot.performance.repository.*;
+import com.bot.performance.repository.CompanySettingRepository;
+import com.bot.performance.repository.LowLevelExecution;
+import com.bot.performance.repository.PerformanceObjectiveRepository;
+import com.bot.performance.repository.PerformanceRepository;
 import com.bot.performance.serviceinterface.IPerformanceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,6 @@ public class PerformanceService implements IPerformanceService {
     }
 
     public List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception {
-        var empObjective = new ArrayList<PerfomanceObjective>();
         if (designationId <= 0)
             throw new Exception("Invalid designation selected. Please login again");
 
@@ -48,10 +49,44 @@ public class PerformanceService implements IPerformanceService {
 
         if (employeeId <= 0)
             throw new Exception("Invalid employee. Please login again");
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
+        var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_employee", dbParameters);
+        if (dataSet == null || dataSet.size() != 3)
+            throw new Exception("Fail to get objectives. Please contact to admin.");
+        List<PerfomanceObjective> empObjective =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
+        List<EmployeePerformance> empPerformance =  objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeePerformance>>() {});
+        empObjective.forEach(x -> {
+            if (empPerformance.size() > 0 && empObjective.size() > 0) {
+                var objective = empPerformance.stream()
+                        .filter(i -> i.getObjectiveId().equals(x.getObjectiveId()))
+                        .findFirst();
 
-        empObjective = performanceObjectiveRepository.getObjectivesByEmployeeId(employeeId);
-        if (empObjective.size() == 0)
-            return new ArrayList<>();
+                if (objective.isPresent()) {
+                    var obj = objective.get();
+                    x.setCurrentValue(obj.getCurrentValue());
+                    x.setUpdatedOn(obj.getUpdatedOn());
+                    x.setStatus(obj.getStatus());
+                    x.setEmployeePerformanceId(obj.getEmployeePerformanceId());
+                    x.setComments(obj.getComments());
+                    x.setRating(obj.getRating());
+                    x.setPerformanceStatus(obj.getPerformanceStatus());
+                    try {
+                        x.setPerformanceDetail(objectMapper.readValue(obj.getPerformanceDetail(), new TypeReference<ArrayList<PerformanceDetail>>() {
+                        }));
+                        x.setPerformanceDetail(x.getPerformanceDetail().stream()
+                                .sorted((a, b) -> {
+                                    return b.getUpdatedOn().compareTo(a.getUpdatedOn());
+                                }).toList());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+//        empObjective = performanceObjectiveRepository.getObjectivesByEmployeeId(employeeId);
+//        if (empObjective.size() == 0)
+//            return new ArrayList<>();
 
 //        var empPerformanceObj = performanceRepository.getEmpPerformanceByEmpId(employeeId);
 //        var companySettingDetail = companySettingRepository.findAll().stream().findFirst();
@@ -66,8 +101,8 @@ public class PerformanceService implements IPerformanceService {
 //                x.setDeclarationStartMonth(companyDetail.getDeclarationStartMonth());
 //                x.setFinancialYear(companyDetail.getFinancialYear());
 //                var canSeeObject = true;
-////                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
-////                    isObjSee = false;
+//                if (currentUserDetail.getUserDetail().getRoleId() == 2 && x.isObjSeeType())
+//                   isObjSee = false;
 //
 //                try {
 //                    x.setTagRole(objectMapper.readValue(x.getTag(), new TypeReference<List<Integer>>(){}));
@@ -135,6 +170,7 @@ public class PerformanceService implements IPerformanceService {
 
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(0);
+            performanceDetail.setUpdatedOn(date);
         }
         else
         {
@@ -150,9 +186,12 @@ public class PerformanceService implements IPerformanceService {
 
         performanceDetail.setStatus(employeePerformance.getStatus());
         performanceDetail.setCurrentValue(employeePerformance.getCurrentValue());
+        performanceDetail.setUpdatedOn(date);
         performanceDetails.add(performanceDetail);
         existEmpPerformance.setPerformanceDetail(objectMapper.writeValueAsString(performanceDetails));
         existEmpPerformance.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+        existEmpPerformance.setPerformanceStatus(ApplicationConstant.Pending);
+        existEmpPerformance.setRating(employeePerformance.getRating());
         existEmpPerformance.setUpdatedOn(date);
 
         return performanceRepository.save(existEmpPerformance);
@@ -162,7 +201,6 @@ public class PerformanceService implements IPerformanceService {
         validateObjectiveDetail(objectiveDetail);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
-
         PerfomanceObjective objective;
         Optional<PerfomanceObjective> objectiveData = performanceObjectiveRepository.findById(objectiveDetail.getObjectiveId());
         if(objectiveData.isEmpty()) {
@@ -235,6 +273,20 @@ public class PerformanceService implements IPerformanceService {
             objectiveDetail.setStartValue(0);
             objectiveDetail.setTargetValue(0);
         }
+    }
+
+    public String submitEmployeeObjectiveService(Long employeeId) throws Exception {
+        if (employeeId  == 0)
+            throw new Exception("Invalid employee performance selected");
+
+        List<EmployeePerformance> performances = this.performanceRepository.getEmpPerformanceByEmpId(employeeId);
+        if (performances.size() == 0)
+            throw new Exception("No performance found. Please contact to admin");
+        performances.forEach(x -> {
+            x.setPerformanceStatus(ApplicationConstant.Submitted);
+        });
+        this.performanceRepository.saveAll(performances);
+        return "Performance submitted successfully";
     }
 
     private void validateEmployeeObjective(@NotNull EmployeePerformance employeePerformance) throws Exception {
