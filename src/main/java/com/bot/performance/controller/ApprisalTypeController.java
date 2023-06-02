@@ -41,4 +41,10 @@ public class ApprisalTypeController extends BaseController {
         var result = this.apprisalTypeService.manageAppraisalCycleService(objectiveCatagory, objectiveCatagoryId);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
+
+    @GetMapping("getObjectiveByCategoryId/{objectiveCategotyId}")
+    public ResponseEntity<ApiResponse> getObjectiveByCategoryId(@PathVariable int objectiveCategotyId) throws Exception {
+        var result = this.apprisalTypeService.getObjectiveByCategoryIdService(objectiveCategotyId);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
+    }
 }

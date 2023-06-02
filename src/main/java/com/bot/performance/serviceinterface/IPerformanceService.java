@@ -15,4 +15,5 @@ public interface IPerformanceService {
     List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception;
     List<PerfomanceObjective> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception;
     List<?> getEmployeeByManagerId(long managerId);
+    String submitEmployeeObjectiveService(Long employeeId) throws Exception;
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "objective_catagory")
@@ -71,5 +72,8 @@ public class ObjectiveCatagory {
     @Transient
     @JsonProperty("Index")
     int index;
+    @Transient
+    @JsonProperty("ObjectiveIds")
+    List<Integer> objectiveIds;
 }
 

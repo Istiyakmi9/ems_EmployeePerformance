@@ -96,4 +96,10 @@ public class EmployeePerformanceController extends BaseController {
         return new ResponseEntity<>(items, HttpStatus.OK);
 
     }
+
+    @GetMapping("submitEmployeeObjective/{employeeId}")
+    public  ResponseEntity<ApiResponse> submitEmployeeObjective(@PathVariable Long employeeId) throws Exception {
+        var result = performanceService.submitEmployeeObjectiveService(employeeId);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
+    }
 }

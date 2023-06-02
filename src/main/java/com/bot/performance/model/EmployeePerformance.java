@@ -1,5 +1,7 @@
 package com.bot.performance.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -9,37 +11,56 @@ import java.util.Date;
 public class EmployeePerformance {
     @Id
     @Column(name = "EmployeePerformanceId")
+    @JsonProperty("EmployeePerformanceId")
     Long employeePerformanceId;
 
     @Column(name = "ObjectiveId")
+    @JsonProperty("ObjectiveId")
     Long objectiveId;
 
     @Column(name = "EmployeeId")
+    @JsonProperty("EmployeeId")
     Long employeeId;
 
     @Column(name = "CompanyId")
+    @JsonProperty("CompanyId")
     int companyId;
 
     @Column(name = "CurrentValue")
-    double currentValue;
+    @JsonProperty("CurrentValue")
+    double currentValue = 0;
 
     @Column(name = "Status")
+    @JsonProperty("Status")
     int status;
 
     @Column(name = "Comments")
+    @JsonProperty("Comments")
     String comments;
 
     @Column(name = "PerformanceDetail")
+    @JsonProperty("PerformanceDetail")
     String performanceDetail;
 
     @Column(name = "UpdatedBy")
+    @JsonProperty("UpdatedBy")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Long updatedBy;
 
     @Column(name = "UpdatedOn")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty("UpdatedOn")
     Date updatedOn;
 
     @Transient
+    @JsonProperty("TargetValue")
     double targetValue;
+    @Column(name = "Rating")
+    @JsonProperty("Rating")
+    double rating;
+    @Column(name = "PerformanceStatus")
+    @JsonProperty("PerformanceStatus")
+    int performanceStatus;
 
     public Long getEmployeePerformanceId() {
         return employeePerformanceId;
@@ -117,27 +138,9 @@ public class EmployeePerformance {
         return updatedOn;
     }
 
-    @Override
-    public String toString() {
-        return "EmployeePerformance{" +
-                "employeePerformanceId=" + employeePerformanceId +
-                ", objectiveId=" + objectiveId +
-                ", employeeId=" + employeeId +
-                ", companyId=" + companyId +
-                ", currentValue=" + currentValue +
-                ", status=" + status +
-                ", comments='" + comments + '\'' +
-                ", performanceDetail='" + performanceDetail + '\'' +
-                ", updatedBy=" + updatedBy +
-                ", updatedOn=" + updatedOn +
-                '}';
-    }
-
     public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
-
-    public EmployeePerformance() {}
 
     public double getTargetValue() {
         return targetValue;
@@ -147,16 +150,19 @@ public class EmployeePerformance {
         this.targetValue = targetValue;
     }
 
-    public EmployeePerformance(Long employeePerformanceId, Long objectiveId, Long employeeId, int companyId, double currentValue, int status, String comments, String performanceDetail, Long updatedBy, Date updatedOn) {
-        this.employeePerformanceId = employeePerformanceId;
-        this.objectiveId = objectiveId;
-        this.employeeId = employeeId;
-        this.companyId = companyId;
-        this.currentValue = currentValue;
-        this.status = status;
-        this.comments = comments;
-        this.performanceDetail = performanceDetail;
-        this.updatedBy = updatedBy;
-        this.updatedOn = updatedOn;
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public int getPerformanceStatus() {
+        return performanceStatus;
+    }
+
+    public void setPerformanceStatus(int performanceStatus) {
+        this.performanceStatus = performanceStatus;
     }
 }

@@ -1,9 +1,6 @@
 package com.bot.performance.service;
 
-import com.bot.performance.model.CurrentSession;
-import com.bot.performance.model.DbParameters;
-import com.bot.performance.model.FilterModel;
-import com.bot.performance.model.ObjectiveCatagory;
+import com.bot.performance.model.*;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
@@ -52,9 +49,8 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setObjectiveCatagoryId(lastObjectiveCatagory.getObjectiveCatagoryId() + 1);
         objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
         objectiveCatagory.setCreatedOn(date);
-        var result = apprisalTypeRepository.save(objectiveCatagory);
-        if (result == null)
-            throw new Exception("Fail to insert appraisal category");
+        objectiveCatagory.setObjectivesId("[]");
+        apprisalTypeRepository.save(objectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
         return  this.getAppraisalTypeByFilter(filterModel);
@@ -79,9 +75,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
         existObjectiveCatagory.setToDate(objectiveCatagory.getToDate());
         existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         existObjectiveCatagory.setUpdatedOn(date);
-        var result = apprisalTypeRepository.save(objectiveCatagory);
-        if (result == null)
-            throw new Exception("Fail to update appraisal category");
+        apprisalTypeRepository.save(objectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
         return  this.getAppraisalTypeByFilter(filterModel);
@@ -119,8 +113,23 @@ public class ApprisalTypeService implements IApprisalTyeService {
         }
 
         existObjectiveCatagory.setStatus(objectiveCatagory.getStatus());
+        if (objectiveCatagory.getObjectiveIds() != null)
+            existObjectiveCatagory.setObjectivesId(objectMapper.writeValueAsString(objectiveCatagory.getObjectiveIds()));
+
         existObjectiveCatagory.setUpdatedOn(date);
-        apprisalTypeRepository.save(objectiveCatagory);
+        apprisalTypeRepository.save(existObjectiveCatagory);
         return "successful";
     }
+
+    public List<ObjectiveDetail> getObjectiveByCategoryIdService(int objectiveCategotyId) throws Exception {
+        if (objectiveCategotyId == 0)
+            throw new Exception("Invalid objective selected.");
+
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategotyId, Types.INTEGER));
+        var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_role", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveDetail>>() {});
+    }
+
+
 }
