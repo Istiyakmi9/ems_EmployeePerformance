@@ -50,6 +50,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
         objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
         objectiveCatagory.setCreatedOn(date);
         objectiveCatagory.setObjectivesId("[]");
+        objectiveCatagory.setRolesId("[]");
         apprisalTypeRepository.save(objectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
@@ -71,13 +72,33 @@ public class ApprisalTypeService implements IApprisalTyeService {
         ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
         existObjectiveCatagory.setObjectiveCatagoryType(objectiveCatagory.getObjectiveCatagoryType());
         existObjectiveCatagory.setTypeDescription(objectiveCatagory.getTypeDescription());
-        existObjectiveCatagory.setFromDate(objectiveCatagory.getFromDate());
-        existObjectiveCatagory.setToDate(objectiveCatagory.getToDate());
+        existObjectiveCatagory.setAppraisalCycleFromDate(objectiveCatagory.getAppraisalCycleFromDate());
+        existObjectiveCatagory.setAppraisalCycleToDate(objectiveCatagory.getAppraisalCycleToDate());
+        existObjectiveCatagory.setSelfAppraisalFromDate(objectiveCatagory.getSelfAppraisalFromDate());
+        existObjectiveCatagory.setSelfAppraisalToDate(objectiveCatagory.getSelfAppraisalToDate());
+        existObjectiveCatagory.setTagByRole(objectiveCatagory.isTagByRole());
+        existObjectiveCatagory.setTagByDepartment(objectiveCatagory.isTagByDepartment());
+        existObjectiveCatagory.setSelfAppraisal(objectiveCatagory.isSelfAppraisal());
+        existObjectiveCatagory.setMultiRaterFeedback(objectiveCatagory.isMultiRaterFeedback());
+        existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
+        existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
+        existObjectiveCatagory.setFeedbackFromDate(objectiveCatagory.getFeedbackFromDate());
+        existObjectiveCatagory.setFeedbackToDate(objectiveCatagory.getFeedbackToDate());
+        existObjectiveCatagory.setDefaultRater(objectiveCatagory.isDefaultRater());
+        existObjectiveCatagory.setAllowSelfAppraisal(objectiveCatagory.isAllowSelfAppraisal());
+        existObjectiveCatagory.setHikeApproval(objectiveCatagory.isHikeApproval());
+        existObjectiveCatagory.setReviewFromDate(objectiveCatagory.getReviewFromDate());
+        existObjectiveCatagory.setReviewToDate(objectiveCatagory.getReviewToDate());
+        existObjectiveCatagory.setNormalizationFromDate(objectiveCatagory.getNormalizationFromDate());
+        existObjectiveCatagory.setNormalizationToDate(objectiveCatagory.getNormalizationToDate());
         existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         existObjectiveCatagory.setUpdatedOn(date);
-        apprisalTypeRepository.save(objectiveCatagory);
+        apprisalTypeRepository.save(existObjectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
+        filterModel.setSearchString("1=1");
+        filterModel.setPageSize(10);
+        filterModel.setPageIndex(1);
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
@@ -88,10 +109,10 @@ public class ApprisalTypeService implements IApprisalTyeService {
         if (objectiveCatagory.getTypeDescription().isEmpty())
             throw new Exception("Please enter description first");
 
-        if (objectiveCatagory.getFromDate() == null)
+        if (objectiveCatagory.getSelfAppraisalToDate() == null)
             throw new Exception("Please select a valid from date");
 
-        if (objectiveCatagory.getToDate() == null)
+        if (objectiveCatagory.getAppraisalCycleToDate() == null)
             throw new Exception("Please select a valid to date");
     }
 
