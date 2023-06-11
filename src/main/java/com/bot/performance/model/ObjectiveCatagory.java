@@ -35,12 +35,6 @@ public class ObjectiveCatagory {
     @Column(name = "ObjectivesId")
     @JsonProperty("ObjectivesId")
     public String objectivesId;
-    @Column(name = "IsTagByRole")
-    @JsonProperty("IsTagByRole")
-    public boolean isTagByRole;
-    @Column(name = "IsTagByDepartment")
-    @JsonProperty("IsTagByDepartment")
-    public boolean isTagByDepartment;
     @Column(name = "IsSelfAppraisal")
     @JsonProperty("IsSelfAppraisal")
     boolean isSelfAppraisal;
@@ -130,5 +124,8 @@ public class ObjectiveCatagory {
     @Transient
     @JsonProperty("ObjectiveIds")
     List<Integer> objectiveIds;
+    @Transient
+    @JsonProperty("RoleIds")
+    List<Integer> roleIds;
 }
 

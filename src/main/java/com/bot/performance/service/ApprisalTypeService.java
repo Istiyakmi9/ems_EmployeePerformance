@@ -4,6 +4,7 @@ import com.bot.performance.model.*;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,15 @@ public class ApprisalTypeService implements IApprisalTyeService {
         dbParameters.add(new DbParameters("_pageSize", filter.getPageSize(), Types.INTEGER));
 
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_filter", dbParameters);
-        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
+        List<ObjectiveCatagory> objectiveCategory =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
+        objectiveCategory.forEach(x -> {
+            try {
+                x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return  objectiveCategory;
     }
 
     @Override
@@ -50,10 +59,13 @@ public class ApprisalTypeService implements IApprisalTyeService {
         objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
         objectiveCatagory.setCreatedOn(date);
         objectiveCatagory.setObjectivesId("[]");
-        objectiveCatagory.setRolesId("[]");
+        objectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
         apprisalTypeRepository.save(objectiveCatagory);
 
         FilterModel filterModel = new FilterModel();
+        filterModel.setSearchString("1=1");
+        filterModel.setPageIndex(1);
+        filterModel.setPageSize(10);
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
@@ -76,8 +88,6 @@ public class ApprisalTypeService implements IApprisalTyeService {
         existObjectiveCatagory.setAppraisalCycleToDate(objectiveCatagory.getAppraisalCycleToDate());
         existObjectiveCatagory.setSelfAppraisalFromDate(objectiveCatagory.getSelfAppraisalFromDate());
         existObjectiveCatagory.setSelfAppraisalToDate(objectiveCatagory.getSelfAppraisalToDate());
-        existObjectiveCatagory.setTagByRole(objectiveCatagory.isTagByRole());
-        existObjectiveCatagory.setTagByDepartment(objectiveCatagory.isTagByDepartment());
         existObjectiveCatagory.setSelfAppraisal(objectiveCatagory.isSelfAppraisal());
         existObjectiveCatagory.setMultiRaterFeedback(objectiveCatagory.isMultiRaterFeedback());
         existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
@@ -91,6 +101,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
         existObjectiveCatagory.setReviewToDate(objectiveCatagory.getReviewToDate());
         existObjectiveCatagory.setNormalizationFromDate(objectiveCatagory.getNormalizationFromDate());
         existObjectiveCatagory.setNormalizationToDate(objectiveCatagory.getNormalizationToDate());
+        existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
         existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         existObjectiveCatagory.setUpdatedOn(date);
         apprisalTypeRepository.save(existObjectiveCatagory);
@@ -109,11 +120,48 @@ public class ApprisalTypeService implements IApprisalTyeService {
         if (objectiveCatagory.getTypeDescription().isEmpty())
             throw new Exception("Please enter description first");
 
-        if (objectiveCatagory.getSelfAppraisalToDate() == null)
-            throw new Exception("Please select a valid from date");
+        if (objectiveCatagory.getReviewFromDate() == null)
+            throw new Exception("Please select a valid review from date");
 
-        if (objectiveCatagory.getAppraisalCycleToDate() == null)
-            throw new Exception("Please select a valid to date");
+        if (objectiveCatagory.getReviewToDate() == null)
+            throw new Exception("Please select a valid review to date");
+
+        if (objectiveCatagory.getNormalizationFromDate() == null)
+            throw new Exception("Please select a valid normalization period from date");
+
+        if (objectiveCatagory.getNormalizationToDate() == null)
+            throw new Exception("Please select a valid normalization period to date");
+
+        if (objectiveCatagory.isMultiRaterFeedback()) {
+            if (objectiveCatagory.getSelectionPeriodFromDate() == null)
+                throw new Exception("Please select a valid selection period from date");
+
+            if (objectiveCatagory.getSelectionPeriodToDate() == null)
+                throw new Exception("Please select a valid selection period to date");
+
+            if (objectiveCatagory.getFeedbackFromDate() == null)
+                throw new Exception("Please select a valid feedback from date");
+
+            if (objectiveCatagory.getFeedbackToDate() == null)
+                throw new Exception("Please select a valid feedback to date");
+        }
+
+        if (objectiveCatagory.isSelfAppraisal()) {
+            if (objectiveCatagory.getAppraisalCycleFromDate() == null)
+                throw new Exception("Please select a valid appraisal cycle from date");
+
+            if (objectiveCatagory.getAppraisalCycleToDate() == null)
+                throw new Exception("Please select a valid appraisal cycle to date");
+
+            if (objectiveCatagory.getSelfAppraisalFromDate() == null)
+                throw new Exception("Please select a valid self appraisal from date");
+
+            if (objectiveCatagory.getSelfAppraisalToDate() == null)
+                throw new Exception("Please select a valid self appraisal to date");
+        }
+
+        if (objectiveCatagory.getRoleIds().size() == 0)
+            throw new Exception("Please select tag roles");
     }
 
     @Override
