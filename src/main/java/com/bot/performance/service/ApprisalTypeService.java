@@ -129,11 +129,6 @@ public class ApprisalTypeService implements IApprisalTyeService {
             throw new Exception("Objective category not found");
 
         ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
-        if(objectiveCatagory.status == null || objectiveCatagory.status.isEmpty()) {
-            throw new Exception("Invalid status value submitted");
-        }
-
-        existObjectiveCatagory.setStatus(objectiveCatagory.getStatus());
         if (objectiveCatagory.getObjectiveIds() != null)
             existObjectiveCatagory.setObjectivesId(objectMapper.writeValueAsString(objectiveCatagory.getObjectiveIds()));
 
