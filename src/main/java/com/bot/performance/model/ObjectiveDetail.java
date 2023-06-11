@@ -5,8 +5,6 @@ import java.util.Date;
 public class ObjectiveDetail extends PerfomanceObjective {
     int objectiveCatagoryId;
     String objectiveCatagoryType;
-    boolean isTagByDepartment;
-    boolean isTagByRole;
     Date fromDate;
     Date toDate;
 
@@ -24,22 +22,6 @@ public class ObjectiveDetail extends PerfomanceObjective {
 
     public void setObjectiveCatagoryType(String objectiveCatagoryType) {
         this.objectiveCatagoryType = objectiveCatagoryType;
-    }
-
-    public boolean isTagByDepartment() {
-        return isTagByDepartment;
-    }
-
-    public void setTagByDepartment(boolean tagByDepartment) {
-        isTagByDepartment = tagByDepartment;
-    }
-
-    public boolean isTagByRole() {
-        return isTagByRole;
-    }
-
-    public void setTagByRole(boolean tagByRole) {
-        isTagByRole = tagByRole;
     }
 
     public Date getFromDate() {
