@@ -1,7 +1,6 @@
 package com.bot.performance.service;
 
 import com.bot.performance.model.*;
-import com.bot.performance.repository.CompanySettingRepository;
 import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.repository.PerformanceObjectiveRepository;
 import com.bot.performance.repository.PerformanceRepository;
@@ -28,8 +27,6 @@ public class PerformanceService implements IPerformanceService {
     PerformanceObjectiveRepository performanceObjectiveRepository;
     @Autowired
     CurrentSession currentUserDetail;
-    @Autowired
-    CompanySettingRepository companySettingRepository;
     @Autowired
     LowLevelExecution lowLevelExecution;
     public List<EmployeePerformance> GetAllEmpPerformanceService() {
@@ -174,6 +171,8 @@ public class PerformanceService implements IPerformanceService {
         }
         else
         {
+            if (existEmpPerformance.getPerformanceStatus() == ApplicationConstant.Submitted)
+                throw new Exception("Objective already submitted");
             performanceDetails = (ArrayList<PerformanceDetail>) objectMapper.readValue(existEmpPerformance.getPerformanceDetail(), new TypeReference<List<PerformanceDetail>>(){});
             var index = performanceDetails.size();
             existEmpPerformance.setStatus(employeePerformance.getStatus());
@@ -183,7 +182,6 @@ public class PerformanceService implements IPerformanceService {
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(index);
         }
-
         performanceDetail.setStatus(employeePerformance.getStatus());
         performanceDetail.setCurrentValue(employeePerformance.getCurrentValue());
         performanceDetail.setUpdatedOn(date);
@@ -282,6 +280,11 @@ public class PerformanceService implements IPerformanceService {
         List<EmployeePerformance> performances = this.performanceRepository.getEmpPerformanceByEmpId(employeeId);
         if (performances.size() == 0)
             throw new Exception("No performance found. Please contact to admin");
+
+        var submittedPerformance = performances.stream().filter(x -> x.getPerformanceStatus() == ApplicationConstant.Submitted).toList();
+        if (submittedPerformance.size() > 0)
+            throw new Exception("You already submitted your performance");
+
         performances.forEach(x -> {
             x.setPerformanceStatus(ApplicationConstant.Submitted);
         });
