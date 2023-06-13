@@ -47,6 +47,10 @@ public class EmployeePerformance {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Long updatedBy;
 
+    @Column(name = "ProjectId")
+    @JsonProperty("ProjectId")
+    int projectId;
+
     @Column(name = "UpdatedOn")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty("UpdatedOn")
