@@ -14,4 +14,4 @@ EXPOSE 8081
 
 COPY --from=MAVEN /build/target/performance.jar /app/
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "performance.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "performance.jar"]
