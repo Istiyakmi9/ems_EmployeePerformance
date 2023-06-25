@@ -16,8 +16,11 @@ public class TestController {
     @Value("${file.folder:#{null}}")
     private String targetFolder;
 
-    @Value("${dev.folder:na}")
+    @Value("${env.folder:na}")
     private String devFolder;
+
+    @Value("${service.name:no service}")
+    private String serviceName;
 
     @GetMapping("get")
     public ResponseEntity<List<String>> get() {
@@ -30,6 +33,7 @@ public class TestController {
         names.add("Developer");
         names.add(targetFolder);
         names.add(devFolder);
+        names.add(serviceName);
 
         return ResponseEntity.ok(names);
     }

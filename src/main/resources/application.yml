@@ -1,9 +1,12 @@
 server:
   port: 8081
 
+env:
+  folder: local-environment
+
 spring:
   profiles:
-    active: default
+    active: prod
   application:
     name: employee-performance-service
 
@@ -12,8 +15,6 @@ spring:
       discovery:
         all-namespaces: true
 
-
-
 ---
 spring:
   config:
@@ -21,43 +22,11 @@ spring:
       on-profile: default
     import: optional:configserver:http://localhost:8083
 
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://192.168.0.101:3306/onlinedatabuilder
-#    username: istiyak
-#    password: live@Bottomhalf_001
-#
-#eureka:
-#  client:
-#    enabled: false
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://194.233.76.48:3306/onlinedatabuilder
-    username: istiyak
-    password: live@Bottomhalf_011
-
-eureka:
-  client:
-    enabled: false
-
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-    import: optional:configserver:http://configserver-service:8083
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://194.233.76.48:3306/onlinedatabuilder
-    username: istiyak
-    password: live@Bottomhalf_011
-
-eureka:
-  client:
-    enabled: false
+    url: jdbc:mysql://localhost:3306/onlinedatabuilder
+    username: root
+    password: istiyak@mi9
 
 ---
 
