@@ -16,6 +16,9 @@ public class TestController {
     @Value("${file.folder:#{null}}")
     private String targetFolder;
 
+    @Value("${dev.folder:na}")
+    private String devFolder;
+
     @GetMapping("get")
     public ResponseEntity<List<String>> get() {
         System.out.println("Application called................");
@@ -26,6 +29,7 @@ public class TestController {
         names.add("Manager");
         names.add("Developer");
         names.add(targetFolder);
+        names.add(devFolder);
 
         return ResponseEntity.ok(names);
     }
