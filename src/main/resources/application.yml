@@ -37,6 +37,11 @@ spring:
       ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: none
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
 
