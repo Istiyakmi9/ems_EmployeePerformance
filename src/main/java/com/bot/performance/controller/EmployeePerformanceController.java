@@ -1,7 +1,6 @@
 package com.bot.performance.controller;
 
 import com.bot.performance.model.*;
-import com.bot.performance.service.PerformanceService;
 import com.bot.performance.serviceinterface.IPerformanceService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +98,13 @@ public class EmployeePerformanceController extends BaseController {
     @GetMapping("submitEmployeeObjective/{employeeId}")
     public  ResponseEntity<ApiResponse> submitEmployeeObjective(@PathVariable Long employeeId) throws Exception {
         var result = performanceService.submitEmployeeObjectiveService(employeeId);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @GetMapping("changeEmployeeObjectiveStatus/{employeeId}/{status}")
+    public  ResponseEntity<ApiResponse> changeEmployeeObjectiveStatus(@PathVariable Long employeeId,
+                                                                @PathVariable int status) throws Exception {
+        var result = performanceService.changeEmployeeObjectiveStatusService(employeeId, status);
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }
