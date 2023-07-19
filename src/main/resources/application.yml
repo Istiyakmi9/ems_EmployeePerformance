@@ -6,7 +6,7 @@ env:
 
 spring:
   profiles:
-    active: prod
+    active: ${profile}
   application:
     name: employee-performance-service
 
@@ -16,6 +16,7 @@ spring:
         all-namespaces: true
 
 ---
+
 spring:
   config:
     activate:
