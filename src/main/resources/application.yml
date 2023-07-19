@@ -6,7 +6,7 @@ env:
 
 spring:
   profiles:
-    active: ${profile}
+    active: ${profile:default}
   application:
     name: employee-performance-service
 
