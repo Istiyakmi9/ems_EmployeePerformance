@@ -1,12 +1,9 @@
 server:
   port: 8081
 
-env:
-  folder: local-environment
-
 spring:
   profiles:
-    active: ${profile:default}
+    active: ${profile:prod}
   application:
     name: employee-performance-service
 
@@ -14,18 +11,6 @@ spring:
     kubernetes:
       discovery:
         all-namespaces: true
-
----
-
-spring:
-  config:
-    import: optional:configserver:http://configserver-service:8083
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/onlinedatabuilder
-    username: root
-    password: istiyak@mi9
 
 ---
 
