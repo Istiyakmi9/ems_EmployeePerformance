@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.sql.Types;
@@ -39,14 +38,12 @@ public class PerformanceService implements IPerformanceService {
     }
 
     public List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception {
-        if (designationId <= 0)
-            throw new Exception("Invalid designation selected. Please login again");
-
         if (companyId <= 0)
             throw new Exception("Invalid company selected. Please login again");
 
         if (employeeId <= 0)
             throw new Exception("Invalid employee. Please login again");
+
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_employee", dbParameters);
@@ -288,6 +285,25 @@ public class PerformanceService implements IPerformanceService {
 
         performances.forEach(x -> {
             x.setPerformanceStatus(ApplicationConstant.Submitted);
+        });
+        this.performanceRepository.saveAll(performances);
+        return "Performance submitted successfully";
+    }
+
+    public String changeEmployeeObjectiveStatusService(Long employeeId, int status) throws Exception {
+        if (employeeId  == 0)
+            throw new Exception("Invalid employee performance selected");
+
+        List<EmployeePerformance> performances = this.performanceRepository.getEmpPerformanceByEmpId(employeeId);
+        if (performances.size() == 0)
+            throw new Exception("No performance found. Please contact to admin");
+
+        var submittedPerformance = performances.stream().filter(x -> x.getPerformanceStatus() == status).toList();
+        if (submittedPerformance.size() > 0)
+            throw new Exception("You already submitted your performance");
+
+        performances.forEach(x -> {
+            x.setPerformanceStatus(status);
         });
         this.performanceRepository.saveAll(performances);
         return "Performance submitted successfully";
