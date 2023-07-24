@@ -1,5 +1,6 @@
 package com.bot.performance.service;
 
+import com.bot.performance.config.ApplicationException;
 import com.bot.performance.model.*;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
@@ -7,6 +8,8 @@ import com.bot.performance.serviceinterface.IApprisalTyeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.kubernetes.client.Exec;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,46 +73,53 @@ public class ApprisalTypeService implements IApprisalTyeService {
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public List<ObjectiveCatagory> updateAppraisalTypeService(ObjectiveCatagory objectiveCatagory, int objectiveCatagoryId) throws Exception {
-        if (objectiveCatagoryId == 0)
-            throw new Exception("Invalid appraisal selected");
-
-        validateApprisalType(objectiveCatagory);
-        java.util.Date utilDate = new java.util.Date();
-        var date = new java.sql.Timestamp(utilDate.getTime());
-        var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
-        if (existObjectiveCatagoryData.isEmpty())
-            throw new Exception("Objective category not found");
-
-        ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
-        existObjectiveCatagory.setObjectiveCatagoryType(objectiveCatagory.getObjectiveCatagoryType());
-        existObjectiveCatagory.setTypeDescription(objectiveCatagory.getTypeDescription());
-        existObjectiveCatagory.setAppraisalCycleFromDate(objectiveCatagory.getAppraisalCycleFromDate());
-        existObjectiveCatagory.setAppraisalCycleToDate(objectiveCatagory.getAppraisalCycleToDate());
-        existObjectiveCatagory.setSelfAppraisalFromDate(objectiveCatagory.getSelfAppraisalFromDate());
-        existObjectiveCatagory.setSelfAppraisalToDate(objectiveCatagory.getSelfAppraisalToDate());
-        existObjectiveCatagory.setSelfAppraisal(objectiveCatagory.isSelfAppraisal());
-        existObjectiveCatagory.setMultiRaterFeedback(objectiveCatagory.isMultiRaterFeedback());
-        existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
-        existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
-        existObjectiveCatagory.setFeedbackFromDate(objectiveCatagory.getFeedbackFromDate());
-        existObjectiveCatagory.setFeedbackToDate(objectiveCatagory.getFeedbackToDate());
-        existObjectiveCatagory.setDefaultRater(objectiveCatagory.isDefaultRater());
-        existObjectiveCatagory.setAllowSelfAppraisal(objectiveCatagory.isAllowSelfAppraisal());
-        existObjectiveCatagory.setHikeApproval(objectiveCatagory.isHikeApproval());
-        existObjectiveCatagory.setReviewFromDate(objectiveCatagory.getReviewFromDate());
-        existObjectiveCatagory.setReviewToDate(objectiveCatagory.getReviewToDate());
-        existObjectiveCatagory.setNormalizationFromDate(objectiveCatagory.getNormalizationFromDate());
-        existObjectiveCatagory.setNormalizationToDate(objectiveCatagory.getNormalizationToDate());
-        existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
-        existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
-        existObjectiveCatagory.setUpdatedOn(date);
-        apprisalTypeRepository.save(existObjectiveCatagory);
-
         FilterModel filterModel = new FilterModel();
-        filterModel.setSearchString("1=1");
-        filterModel.setPageSize(10);
-        filterModel.setPageIndex(1);
+
+        try {
+            if (objectiveCatagoryId == 0)
+                throw new Exception("Invalid appraisal selected");
+
+            validateApprisalType(objectiveCatagory);
+            java.util.Date utilDate = new java.util.Date();
+            var date = new java.sql.Timestamp(utilDate.getTime());
+            var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
+            if (existObjectiveCatagoryData.isEmpty())
+                throw new Exception("Objective category not found");
+
+            ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
+            existObjectiveCatagory.setObjectiveCatagoryType(objectiveCatagory.getObjectiveCatagoryType());
+            existObjectiveCatagory.setTypeDescription(objectiveCatagory.getTypeDescription());
+            existObjectiveCatagory.setAppraisalCycleFromDate(objectiveCatagory.getAppraisalCycleFromDate());
+            existObjectiveCatagory.setAppraisalCycleToDate(objectiveCatagory.getAppraisalCycleToDate());
+            existObjectiveCatagory.setSelfAppraisalFromDate(objectiveCatagory.getSelfAppraisalFromDate());
+            existObjectiveCatagory.setSelfAppraisalToDate(objectiveCatagory.getSelfAppraisalToDate());
+            existObjectiveCatagory.setSelfAppraisal(objectiveCatagory.isSelfAppraisal());
+            existObjectiveCatagory.setMultiRaterFeedback(objectiveCatagory.isMultiRaterFeedback());
+            existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
+            existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
+            existObjectiveCatagory.setFeedbackFromDate(objectiveCatagory.getFeedbackFromDate());
+            existObjectiveCatagory.setFeedbackToDate(objectiveCatagory.getFeedbackToDate());
+            existObjectiveCatagory.setDefaultRater(objectiveCatagory.isDefaultRater());
+            existObjectiveCatagory.setAllowSelfAppraisal(objectiveCatagory.isAllowSelfAppraisal());
+            existObjectiveCatagory.setHikeApproval(objectiveCatagory.isHikeApproval());
+            existObjectiveCatagory.setReviewFromDate(objectiveCatagory.getReviewFromDate());
+            existObjectiveCatagory.setReviewToDate(objectiveCatagory.getReviewToDate());
+            existObjectiveCatagory.setNormalizationFromDate(objectiveCatagory.getNormalizationFromDate());
+            existObjectiveCatagory.setNormalizationToDate(objectiveCatagory.getNormalizationToDate());
+            existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
+            existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+            existObjectiveCatagory.setUpdatedOn(date);
+            apprisalTypeRepository.save(existObjectiveCatagory);
+
+            filterModel.setSearchString("1=1");
+            filterModel.setPageSize(10);
+            filterModel.setPageIndex(1);
+        } catch (Exception ex) {
+            throw ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
+        }
+
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
