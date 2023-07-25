@@ -41,13 +41,6 @@ public class ApprisalTypeService implements IApprisalTyeService {
 
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_filter", dbParameters);
         return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
-//        objectiveCategory.forEach(x -> {
-//            try {
-//                x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
-//            } catch (JsonProcessingException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
     }
 
     @Transactional(rollbackOn = Exception.class)
