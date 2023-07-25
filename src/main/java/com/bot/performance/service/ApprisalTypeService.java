@@ -1,5 +1,6 @@
 package com.bot.performance.service;
 
+import com.bot.performance.config.ApplicationException;
 import com.bot.performance.model.*;
 import com.bot.performance.repository.AppraisalAndCategoryDTO;
 import com.bot.performance.repository.AppraisalDetailRepository;
@@ -61,33 +62,8 @@ public class ApprisalTypeService implements IApprisalTyeService {
         objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
         objectiveCatagory.setCreatedOn(date);
         objectiveCatagory.setObjectivesId("[]");
-        objectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
+        objectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
         apprisalTypeRepository.save(objectiveCatagory);
-
-        var lastAppraisalDetail = appraisalDetailRepository.getLastAppraisalDetail();
-        AppraisalDetail appraisalDetail = new AppraisalDetail();
-        if (lastAppraisalDetail == null)
-            appraisalDetail.setAppraisalDetailId(1);
-        else
-            appraisalDetail.setAppraisalDetailId(lastAppraisalDetail.getAppraisalDetailId() + 1);
-
-        appraisalDetail.setObjectiveCatagoryId(objectiveCatagory.getObjectiveCatagoryId());
-        appraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
-        appraisalDetail.setAppraisalCycleEndDate(appraisalAndCategoryDTO.getAppraisalCycleEndDate());
-        appraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
-        appraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
-        appraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
-        appraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
-        appraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
-        appraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
-        appraisalDetail.setMultiraterFeedBackEndDate(appraisalAndCategoryDTO.getMultiraterFeedBackEndDate());
-        appraisalDetail.setReviewStartDate(appraisalAndCategoryDTO.getReviewStartDate());
-        appraisalDetail.setReviewEndDate(appraisalAndCategoryDTO.getReviewEndDate());
-        appraisalDetail.setSelfAppraisalStartDate(appraisalAndCategoryDTO.getSelfAppraisalStartDate());
-        appraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
-        appraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
-        appraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
-        appraisalDetailRepository.save(appraisalDetail);
 
         FilterModel filterModel = new FilterModel();
         filterModel.setSearchString("1=1");
@@ -98,49 +74,54 @@ public class ApprisalTypeService implements IApprisalTyeService {
 
     @Transactional(rollbackOn = Exception.class)
     public List<ObjectiveCatagory> updateAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO, int objectiveCatagoryId) throws Exception {
-        if (objectiveCatagoryId == 0)
-            throw new Exception("Invalid appraisal selected");
-
-         validateApprisalType(appraisalAndCategoryDTO);
-        java.util.Date utilDate = new java.util.Date();
-        var date = new java.sql.Timestamp(utilDate.getTime());
-        var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
-        if (existObjectiveCatagoryData.isEmpty())
-            throw new Exception("Objective category not found");
-
-        ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
-        existObjectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
-        existObjectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
-        existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
-        existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
-        existObjectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
-        existObjectiveCatagory.setUpdatedOn(date);
-        apprisalTypeRepository.save(existObjectiveCatagory);
-
-        var existAppraisalDetailData = appraisalDetailRepository.findById(appraisalAndCategoryDTO.getAppraisalDetailId());
-        if (existAppraisalDetailData.isEmpty())
-            throw new Exception("Appraisal details not found");
-
-        AppraisalDetail existingAppraisalDetail = existAppraisalDetailData.get();
-        existingAppraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
-        existingAppraisalDetail.setAppraisalCycleEndDate((appraisalAndCategoryDTO.getAppraisalCycleEndDate()));
-        existingAppraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
-        existingAppraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
-        existingAppraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
-        existingAppraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
-        existingAppraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
-        existingAppraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
-        existingAppraisalDetail.setMultiraterFeedBackEndDate(appraisalAndCategoryDTO.getMultiraterFeedBackEndDate());
-        existingAppraisalDetail.setSelfAppraisalStartDate(appraisalAndCategoryDTO.getSelfAppraisalStartDate());
-        existingAppraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
-        existingAppraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
-        existingAppraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
-        appraisalDetailRepository.save(existingAppraisalDetail);
-
         FilterModel filterModel = new FilterModel();
-        filterModel.setSearchString("1=1");
-        filterModel.setPageSize(10);
-        filterModel.setPageIndex(1);
+        try {
+            if (objectiveCatagoryId == 0)
+                throw new Exception("Invalid appraisal selected");
+
+            validateApprisalType(appraisalAndCategoryDTO);
+            java.util.Date utilDate = new java.util.Date();
+            var date = new java.sql.Timestamp(utilDate.getTime());
+            var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
+            if (existObjectiveCatagoryData.isEmpty())
+                throw new Exception("Objective category not found");
+
+            ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
+            existObjectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
+            existObjectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
+            existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
+            existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+            existObjectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
+            existObjectiveCatagory.setUpdatedOn(date);
+            apprisalTypeRepository.save(existObjectiveCatagory);
+
+            var existAppraisalDetailData = appraisalDetailRepository.findById(appraisalAndCategoryDTO.getAppraisalDetailId());
+            if (existAppraisalDetailData.isEmpty())
+                throw new Exception("Appraisal details not found");
+
+            AppraisalDetail existingAppraisalDetail = existAppraisalDetailData.get();
+            existingAppraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
+            existingAppraisalDetail.setAppraisalCycleEndDate((appraisalAndCategoryDTO.getAppraisalCycleEndDate()));
+            existingAppraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
+            existingAppraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
+            existingAppraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
+            existingAppraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
+            existingAppraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
+            existingAppraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
+            existingAppraisalDetail.setMultiraterFeedBackEndDate(appraisalAndCategoryDTO.getMultiraterFeedBackEndDate());
+            existingAppraisalDetail.setSelfAppraisalStartDate(appraisalAndCategoryDTO.getSelfAppraisalStartDate());
+            existingAppraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
+            existingAppraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
+            existingAppraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
+            appraisalDetailRepository.save(existingAppraisalDetail);
+
+            filterModel.setSearchString("1=1");
+            filterModel.setPageSize(10);
+            filterModel.setPageIndex(1);
+        } catch (Exception ex) {
+            throw ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
+        }
+
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
