@@ -1,16 +1,12 @@
 package com.bot.performance.service;
 
-import com.bot.performance.config.ApplicationException;
 import com.bot.performance.model.*;
-import com.bot.performance.repository.AppraisalAndCategoryDTO;
-import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +25,6 @@ public class ApprisalTypeService implements IApprisalTyeService {
     LowLevelExecution lowLevelExecution;
     @Autowired
     ObjectMapper objectMapper;
-    @Autowired
-    AppraisalDetailRepository appraisalDetailRepository;
 
     @Override
     public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) {
@@ -41,12 +35,20 @@ public class ApprisalTypeService implements IApprisalTyeService {
         dbParameters.add(new DbParameters("_pageSize", filter.getPageSize(), Types.INTEGER));
 
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_filter", dbParameters);
-        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
+        List<ObjectiveCatagory> objectiveCategory =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
+        objectiveCategory.forEach(x -> {
+            try {
+                x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return  objectiveCategory;
     }
 
-    @Transactional(rollbackOn = Exception.class)
-    public List<ObjectiveCatagory> addAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception {
-         validateApprisalType(appraisalAndCategoryDTO);
+    @Override
+    public List<ObjectiveCatagory> addAppraisalTypeService(ObjectiveCatagory objectiveCatagory) throws Exception {
+        validateApprisalType(objectiveCatagory);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
         var lastObjectiveCatagory = apprisalTypeRepository.getLastObjectiveCategory();
@@ -122,47 +124,94 @@ public class ApprisalTypeService implements IApprisalTyeService {
             throw ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
         }
 
+    @Override
+    public List<ObjectiveCatagory> updateAppraisalTypeService(ObjectiveCatagory objectiveCatagory, int objectiveCatagoryId) throws Exception {
+        if (objectiveCatagoryId == 0)
+            throw new Exception("Invalid appraisal selected");
+
+        validateApprisalType(objectiveCatagory);
+        java.util.Date utilDate = new java.util.Date();
+        var date = new java.sql.Timestamp(utilDate.getTime());
+        var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
+        if (existObjectiveCatagoryData.isEmpty())
+            throw new Exception("Objective category not found");
+
+        ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
+        existObjectiveCatagory.setObjectiveCatagoryType(objectiveCatagory.getObjectiveCatagoryType());
+        existObjectiveCatagory.setTypeDescription(objectiveCatagory.getTypeDescription());
+        existObjectiveCatagory.setAppraisalCycleFromDate(objectiveCatagory.getAppraisalCycleFromDate());
+        existObjectiveCatagory.setAppraisalCycleToDate(objectiveCatagory.getAppraisalCycleToDate());
+        existObjectiveCatagory.setSelfAppraisalFromDate(objectiveCatagory.getSelfAppraisalFromDate());
+        existObjectiveCatagory.setSelfAppraisalToDate(objectiveCatagory.getSelfAppraisalToDate());
+        existObjectiveCatagory.setSelfAppraisal(objectiveCatagory.isSelfAppraisal());
+        existObjectiveCatagory.setMultiRaterFeedback(objectiveCatagory.isMultiRaterFeedback());
+        existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
+        existObjectiveCatagory.setSelectionPeriodFromDate(objectiveCatagory.getSelectionPeriodFromDate());
+        existObjectiveCatagory.setFeedbackFromDate(objectiveCatagory.getFeedbackFromDate());
+        existObjectiveCatagory.setFeedbackToDate(objectiveCatagory.getFeedbackToDate());
+        existObjectiveCatagory.setDefaultRater(objectiveCatagory.isDefaultRater());
+        existObjectiveCatagory.setAllowSelfAppraisal(objectiveCatagory.isAllowSelfAppraisal());
+        existObjectiveCatagory.setHikeApproval(objectiveCatagory.isHikeApproval());
+        existObjectiveCatagory.setReviewFromDate(objectiveCatagory.getReviewFromDate());
+        existObjectiveCatagory.setReviewToDate(objectiveCatagory.getReviewToDate());
+        existObjectiveCatagory.setNormalizationFromDate(objectiveCatagory.getNormalizationFromDate());
+        existObjectiveCatagory.setNormalizationToDate(objectiveCatagory.getNormalizationToDate());
+        existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
+        existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+        existObjectiveCatagory.setUpdatedOn(date);
+        apprisalTypeRepository.save(existObjectiveCatagory);
+
+        FilterModel filterModel = new FilterModel();
+        filterModel.setSearchString("1=1");
+        filterModel.setPageSize(10);
+        filterModel.setPageIndex(1);
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
-    private void validateApprisalType(AppraisalAndCategoryDTO objectiveCatagory) throws Exception {
+    private void validateApprisalType(ObjectiveCatagory objectiveCatagory) throws Exception {
         if (objectiveCatagory.getObjectiveCatagoryType().isEmpty())
             throw new Exception("Please enter objective category first");
 
         if (objectiveCatagory.getTypeDescription().isEmpty())
             throw new Exception("Please enter description first");
 
-        if (objectiveCatagory.getReviewStartDate() == null)
+        if (objectiveCatagory.getReviewFromDate() == null)
             throw new Exception("Please select a valid review from date");
 
-        if (objectiveCatagory.getReviewEndDate() == null)
+        if (objectiveCatagory.getReviewToDate() == null)
             throw new Exception("Please select a valid review to date");
 
-        if (objectiveCatagory.isIsRequiredRatersFeedback()) {
-            if (objectiveCatagory.getSelectionPeriodStartDate() == null)
+        if (objectiveCatagory.getNormalizationFromDate() == null)
+            throw new Exception("Please select a valid normalization period from date");
+
+        if (objectiveCatagory.getNormalizationToDate() == null)
+            throw new Exception("Please select a valid normalization period to date");
+
+        if (objectiveCatagory.isMultiRaterFeedback()) {
+            if (objectiveCatagory.getSelectionPeriodFromDate() == null)
                 throw new Exception("Please select a valid selection period from date");
 
-            if (objectiveCatagory.getSelectionPeriodEndDate() == null)
+            if (objectiveCatagory.getSelectionPeriodToDate() == null)
                 throw new Exception("Please select a valid selection period to date");
 
-            if (objectiveCatagory.getMultiraterFeedBackStartDate() == null)
+            if (objectiveCatagory.getFeedbackFromDate() == null)
                 throw new Exception("Please select a valid feedback from date");
 
-            if (objectiveCatagory.getMultiraterFeedBackEndDate() == null)
+            if (objectiveCatagory.getFeedbackToDate() == null)
                 throw new Exception("Please select a valid feedback to date");
         }
 
-        if (objectiveCatagory.isIsSelfAppraisal()) {
-            if (objectiveCatagory.getAppraisalCycleStartDate() == null)
+        if (objectiveCatagory.isSelfAppraisal()) {
+            if (objectiveCatagory.getAppraisalCycleFromDate() == null)
                 throw new Exception("Please select a valid appraisal cycle from date");
 
-            if (objectiveCatagory.getAppraisalCycleEndDate() == null)
+            if (objectiveCatagory.getAppraisalCycleToDate() == null)
                 throw new Exception("Please select a valid appraisal cycle to date");
 
-            if (objectiveCatagory.getSelfAppraisalStartDate() == null)
+            if (objectiveCatagory.getSelfAppraisalFromDate() == null)
                 throw new Exception("Please select a valid self appraisal from date");
 
-            if (objectiveCatagory.getSelfAppraisalEndDate() == null)
+            if (objectiveCatagory.getSelfAppraisalToDate() == null)
                 throw new Exception("Please select a valid self appraisal to date");
         }
 
@@ -175,7 +224,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
         if (objectiveCatagoryId == 0)
             throw new Exception("Invalid appraisal selected");
 
-        //validateApprisalType(objectiveCatagory);
+        validateApprisalType(objectiveCatagory);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
         var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
@@ -191,32 +240,14 @@ public class ApprisalTypeService implements IApprisalTyeService {
         return "successful";
     }
 
-    public List<ObjectiveDetail> getObjectiveByCategoryIdService(int objectiveCategoryId) throws Exception {
-        if (objectiveCategoryId == 0)
+    public List<ObjectiveDetail> getObjectiveByCategoryIdService(int objectiveCategotyId) throws Exception {
+        if (objectiveCategotyId == 0)
             throw new Exception("Invalid objective selected.");
 
         List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategoryId, Types.INTEGER));
+        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategotyId, Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_role", dbParameters);
         return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveDetail>>() {});
-    }
-
-    public List<AppraisalAndCategoryDTO> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception {
-        if (objectiveCategoryId == 0)
-            throw new Exception("Invalid objective category id");
-
-        List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategoryId, Types.INTEGER));
-        var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_appraisal_detail_byid", dbParameters);
-        List<AppraisalAndCategoryDTO> result =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalAndCategoryDTO>>() {});
-        result.forEach(x -> {
-            try {
-                x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        return  result;
     }
 
 

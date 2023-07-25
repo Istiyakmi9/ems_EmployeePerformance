@@ -3,7 +3,6 @@ package com.bot.performance.controller;
 import com.bot.performance.model.ApiResponse;
 import com.bot.performance.model.FilterModel;
 import com.bot.performance.model.ObjectiveCatagory;
-import com.bot.performance.repository.AppraisalAndCategoryDTO;
 import com.bot.performance.service.ApprisalTypeService;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +23,17 @@ public class ApprisalTypeController extends BaseController {
     }
 
     @PostMapping("addAppraisalType")
-    public ResponseEntity<ApiResponse> addAppraisalType(@RequestBody AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception {
-        var result = this.apprisalTypeService.addAppraisalTypeService(appraisalAndCategoryDTO);
+    public ResponseEntity<ApiResponse> addAppraisalType(@RequestBody ObjectiveCatagory objectiveCatagory) throws Exception {
+        var result = this.apprisalTypeService.addAppraisalTypeService(objectiveCatagory);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @PutMapping("updateAppraisalType/{objectiveCatagoryId}")
-    public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody AppraisalAndCategoryDTO appraisalAndCategoryDTO,
+    public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody ObjectiveCatagory objectiveCatagory,
                                                           @PathVariable int objectiveCatagoryId) throws Exception {
-        var result = this.apprisalTypeService.updateAppraisalTypeService(appraisalAndCategoryDTO, objectiveCatagoryId);
+        var result = this.apprisalTypeService.updateAppraisalTypeService(objectiveCatagory, objectiveCatagoryId);
         return ResponseEntity.ok(ApiResponse.Ok(result));
+>>>>>>>>> Temporary merge branch 2
     }
 
     @PutMapping("manageAppraisalCycle/{objectiveCatagoryId}")
@@ -43,15 +43,9 @@ public class ApprisalTypeController extends BaseController {
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
-    @GetMapping("getObjectiveByCategoryId/{objectiveCategoryId}")
-    public ResponseEntity<ApiResponse> getObjectiveByCategoryId(@PathVariable int objectiveCategoryId) throws Exception {
-        var result = this.apprisalTypeService.getObjectiveByCategoryIdService(objectiveCategoryId);
-        return ResponseEntity.ok(ApiResponse.Ok(result));
-    }
-
-    @GetMapping("getCategoryByCategoryId/{objectiveCategoryId}")
-    public ResponseEntity<ApiResponse> getCategoryByCategoryId(@PathVariable int objectiveCategoryId) throws Exception {
-        var result = this.apprisalTypeService.getAppraisalDetailAndCategoryService(objectiveCategoryId);
+    @GetMapping("getObjectiveByCategoryId/{objectiveCategotyId}")
+    public ResponseEntity<ApiResponse> getObjectiveByCategoryId(@PathVariable int objectiveCategotyId) throws Exception {
+        var result = this.apprisalTypeService.getObjectiveByCategoryIdService(objectiveCategotyId);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }
