@@ -31,12 +31,8 @@ public class ApprisalTypeController extends BaseController {
     @PutMapping("updateAppraisalType/{objectiveCatagoryId}")
     public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody ObjectiveCatagory objectiveCatagory,
                                                           @PathVariable int objectiveCatagoryId) throws Exception {
-        try {
-            var result = this.apprisalTypeService.updateAppraisalTypeService(objectiveCatagory, objectiveCatagoryId);
-            return ResponseEntity.ok(ApiResponse.Ok(result));
-        } catch (Exception ex){
-            throw ex;
-        }
+        var result = this.apprisalTypeService.updateAppraisalTypeService(objectiveCatagory, objectiveCatagoryId);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @PutMapping("manageAppraisalCycle/{objectiveCatagoryId}")
