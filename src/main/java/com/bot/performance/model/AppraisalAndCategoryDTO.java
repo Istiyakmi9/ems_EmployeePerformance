@@ -1,4 +1,4 @@
-package com.bot.performance.repository;
+package com.bot.performance.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;

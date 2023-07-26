@@ -17,4 +17,5 @@ public final class ApplicationConstant {
     public static final int Saved = 13;
     public static final int AutoPromoted = 14;
     public static final int FinalLevel = 1;
+    public  static final String IST = "IST";
 }

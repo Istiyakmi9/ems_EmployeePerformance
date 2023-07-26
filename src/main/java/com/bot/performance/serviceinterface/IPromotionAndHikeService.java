@@ -1,9 +1,9 @@
 package com.bot.performance.serviceinterface;
 
-import com.bot.performance.model.PromotionAndHike;
+import com.bot.performance.model.AppraisalReviewDetail;
 
 import java.util.List;
 
 public interface IPromotionAndHikeService {
-    PromotionAndHike addPromotionAndHike(List<PromotionAndHike> promotionAndHike) throws Exception;
+    AppraisalReviewDetail addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetail) throws Exception;
 }

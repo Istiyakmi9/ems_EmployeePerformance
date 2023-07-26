@@ -58,4 +58,7 @@ public class AppraisalDetail {
     @JsonProperty("SelectionPeriodEndDate")
     @Column(name = "SelectionPeriodEndDate")
     public Date selectionPeriodEndDate;
+    @Column(name = "IsActiveCycle")
+    @JsonProperty("IsActiveCycle")
+    boolean isActiveCycle;
 }

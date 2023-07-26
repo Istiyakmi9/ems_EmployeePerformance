@@ -98,13 +98,16 @@ public class PerfomanceObjective {
     @JsonProperty("Comments")
     String comments;
     @Transient
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("AppraisalCycleFromDate")
-    Date appraisalCycleFromDate;
+    @JsonProperty("AppraisalDetailId")
+    int appraisalDetailId;
     @Transient
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("AppraisalCycleToDate")
-    Date appraisalCycleToDate;
+    @JsonProperty("AppraisalCycleStartDate")
+    Date appraisalCycleStartDate;
+    @Transient
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty("AppraisalCycleEndDate")
+    Date appraisalCycleEndDate;
     @Transient
     @JsonProperty("Rating")
     double rating;

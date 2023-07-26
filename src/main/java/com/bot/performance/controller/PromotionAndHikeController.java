@@ -1,7 +1,7 @@
 package com.bot.performance.controller;
 
 import com.bot.performance.model.ApiResponse;
-import com.bot.performance.model.PromotionAndHike;
+import com.bot.performance.model.AppraisalReviewDetail;
 import com.bot.performance.serviceinterface.IPromotionAndHikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +19,8 @@ public class PromotionAndHikeController {
     IPromotionAndHikeService iPromotionAndHikeService;
 
     @PostMapping("addPromotionAndHike")
-    public ResponseEntity<ApiResponse> addPromotionAndHike(@RequestBody List<PromotionAndHike> promotionAndHikes) throws Exception {
-        var result = iPromotionAndHikeService.addPromotionAndHike(promotionAndHikes);
+    public ResponseEntity<ApiResponse> addPromotionAndHike(@RequestBody List<AppraisalReviewDetail> appraisalReviewDetails) throws Exception {
+        var result = iPromotionAndHikeService.addPromotionAndHike(appraisalReviewDetails);
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }

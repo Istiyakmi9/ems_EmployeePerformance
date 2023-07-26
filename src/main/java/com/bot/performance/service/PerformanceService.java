@@ -1,6 +1,7 @@
 package com.bot.performance.service;
 
 import com.bot.performance.model.*;
+import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.repository.PerformanceObjectiveRepository;
 import com.bot.performance.repository.PerformanceRepository;
@@ -29,6 +30,9 @@ public class PerformanceService implements IPerformanceService {
     CurrentSession currentUserDetail;
     @Autowired
     LowLevelExecution lowLevelExecution;
+    @Autowired
+    AppraisalDetailRepository appraisalDetailRepository;
+
     public List<EmployeePerformance> GetAllEmpPerformanceService() {
         return performanceRepository.findAll();
     }
@@ -165,7 +169,6 @@ public class PerformanceService implements IPerformanceService {
 
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(0);
-            performanceDetail.setUpdatedOn(date);
         }
         else
         {
@@ -189,6 +192,7 @@ public class PerformanceService implements IPerformanceService {
         existEmpPerformance.setPerformanceStatus(ApplicationConstant.Pending);
         existEmpPerformance.setRating(employeePerformance.getRating());
         existEmpPerformance.setUpdatedOn(date);
+        existEmpPerformance.setAppraisalDetailId(employeePerformance.getAppraisalDetailId());
 
         return performanceRepository.save(existEmpPerformance);
     }
@@ -327,5 +331,21 @@ public class PerformanceService implements IPerformanceService {
 
         if (employeePerformance.getCurrentValue() > employeePerformance.getTargetValue())
             throw new Exception("New value is greater than targeted value");
+
+        if (employeePerformance.getAppraisalDetailId() <= 0)
+            throw new Exception("Invalid appraisal selected. Please select a valid objective");
+
+        var apppraisalDetailData = appraisalDetailRepository.findById(employeePerformance.getAppraisalDetailId());
+        if (apppraisalDetailData.isEmpty())
+            throw new Exception("Appraisal details not found");
+
+        AppraisalDetail appraisalDetail = apppraisalDetailData.get();
+        java.util.Date utilDate = new java.util.Date();
+        var date = new java.sql.Timestamp(utilDate.getTime());
+        if (date.after(appraisalDetail.getAppraisalCycleEndDate()))
+            throw new Exception("Appraisal cycle date is passed");
+
+        if (date.before(appraisalDetail.getAppraisalCycleStartDate()))
+            throw new Exception("Appraisal cycle date has not come");
     }
 }

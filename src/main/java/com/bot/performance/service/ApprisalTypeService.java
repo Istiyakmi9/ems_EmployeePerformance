@@ -2,7 +2,7 @@ package com.bot.performance.service;
 
 import com.bot.performance.config.ApplicationException;
 import com.bot.performance.model.*;
-import com.bot.performance.repository.AppraisalAndCategoryDTO;
+import com.bot.performance.model.AppraisalAndCategoryDTO;
 import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.repository.LowLevelExecution;
@@ -15,7 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Types;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -46,29 +52,66 @@ public class ApprisalTypeService implements IApprisalTyeService {
 
     @Transactional(rollbackOn = Exception.class)
     public List<ObjectiveCatagory> addAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception {
-        validateApprisalType(appraisalAndCategoryDTO);
-        java.util.Date utilDate = new java.util.Date();
-        var date = new java.sql.Timestamp(utilDate.getTime());
-        var lastObjectiveCatagory = apprisalTypeRepository.getLastObjectiveCategory();
-        ObjectiveCatagory objectiveCatagory = new ObjectiveCatagory();
-        if (lastObjectiveCatagory == null)
-            objectiveCatagory.setObjectiveCatagoryId(1);
-        else
-            objectiveCatagory.setObjectiveCatagoryId(lastObjectiveCatagory.getObjectiveCatagoryId() + 1);
-
-        objectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
-        objectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
-        objectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
-        objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
-        objectiveCatagory.setCreatedOn(date);
-        objectiveCatagory.setObjectivesId("[]");
-        objectiveCatagory.setRolesId(objectMapper.writeValueAsString(objectiveCatagory.getRoleIds()));
-        apprisalTypeRepository.save(objectiveCatagory);
-
         FilterModel filterModel = new FilterModel();
-        filterModel.setSearchString("1=1");
-        filterModel.setPageIndex(1);
-        filterModel.setPageSize(10);
+        try {
+            validateApprisalType(appraisalAndCategoryDTO);
+            java.util.Date utilDate = new java.util.Date();
+            var date = new java.sql.Timestamp(utilDate.getTime());
+            var lastObjectiveCatagory = apprisalTypeRepository.getLastObjectiveCategory();
+            ObjectiveCatagory objectiveCatagory = new ObjectiveCatagory();
+            if (lastObjectiveCatagory == null)
+                objectiveCatagory.setObjectiveCatagoryId(1);
+            else
+                objectiveCatagory.setObjectiveCatagoryId(lastObjectiveCatagory.getObjectiveCatagoryId() + 1);
+
+            objectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
+            objectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
+            objectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
+            objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
+            objectiveCatagory.setCreatedOn(date);
+            objectiveCatagory.setObjectivesId("[]");
+            objectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
+            apprisalTypeRepository.save(objectiveCatagory);
+
+            var lastAppraisalDetail = appraisalDetailRepository.getLastAppraisalDetail();
+            AppraisalDetail appraisalDetail = new AppraisalDetail();
+            if (lastAppraisalDetail == null)
+                appraisalDetail.setAppraisalDetailId(1);
+            else
+                appraisalDetail.setAppraisalDetailId(lastAppraisalDetail.getAppraisalDetailId() + 1);
+
+            appraisalDetail.setObjectiveCatagoryId(objectiveCatagory.getObjectiveCatagoryId());
+            appraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
+            appraisalDetail.setAppraisalCycleEndDate(appraisalAndCategoryDTO.getAppraisalCycleEndDate());
+            appraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
+            appraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
+            appraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
+            appraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
+            appraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
+            appraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
+            appraisalDetail.setMultiraterFeedBackEndDate(appraisalAndCategoryDTO.getMultiraterFeedBackEndDate());
+            appraisalDetail.setReviewStartDate(appraisalAndCategoryDTO.getReviewStartDate());
+            appraisalDetail.setReviewEndDate(appraisalAndCategoryDTO.getReviewEndDate());
+            appraisalDetail.setSelfAppraisalStartDate(appraisalAndCategoryDTO.getSelfAppraisalStartDate());
+            appraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
+            appraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
+            appraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
+
+            Date currentIstTime = new Date();
+            if ((currentIstTime.after(appraisalDetail.getAppraisalCycleStartDate()) || currentIstTime.equals(appraisalDetail.getAppraisalCycleStartDate()))
+                && (currentIstTime.before(appraisalDetail.getAppraisalCycleEndDate()) || currentIstTime.equals(appraisalDetail.getAppraisalCycleEndDate())))
+                appraisalDetail.setActiveCycle(true);
+            else
+                appraisalDetail.setActiveCycle(false);
+
+            appraisalDetailRepository.save(appraisalDetail);
+            filterModel.setSearchString("1=1");
+            filterModel.setPageIndex(1);
+            filterModel.setPageSize(10);
+        } catch (Exception ex) {
+            throw  ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
+        }
+
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
@@ -215,5 +258,20 @@ public class ApprisalTypeService implements IApprisalTyeService {
             }
         });
         return  result;
+    }
+
+    private Date utcToIstTimeZone(Date date) {
+        // Step 1: Parse the UTC time string to LocalDateTime
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime utcTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        // Step 2: Convert to IST
+        ZoneId istZone = ZoneId.of("Asia/Kolkata");
+        ZonedDateTime istTime = utcTime.atZone(ZoneOffset.UTC).withZoneSameInstant(istZone);
+
+        // Step 3: Format the IST time
+        String formattedIstTime = istTime.format(formatter);
+        Date convertDate = (Date) formatter.parse(formattedIstTime);
+        return java.sql.Date.valueOf(formattedIstTime);
     }
 }

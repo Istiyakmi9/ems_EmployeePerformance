@@ -3,7 +3,7 @@ package com.bot.performance.serviceinterface;
 import com.bot.performance.model.FilterModel;
 import com.bot.performance.model.ObjectiveCatagory;
 import com.bot.performance.model.ObjectiveDetail;
-import com.bot.performance.repository.AppraisalAndCategoryDTO;
+import com.bot.performance.model.AppraisalAndCategoryDTO;
 
 import java.util.List;
 
