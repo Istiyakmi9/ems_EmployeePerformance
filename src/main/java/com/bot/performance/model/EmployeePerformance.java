@@ -65,6 +65,9 @@ public class EmployeePerformance {
     @Column(name = "PerformanceStatus")
     @JsonProperty("PerformanceStatus")
     int performanceStatus;
+    @Column(name = "AppraisalDetailId")
+    @JsonProperty("AppraisalDetailId")
+    int appraisalDetailId;
 
     public Long getEmployeePerformanceId() {
         return employeePerformanceId;
@@ -164,6 +167,22 @@ public class EmployeePerformance {
 
     public int getPerformanceStatus() {
         return performanceStatus;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
+    }
+
+    public int getAppraisalDetailId() {
+        return appraisalDetailId;
+    }
+
+    public void setAppraisalDetailId(int appraisalDetailId) {
+        this.appraisalDetailId = appraisalDetailId;
     }
 
     public void setPerformanceStatus(int performanceStatus) {

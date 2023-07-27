@@ -3,7 +3,7 @@ package com.bot.performance.controller;
 import com.bot.performance.model.ApiResponse;
 import com.bot.performance.model.FilterModel;
 import com.bot.performance.model.ObjectiveCatagory;
-import com.bot.performance.service.ApprisalTypeService;
+import com.bot.performance.model.AppraisalAndCategoryDTO;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,20 +23,16 @@ public class ApprisalTypeController extends BaseController {
     }
 
     @PostMapping("addAppraisalType")
-    public ResponseEntity<ApiResponse> addAppraisalType(@RequestBody ObjectiveCatagory objectiveCatagory) throws Exception {
-        var result = this.apprisalTypeService.addAppraisalTypeService(objectiveCatagory);
+    public ResponseEntity<ApiResponse> addAppraisalType(@RequestBody AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception {
+        var result = this.apprisalTypeService.addAppraisalTypeService(appraisalAndCategoryDTO);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @PutMapping("updateAppraisalType/{objectiveCatagoryId}")
-    public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody ObjectiveCatagory objectiveCatagory,
+    public ResponseEntity<ApiResponse> updateApprisalType(@RequestBody AppraisalAndCategoryDTO appraisalAndCategoryDTO,
                                                           @PathVariable int objectiveCatagoryId) throws Exception {
-        try {
-            var result = this.apprisalTypeService.updateAppraisalTypeService(objectiveCatagory, objectiveCatagoryId);
-            return ResponseEntity.ok(ApiResponse.Ok(result));
-        } catch (Exception ex){
-            throw ex;
-        }
+        var result = this.apprisalTypeService.updateAppraisalTypeService(appraisalAndCategoryDTO, objectiveCatagoryId);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 
     @PutMapping("manageAppraisalCycle/{objectiveCatagoryId}")
@@ -49,6 +45,12 @@ public class ApprisalTypeController extends BaseController {
     @GetMapping("getObjectiveByCategoryId/{objectiveCategotyId}")
     public ResponseEntity<ApiResponse> getObjectiveByCategoryId(@PathVariable int objectiveCategotyId) throws Exception {
         var result = this.apprisalTypeService.getObjectiveByCategoryIdService(objectiveCategotyId);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @GetMapping("getCategoryByCategoryId/{objectiveCategotyId}")
+    public ResponseEntity<ApiResponse> getCategoryByCategoryId(@PathVariable int objectiveCategotyId) throws Exception {
+        var result = this.apprisalTypeService.getAppraisalDetailAndCategoryService(objectiveCategotyId);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }
