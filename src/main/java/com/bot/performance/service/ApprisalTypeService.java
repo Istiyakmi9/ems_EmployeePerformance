@@ -50,11 +50,19 @@ public class ApprisalTypeService implements IApprisalTyeService {
        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
     }
 
-    @Transactional(rollbackOn = Exception.class)
     public List<ObjectiveCatagory> addAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception {
         FilterModel filterModel = new FilterModel();
+        validateApprisalType(appraisalAndCategoryDTO);
+        addCategoryAndAppraisalDetail(appraisalAndCategoryDTO);
+        filterModel.setSearchString("1=1");
+        filterModel.setPageIndex(1);
+        filterModel.setPageSize(10);
+        return  this.getAppraisalTypeByFilter(filterModel);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    private void addCategoryAndAppraisalDetail(AppraisalAndCategoryDTO appraisalAndCategoryDTO) {
         try {
-            validateApprisalType(appraisalAndCategoryDTO);
             java.util.Date utilDate = new java.util.Date();
             var date = new java.sql.Timestamp(utilDate.getTime());
             var lastObjectiveCatagory = apprisalTypeRepository.getLastObjectiveCategory();
@@ -73,56 +81,64 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
             apprisalTypeRepository.save(objectiveCatagory);
 
-            var lastAppraisalDetail = appraisalDetailRepository.getLastAppraisalDetail();
             AppraisalDetail appraisalDetail = new AppraisalDetail();
-            if (lastAppraisalDetail == null)
-                appraisalDetail.setAppraisalDetailId(1);
-            else
-                appraisalDetail.setAppraisalDetailId(lastAppraisalDetail.getAppraisalDetailId() + 1);
-
-            appraisalDetail.setObjectiveCatagoryId(objectiveCatagory.getObjectiveCatagoryId());
-            appraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
-            appraisalDetail.setAppraisalCycleEndDate(appraisalAndCategoryDTO.getAppraisalCycleEndDate());
-            appraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
-            appraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
-            appraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
-            appraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
-            appraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
-            appraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
-            appraisalDetail.setMultiraterFeedBackEndDate(appraisalAndCategoryDTO.getMultiraterFeedBackEndDate());
-            appraisalDetail.setReviewStartDate(appraisalAndCategoryDTO.getReviewStartDate());
-            appraisalDetail.setReviewEndDate(appraisalAndCategoryDTO.getReviewEndDate());
-            appraisalDetail.setSelfAppraisalStartDate(appraisalAndCategoryDTO.getSelfAppraisalStartDate());
-            appraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
-            appraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
-            appraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
-
-            Date currentIstTime = new Date();
-            if ((currentIstTime.after(appraisalDetail.getAppraisalCycleStartDate()) || currentIstTime.equals(appraisalDetail.getAppraisalCycleStartDate()))
-                && (currentIstTime.before(appraisalDetail.getAppraisalCycleEndDate()) || currentIstTime.equals(appraisalDetail.getAppraisalCycleEndDate())))
-                appraisalDetail.setActiveCycle(true);
-            else
+            if (appraisalAndCategoryDTO.getAppraisalDetailId() == 0) {
+                var lastAppraisalDetail = appraisalDetailRepository.getLastAppraisalDetail();
+                if (lastAppraisalDetail == null)
+                    appraisalDetail.setAppraisalDetailId(1);
+                else
+                    appraisalDetail.setAppraisalDetailId(lastAppraisalDetail.getAppraisalDetailId() + 1);
+                List<Integer> objectiveIds = new ArrayList<>();
+                objectiveIds.add(objectiveCatagory.getObjectiveCatagoryId());
+                appraisalDetail.setObjectiveCatagoryId(objectMapper.writeValueAsString(objectiveIds));
+                appraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
+                appraisalDetail.setAppraisalCycleEndDate(appraisalAndCategoryDTO.getAppraisalCycleEndDate());
+                appraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
+                appraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
+                appraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
+                appraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
+                appraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
+                appraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
+                appraisalDetail.setMultiraterFeedBackEndDate(appraisalAndCategoryDTO.getMultiraterFeedBackEndDate());
+                appraisalDetail.setReviewStartDate(appraisalAndCategoryDTO.getReviewStartDate());
+                appraisalDetail.setReviewEndDate(appraisalAndCategoryDTO.getReviewEndDate());
+                appraisalDetail.setSelfAppraisalStartDate(appraisalAndCategoryDTO.getSelfAppraisalStartDate());
+                appraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
+                appraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
+                appraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
                 appraisalDetail.setActiveCycle(false);
+            } else  {
+                var appraisalDetailData = appraisalDetailRepository.findById(appraisalAndCategoryDTO.getAppraisalDetailId());
+                if (appraisalDetailData.isEmpty())
+                    throw new Exception("Appraisal detail not found");
+
+                appraisalDetail = appraisalDetailData.get();
+                List<Integer> objectCategoryId = objectMapper.readValue(appraisalDetail.getObjectiveCatagoryId(), new TypeReference<List<Integer>>() {});
+                objectCategoryId.add(objectiveCatagory.getObjectiveCatagoryId());
+                appraisalDetail.setObjectiveCatagoryId(objectMapper.writeValueAsString(objectCategoryId));
+            }
 
             appraisalDetailRepository.save(appraisalDetail);
-            filterModel.setSearchString("1=1");
-            filterModel.setPageIndex(1);
-            filterModel.setPageSize(10);
         } catch (Exception ex) {
             throw  ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
         }
-
-        return  this.getAppraisalTypeByFilter(filterModel);
     }
 
-    @Transactional(rollbackOn = Exception.class)
     public List<ObjectiveCatagory> updateAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO, int objectiveCatagoryId) throws Exception {
-        FilterModel filterModel = new FilterModel();
-        try {
-            if (objectiveCatagoryId == 0)
-                throw new Exception("Invalid appraisal selected");
+        if (objectiveCatagoryId == 0)
+            throw new Exception("Invalid appraisal selected");
 
-            validateApprisalType(appraisalAndCategoryDTO);
+        validateApprisalType(appraisalAndCategoryDTO);
+        updateCtegoryAndAppraisalDeatil(appraisalAndCategoryDTO, objectiveCatagoryId);
+        FilterModel filterModel = new FilterModel();
+        filterModel.setSearchString("1=1");
+        filterModel.setPageSize(10);
+        filterModel.setPageIndex(1);
+        return this.getAppraisalTypeByFilter(filterModel);
+    }
+    @Transactional(rollbackOn = Exception.class)
+    private void updateCtegoryAndAppraisalDeatil(AppraisalAndCategoryDTO appraisalAndCategoryDTO, int objectiveCatagoryId) {
+        try {
             java.util.Date utilDate = new java.util.Date();
             var date = new java.sql.Timestamp(utilDate.getTime());
             var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
@@ -157,14 +173,9 @@ public class ApprisalTypeService implements IApprisalTyeService {
             existingAppraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
             existingAppraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
             appraisalDetailRepository.save(existingAppraisalDetail);
-
-            filterModel.setSearchString("1=1");
-            filterModel.setPageSize(10);
-            filterModel.setPageIndex(1);
         } catch (Exception ex) {
             throw ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
         }
-        return this.getAppraisalTypeByFilter(filterModel);
     }
     private void validateApprisalType(AppraisalAndCategoryDTO objectiveCatagory) throws Exception {
         if (objectiveCatagory.getObjectiveCatagoryType().isEmpty())
@@ -249,7 +260,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategoryId, Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_appraisal_detail_byid", dbParameters);
-        List<AppraisalAndCategoryDTO> result =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalAndCategoryDTO>>() {});
+        List<AppraisalAndCategoryDTO> result =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference< List<AppraisalAndCategoryDTO>>() {});
         result.forEach(x -> {
             try {
                 x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
