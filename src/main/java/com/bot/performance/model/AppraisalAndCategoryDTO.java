@@ -88,4 +88,81 @@ public class AppraisalAndCategoryDTO {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty("SelectionPeriodEndDate")
     public Date selectionPeriodEndDate;
+    public AppraisalAndCategoryDTO() {
+
+    }
+    public AppraisalAndCategoryDTO(int objectiveCatagoryId, String objectiveCatagoryType, String typeDescription, String rolesId, String objectivesId, boolean isHikeApproval, Long createdBy, Long updatedBy, Date createdOn, Date updatedOn, String status, int total, int index, List<Integer> objectiveIds, List<Integer> roleIds, int appraisalDetailId, Date appraisalCycleStartDate, Date appraisalCycleEndDate, long startedBy, Date startedOn, boolean isSelfAppraisal, boolean isRequiredRatersFeedback, boolean isRaterSelectedByManager, boolean ratersRequired, boolean canRaterViewAppraisal, Date multiraterFeedBackStartDate, Date multiraterFeedBackEndDate, Date reviewStartDate, Date reviewEndDate, Date selfAppraisalStartDate, Date selfAppraisalEndDate, Date selectionPeriodStartDate, Date selectionPeriodEndDate) {
+        this.objectiveCatagoryId = objectiveCatagoryId;
+        this.objectiveCatagoryType = objectiveCatagoryType;
+        this.typeDescription = typeDescription;
+        this.rolesId = rolesId;
+        this.objectivesId = objectivesId;
+        this.isHikeApproval = isHikeApproval;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+        this.createdOn = createdOn;
+        this.updatedOn = updatedOn;
+        this.status = status;
+        this.total = total;
+        this.index = index;
+        this.objectiveIds = objectiveIds;
+        this.roleIds = roleIds;
+        AppraisalDetailId = appraisalDetailId;
+        AppraisalCycleStartDate = appraisalCycleStartDate;
+        AppraisalCycleEndDate = appraisalCycleEndDate;
+        StartedBy = startedBy;
+        StartedOn = startedOn;
+        IsSelfAppraisal = isSelfAppraisal;
+        IsRequiredRatersFeedback = isRequiredRatersFeedback;
+        IsRaterSelectedByManager = isRaterSelectedByManager;
+        RatersRequired = ratersRequired;
+        CanRaterViewAppraisal = canRaterViewAppraisal;
+        MultiraterFeedBackStartDate = multiraterFeedBackStartDate;
+        MultiraterFeedBackEndDate = multiraterFeedBackEndDate;
+        ReviewStartDate = reviewStartDate;
+        ReviewEndDate = reviewEndDate;
+        this.selfAppraisalStartDate = selfAppraisalStartDate;
+        this.selfAppraisalEndDate = selfAppraisalEndDate;
+        this.selectionPeriodStartDate = selectionPeriodStartDate;
+        this.selectionPeriodEndDate = selectionPeriodEndDate;
+    }
+
+    @Override
+    public String toString() {
+        return "AppraisalAndCategoryDTO{" +
+                "objectiveCatagoryId=" + objectiveCatagoryId +
+                ", objectiveCatagoryType='" + objectiveCatagoryType + '\'' +
+                ", typeDescription='" + typeDescription + '\'' +
+                ", rolesId='" + rolesId + '\'' +
+                ", objectivesId='" + objectivesId + '\'' +
+                ", isHikeApproval=" + isHikeApproval +
+                ", createdBy=" + createdBy +
+                ", updatedBy=" + updatedBy +
+                ", createdOn=" + createdOn +
+                ", updatedOn=" + updatedOn +
+                ", status='" + status + '\'' +
+                ", total=" + total +
+                ", index=" + index +
+                ", objectiveIds=" + objectiveIds +
+                ", roleIds=" + roleIds +
+                ", AppraisalDetailId=" + AppraisalDetailId +
+                ", AppraisalCycleStartDate=" + AppraisalCycleStartDate +
+                ", AppraisalCycleEndDate=" + AppraisalCycleEndDate +
+                ", StartedBy=" + StartedBy +
+                ", StartedOn=" + StartedOn +
+                ", IsSelfAppraisal=" + IsSelfAppraisal +
+                ", IsRequiredRatersFeedback=" + IsRequiredRatersFeedback +
+                ", IsRaterSelectedByManager=" + IsRaterSelectedByManager +
+                ", RatersRequired=" + RatersRequired +
+                ", CanRaterViewAppraisal=" + CanRaterViewAppraisal +
+                ", MultiraterFeedBackStartDate=" + MultiraterFeedBackStartDate +
+                ", MultiraterFeedBackEndDate=" + MultiraterFeedBackEndDate +
+                ", ReviewStartDate=" + ReviewStartDate +
+                ", ReviewEndDate=" + ReviewEndDate +
+                ", selfAppraisalStartDate=" + selfAppraisalStartDate +
+                ", selfAppraisalEndDate=" + selfAppraisalEndDate +
+                ", selectionPeriodStartDate=" + selectionPeriodStartDate +
+                ", selectionPeriodEndDate=" + selectionPeriodEndDate +
+                '}';
+    }
 }

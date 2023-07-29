@@ -15,7 +15,7 @@ public class AppraisalDetail {
     @Column(name = "AppraisalDetailId")
     int AppraisalDetailId;
     @Column(name = "ObjectiveCatagoryId")
-    int ObjectiveCatagoryId;
+    String ObjectiveCatagoryId;
     @Column(name = "AppraisalCycleStartDate")
     Date AppraisalCycleStartDate;
     @Column(name = "AppraisalCycleEndDate")
