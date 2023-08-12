@@ -67,5 +67,13 @@ public class ObjectiveCatagory {
     @Transient
     @JsonProperty("RoleIds")
     List<Integer> roleIds;
+    @Transient
+    @JsonProperty("AppraisalCycleStartDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    Date appraisalCycleStartDate;
+    @Transient
+    @JsonProperty("AppraisalCycleEndDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    Date appraisalCycleEndDate;
 }
 

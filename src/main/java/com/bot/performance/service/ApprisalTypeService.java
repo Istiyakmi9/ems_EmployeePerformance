@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ApprisalTypeService implements IApprisalTyeService {
@@ -41,10 +42,18 @@ public class ApprisalTypeService implements IApprisalTyeService {
     @Override
     public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) {
         List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_searchString", filter.getSearchString(), Types.VARCHAR));
+        if (filter.getObjectiveCatagoryType() == null && filter.getTypeDescription() == null &&
+                (Objects.equals(filter.getRolesId(), "null") || filter.getRolesId() == null)) {
+            filter.setObjectiveCatagoryType("");
+            filter.setRolesId("");
+        }
+
         dbParameters.add(new DbParameters("_sortBy", filter.getSortBy(), Types.VARCHAR));
         dbParameters.add(new DbParameters("_pageIndex", filter.getPageIndex(), Types.INTEGER));
         dbParameters.add(new DbParameters("_pageSize", filter.getPageSize(), Types.INTEGER));
+        dbParameters.add(new DbParameters("_objectiveCatagoryType", filter.getObjectiveCatagoryType(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_typeDescription", filter.getTypeDescription(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_rolesid", filter.getRolesId(), Types.VARCHAR));
 
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_filter", dbParameters);
        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
