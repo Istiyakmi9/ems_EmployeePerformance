@@ -16,7 +16,7 @@ public class ObjectiveController extends BaseController {
     ObjectiveService objectiveService;
 
     @RequestMapping(value = "get/{catagoryId}", method = RequestMethod.GET)
-    public ResponseEntity<?> getObjectiveByCatagory(@PathVariable int catagoryId) {
+    public ResponseEntity<?> getObjectiveByCatagory(@PathVariable int catagoryId) throws Exception {
         var result = this.objectiveService.getObjectiveByCatagoryId(catagoryId);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }

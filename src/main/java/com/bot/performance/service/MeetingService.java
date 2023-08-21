@@ -1,5 +1,6 @@
 package com.bot.performance.service;
 
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.CurrentSession;
 import com.bot.performance.model.Meeting;
 import com.bot.performance.repository.MeetingReppository;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import static com.bot.performance.model.ApplicationConstant.*;
 import java.util.List;
-import java.util.Optional;
 @Service
 public class MeetingService implements IMeetingService {
     @Autowired
@@ -18,12 +18,14 @@ public class MeetingService implements IMeetingService {
     CurrentSession currentSession;
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    DbManager dbManager;
 
     public List<Meeting> getMeetingByEmpIdService(Long employeeId) throws Exception {
         if (employeeId <= 0)
             throw new Exception("Invalid employee selected. Please login again");
 
-        return meetingReppository.getMeetingByEmpId(employeeId);
+        return meetingReppository.getMeetingByEmpIdRepository(employeeId);
     }
 
     public List<Meeting> manageMeetingService(Meeting meeting) throws Exception {
@@ -31,20 +33,13 @@ public class MeetingService implements IMeetingService {
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
 
-        Meeting existMeeting = new Meeting();
-        Optional<Meeting> existMeetingData = meetingReppository.findById(meeting.getMeetingId());
-        if (existMeetingData.isEmpty()) {
+        Meeting existMeeting = dbManager.getById(meeting.getMeetingId(), Meeting.class);
+        if (existMeeting == null) {
             existMeeting = meeting;
-            var lastMeeting = meetingReppository.getLastEmployeeMeeting();
-            if (lastMeeting == null)
-                existMeeting.setMeetingId(1L);
-            else
-                existMeeting.setMeetingId(lastMeeting.getMeetingId()+1);
-
+            existMeeting.setMeetingId(dbManager.nextLongPrimaryKey(Meeting.class));
             existMeeting.setCreatedOn(date);
             existMeeting.setCreatedBy(currentSession.getUserDetail().getUserId());
         } else  {
-            existMeeting = existMeetingData.get();
             existMeeting.setMeetingDate(meeting.getMeetingDate());
             existMeeting.setMeetingFrequency(meeting.getMeetingFrequency());
             existMeeting.setMeetingPlaforms(meeting.getMeetingPlaforms());
@@ -62,10 +57,7 @@ public class MeetingService implements IMeetingService {
         else
             existMeeting.setStatus(NotSubmitted);
 
-        var result = meetingReppository.save(existMeeting);
-        if (result == null)
-            throw new Exception("Fail to insert/update meeting details");
-
+        dbManager.save(existMeeting);
         return this.getMeetingByEmpIdService(currentSession.getUserDetail().getUserId());
     }
 
@@ -75,11 +67,10 @@ public class MeetingService implements IMeetingService {
 
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
-        var meetingData = meetingReppository.findById(meetingId);
-        if (meetingData.isEmpty())
+        var meeting = dbManager.getById(meetingId, Meeting.class);
+        if (meeting == null)
             throw new Exception("Meeting records not found");
 
-        var meeting = meetingData.get();
         if (status == Completed)
             meeting.setStatus(Completed);
         else if (status == Canceled)
@@ -89,9 +80,7 @@ public class MeetingService implements IMeetingService {
 
         meeting.setUpdatedBy(currentSession.getUserDetail().getUserId());
         meeting.setUpdatedOn(date);
-        var result = meetingReppository.save(meeting);
-        if (result == null)
-            throw new Exception("Fail to insert/update meeting details");
+        dbManager.save(meeting);
 
         return this.getMeetingByEmpIdService(currentSession.getUserDetail().getUserId());
     }
@@ -100,7 +89,7 @@ public class MeetingService implements IMeetingService {
         if (meetingId <= 0)
             throw new Exception("Invalid meeting selected. Please select a valid email");
 
-        meetingReppository.deleteById(meetingId);
+        meetingReppository.deleteMeetingByIdRepository(meetingId);
         return this.getMeetingByEmpIdService(currentSession.getUserDetail().getUserId());
     }
 

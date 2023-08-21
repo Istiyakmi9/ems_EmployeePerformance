@@ -35,7 +35,4 @@ public class CurrentSession {
     public void setTimeZone(TimeZone timeZone) {
         this.timeZone = timeZone;
     }
-
-
-
 }

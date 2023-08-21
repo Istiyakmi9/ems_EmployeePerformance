@@ -1,15 +1,13 @@
 package com.bot.performance.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Entity
 @Table(name = "employee_salary_detail")
 @Data
 public class EmployeeSalaryDetail {

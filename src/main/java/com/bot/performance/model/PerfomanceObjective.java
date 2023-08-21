@@ -1,14 +1,16 @@
 package com.bot.performance.model;
 
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
+import com.bot.performance.db.annotations.Transient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
 
-@Entity
 @Data
 @Table(name = "performance_objective")
 public class PerfomanceObjective {

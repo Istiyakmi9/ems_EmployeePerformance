@@ -1,21 +1,63 @@
 package com.bot.performance.repository;
 
-import com.bot.performance.model.ApprisalEmployeeDetail;
-import com.bot.performance.model.EmployeePerformance;
+import com.bot.performance.db.service.DbManager;
+import com.bot.performance.db.utils.LowLevelExecution;
+import com.bot.performance.model.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 @Repository
-public interface PerformanceRepository extends JpaRepository<EmployeePerformance, Long> {
-    @Query(nativeQuery = true, value = "select e.* from employee_performance e order by e.EmployeePerformanceId desc limit 1")
-    EmployeePerformance getLastEmployeePerformance();
+public class PerformanceRepository {
+    @Autowired
+    LowLevelExecution lowLevelExecution;
+    @Autowired
+    ObjectMapper objectMapper;
 
-    @Query("select p from EmployeePerformance p where p.employeeId = :empId")
-    List<EmployeePerformance> getEmpPerformanceByEmpId(@Param("empId") Long empId);
+    @Autowired
+    DbManager dbManager;
 
-    @Query(value = "Call sp_employee_performance_by_managerid_get(:_ReportingManagerId)", nativeQuery = true)
-    List<?> getEmployeeByManagerId(@Param("_ReportingManagerId") Long _ReportingManagerId);
+    public List<?> getEmployeeByManagerIdRepository(long objectiveCategotyId) {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_ReportingManagerId", objectiveCategotyId, Types.BIGINT));
+        var dataSet = lowLevelExecution.executeProcedure("sp_employee_performance_by_managerid_get", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public Map<String, Object> getEmployeeNObjectivesRepository(long employeeId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
+        Map<String, Object> dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_employee", dbParameters);
+        if (dataSet == null || dataSet.size() != 3)
+            throw new Exception("Fail to get objectives. Please contact to admin.");
+
+        return dataSet;
+    }
+
+    public List<PerfomanceObjective> getPerformanceObjectiveRepository(FilterModel filterModel) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));
+        dbParameters.add(new DbParameters("_pageIndex", filterModel.getPageIndex(), Types.INTEGER));
+        dbParameters.add(new DbParameters("_pageSize", filterModel.getPageSize(), Types.INTEGER));
+        var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
+        if (dataSet == null || dataSet.size() != 2)
+            throw new Exception("Fail to get objectives. Please contact to admin.");
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {
+        });
+    }
+
+    public List<EmployeePerformance> getEmployeePerformanceByIdRepository(long employeeId) {
+        String query = "select p from EmployeePerformance p where p.employeeId = :empId";
+        return dbManager.queryList(query, EmployeePerformance.class);
+    }
 }

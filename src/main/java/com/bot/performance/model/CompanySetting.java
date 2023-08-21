@@ -1,15 +1,14 @@
 package com.bot.performance.model;
 
-
-import jakarta.persistence.*;
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
 
 import java.util.Date;
 
-@Entity
 @Table(name = "company_setting")
 public class CompanySetting {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
     @Column(name = "SettingId")
     Long settingId;
 

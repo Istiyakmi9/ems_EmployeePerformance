@@ -1,9 +1,8 @@
 package com.bot.performance.service;
 
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.*;
 import com.bot.performance.repository.AppraisalDetailRepository;
-import com.bot.performance.repository.LowLevelExecution;
-import com.bot.performance.repository.PerformanceObjectiveRepository;
 import com.bot.performance.repository.PerformanceRepository;
 import com.bot.performance.serviceinterface.IPerformanceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,10 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @Service
 public class PerformanceService implements IPerformanceService {
@@ -25,20 +23,20 @@ public class PerformanceService implements IPerformanceService {
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
-    PerformanceObjectiveRepository performanceObjectiveRepository;
-    @Autowired
     CurrentSession currentUserDetail;
-    @Autowired
-    LowLevelExecution lowLevelExecution;
     @Autowired
     AppraisalDetailRepository appraisalDetailRepository;
 
+    @Autowired
+    DbManager dbManager;
+
     public List<EmployeePerformance> GetAllEmpPerformanceService() {
-        return performanceRepository.findAll();
+
+        return dbManager.queryList("select * from performance_objective", EmployeePerformance.class);
     }
 
     public List<?> getEmployeeByManagerId(long managerId) {
-        return this.performanceRepository.getEmployeeByManagerId(managerId);
+        return this.performanceRepository.getEmployeeByManagerIdRepository(managerId);
     }
 
     public List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception {
@@ -48,13 +46,12 @@ public class PerformanceService implements IPerformanceService {
         if (employeeId <= 0)
             throw new Exception("Invalid employee. Please login again");
 
-        List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
-        var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_employee", dbParameters);
-        if (dataSet == null || dataSet.size() != 3)
-            throw new Exception("Fail to get objectives. Please contact to admin.");
-        List<PerfomanceObjective> empObjective =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
-        List<EmployeePerformance> empPerformance =  objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeePerformance>>() {});
+        Map<String, Object> dataSet = performanceRepository.getEmployeeNObjectivesRepository(employeeId);
+        List<PerfomanceObjective> empObjective = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {
+        });
+        List<EmployeePerformance> empPerformance = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference<List<EmployeePerformance>>() {
+        });
+
         empObjective.forEach(x -> {
             if (empPerformance.size() > 0 && empObjective.size() > 0) {
                 var objective = empPerformance.stream()
@@ -151,30 +148,17 @@ public class PerformanceService implements IPerformanceService {
         var performanceDetails = new ArrayList<PerformanceDetail>();
         PerformanceDetail performanceDetail = new PerformanceDetail();
 
-        Optional<EmployeePerformance> existEmpPerformanceData = performanceRepository.findById(employeePerformance.getEmployeePerformanceId());
-        if (existEmpPerformanceData.isPresent())
-            existEmpPerformance =  existEmpPerformanceData.get();
-
-        if (existEmpPerformance == null)
-        {
-            var lastPerformance = performanceRepository.getLastEmployeePerformance();
-            existEmpPerformance = employeePerformance;
-
-            if (lastPerformance == null) {
-                existEmpPerformance.setEmployeePerformanceId(1L);
-            }
-            else {
-                existEmpPerformance.setEmployeePerformanceId(lastPerformance.getEmployeePerformanceId()+1);
-            }
-
+        existEmpPerformance = dbManager.getById(employeePerformance.getEmployeePerformanceId(), EmployeePerformance.class);
+        if (existEmpPerformance == null) {
+            dbManager.nextLongPrimaryKey(EmployeePerformance.class);
+            existEmpPerformance.setEmployeePerformanceId(dbManager.nextLongPrimaryKey(EmployeePerformance.class));
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(0);
-        }
-        else
-        {
+        } else {
             if (existEmpPerformance.getPerformanceStatus() == ApplicationConstant.Submitted)
                 throw new Exception("Objective already submitted");
-            performanceDetails = (ArrayList<PerformanceDetail>) objectMapper.readValue(existEmpPerformance.getPerformanceDetail(), new TypeReference<List<PerformanceDetail>>(){});
+            performanceDetails = (ArrayList<PerformanceDetail>) objectMapper.readValue(existEmpPerformance.getPerformanceDetail(), new TypeReference<List<PerformanceDetail>>() {
+            });
             var index = performanceDetails.size();
             existEmpPerformance.setStatus(employeePerformance.getStatus());
             existEmpPerformance.setCurrentValue(employeePerformance.getCurrentValue());
@@ -194,29 +178,22 @@ public class PerformanceService implements IPerformanceService {
         existEmpPerformance.setUpdatedOn(date);
         existEmpPerformance.setAppraisalDetailId(employeePerformance.getAppraisalDetailId());
 
-        return performanceRepository.save(existEmpPerformance);
+        dbManager.save(existEmpPerformance);
+        return existEmpPerformance;
     }
 
     public List<PerfomanceObjective> ObjectiveInsertUpdateService(PerfomanceObjective objectiveDetail) throws Exception {
         validateObjectiveDetail(objectiveDetail);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
-        PerfomanceObjective objective;
-        Optional<PerfomanceObjective> objectiveData = performanceObjectiveRepository.findById(objectiveDetail.getObjectiveId());
-        if(objectiveData.isEmpty()) {
-            var lastObjective = performanceObjectiveRepository.getLastPerformanceObjective();
+        PerfomanceObjective objective = dbManager.getById(objectiveDetail.getObjectiveId(), PerfomanceObjective.class);
+        if (objective == null) {
+            dbManager.nextLongPrimaryKey(PerfomanceObjective.class);
             objective = objectiveDetail;
-            if (lastObjective == null)
-                objective.setObjectiveId(1L);
-            else
-                objective.setObjectiveId(lastObjective.getObjectiveId()+1);
-
+            objective.setObjectiveId(dbManager.nextLongPrimaryKey(PerfomanceObjective.class));
             objective.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
             objective.setCreatedOn(date);
-        }
-        else
-        {
-            objective = objectiveData.get();
+        } else {
             objective.setObjective(objectiveDetail.getObjective());
             objective.setStartValue(objectiveDetail.getStartValue());
             objective.setTargetValue(objectiveDetail.getTargetValue());
@@ -229,7 +206,7 @@ public class PerformanceService implements IPerformanceService {
             objective.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         }
 
-        performanceObjectiveRepository.save(objective);
+        dbManager.save(objective);
 
         var filterModel = new FilterModel();
         filterModel.setSearchString(String.format("1=1 And CompanyId = %d", objective.getCompanyId()));
@@ -239,15 +216,7 @@ public class PerformanceService implements IPerformanceService {
     }
 
     public List<PerfomanceObjective> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception {
-        List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_searchString", filterModel.getSearchString(), Types.VARCHAR));
-        dbParameters.add(new DbParameters("_sortBy", filterModel.getSortBy(), Types.VARCHAR));
-        dbParameters.add(new DbParameters("_pageIndex", filterModel.getPageIndex(), Types.INTEGER));
-        dbParameters.add(new DbParameters("_pageSize", filterModel.getPageSize(), Types.INTEGER));
-        var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
-        if (dataSet == null || dataSet.size() != 2)
-            throw new Exception("Fail to get objectives. Please contact to admin.");
-        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {});
+        return performanceRepository.getPerformanceObjectiveRepository(filterModel);
     }
 
     private void validateObjectiveDetail(@NotNull PerfomanceObjective objectiveDetail) throws Exception {
@@ -260,26 +229,23 @@ public class PerformanceService implements IPerformanceService {
         if (objectiveDetail.getProgressMeassureType() <= 0)
             throw new Exception("Invalid progress measured type selected");
 
-        if (objectiveDetail.getProgressMeassureType() == 1)
-        {
+        if (objectiveDetail.getProgressMeassureType() == 1) {
             if (objectiveDetail.getStartValue() < 0)
                 throw new Exception("Invalid start value entered");
 
             if (objectiveDetail.getTargetValue() < 0)
                 throw new Exception("Invalid target value entered");
-        }
-        else
-        {
+        } else {
             objectiveDetail.setStartValue(0);
             objectiveDetail.setTargetValue(0);
         }
     }
 
     public String submitEmployeeObjectiveService(Long employeeId) throws Exception {
-        if (employeeId  == 0)
+        if (employeeId == 0)
             throw new Exception("Invalid employee performance selected");
 
-        List<EmployeePerformance> performances = this.performanceRepository.getEmpPerformanceByEmpId(employeeId);
+        List<EmployeePerformance> performances = this.performanceRepository.getEmployeePerformanceByIdRepository(employeeId);
         if (performances.size() == 0)
             throw new Exception("No performance found. Please contact to admin");
 
@@ -290,15 +256,16 @@ public class PerformanceService implements IPerformanceService {
         performances.forEach(x -> {
             x.setPerformanceStatus(ApplicationConstant.Submitted);
         });
-        this.performanceRepository.saveAll(performances);
+
+        dbManager.saveAll(performances, EmployeePerformance.class);
         return "Performance submitted successfully";
     }
 
     public String changeEmployeeObjectiveStatusService(Long employeeId, int status) throws Exception {
-        if (employeeId  == 0)
+        if (employeeId == 0)
             throw new Exception("Invalid employee performance selected");
 
-        List<EmployeePerformance> performances = this.performanceRepository.getEmpPerformanceByEmpId(employeeId);
+        List<EmployeePerformance> performances = performanceRepository.getEmployeePerformanceByIdRepository(employeeId);
         if (performances.size() == 0)
             throw new Exception("No performance found. Please contact to admin");
 
@@ -309,7 +276,8 @@ public class PerformanceService implements IPerformanceService {
         performances.forEach(x -> {
             x.setPerformanceStatus(status);
         });
-        this.performanceRepository.saveAll(performances);
+
+        dbManager.saveAll(performances, EmployeePerformance.class);
         return "Performance submitted successfully";
     }
 
@@ -335,11 +303,7 @@ public class PerformanceService implements IPerformanceService {
         if (employeePerformance.getAppraisalDetailId() <= 0)
             throw new Exception("Invalid appraisal selected. Please select a valid objective");
 
-        var apppraisalDetailData = appraisalDetailRepository.findById(employeePerformance.getAppraisalDetailId());
-        if (apppraisalDetailData.isEmpty())
-            throw new Exception("Appraisal details not found");
-
-        AppraisalDetail appraisalDetail = apppraisalDetailData.get();
+        AppraisalDetail appraisalDetail = dbManager.getById(employeePerformance.getAppraisalDetailId(), AppraisalDetail.class);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
         if (date.after(appraisalDetail.getAppraisalCycleEndDate()))

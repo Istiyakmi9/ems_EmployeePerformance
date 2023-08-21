@@ -1,13 +1,18 @@
 package com.bot.performance.repository;
 
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.AppraisalDetail;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-public interface AppraisalDetailRepository extends JpaRepository<AppraisalDetail, Integer> {
-    @Query(nativeQuery = true, value = "select o.* from appraisal_detail o order by o.AppraisalDetailId desc limit 1")
-    AppraisalDetail getLastAppraisalDetail();
+@Repository
+public class AppraisalDetailRepository {
+    @Autowired
+    DbManager dbManager;
 
-    @Query(value = "select o from AppraisalDetail o where o.isActiveCycle = 1")
-    AppraisalDetail getActiveAppraisalDetail();
+    public AppraisalDetail getActiveAppraisalDetailRepository() {
+        return dbManager.queryRaw("select o from AppraisalDetail o where o.isActiveCycle = 1", AppraisalDetail.class);
+    }
 }

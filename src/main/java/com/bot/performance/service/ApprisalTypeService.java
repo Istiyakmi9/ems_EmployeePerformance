@@ -1,18 +1,17 @@
 package com.bot.performance.service;
 
 import com.bot.performance.config.ApplicationException;
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.*;
 import com.bot.performance.model.AppraisalAndCategoryDTO;
-import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.repository.ApprisalTypeRepository;
-import com.bot.performance.repository.LowLevelExecution;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Types;
 import java.time.LocalDateTime;
@@ -33,11 +32,9 @@ public class ApprisalTypeService implements IApprisalTyeService {
     @Autowired
     CurrentSession currentUserDetail;
     @Autowired
-    LowLevelExecution lowLevelExecution;
-    @Autowired
     ObjectMapper objectMapper;
     @Autowired
-    AppraisalDetailRepository appraisalDetailRepository;
+    DbManager dbManager;
 
     @Override
     public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) {
@@ -48,15 +45,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
             filter.setRolesId("");
         }
 
-        dbParameters.add(new DbParameters("_sortBy", filter.getSortBy(), Types.VARCHAR));
-        dbParameters.add(new DbParameters("_pageIndex", filter.getPageIndex(), Types.INTEGER));
-        dbParameters.add(new DbParameters("_pageSize", filter.getPageSize(), Types.INTEGER));
-        dbParameters.add(new DbParameters("_objectiveCatagoryType", filter.getObjectiveCatagoryType(), Types.VARCHAR));
-        dbParameters.add(new DbParameters("_typeDescription", filter.getTypeDescription(), Types.VARCHAR));
-        dbParameters.add(new DbParameters("_rolesid", filter.getRolesId(), Types.VARCHAR));
-
-        var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_filter", dbParameters);
-       return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
+        return apprisalTypeRepository.getAppraisalTypeByFilterRepository(filter);
     }
 
     public List<ObjectiveCatagory> addAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception {
@@ -69,17 +58,14 @@ public class ApprisalTypeService implements IApprisalTyeService {
         return  this.getAppraisalTypeByFilter(filterModel);
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     private void addCategoryAndAppraisalDetail(AppraisalAndCategoryDTO appraisalAndCategoryDTO) {
         try {
             java.util.Date utilDate = new java.util.Date();
             var date = new java.sql.Timestamp(utilDate.getTime());
-            var lastObjectiveCatagory = apprisalTypeRepository.getLastObjectiveCategory();
+            var nextKey = dbManager.nextIntPrimaryKey(ObjectiveCatagory.class);
             ObjectiveCatagory objectiveCatagory = new ObjectiveCatagory();
-            if (lastObjectiveCatagory == null)
-                objectiveCatagory.setObjectiveCatagoryId(1);
-            else
-                objectiveCatagory.setObjectiveCatagoryId(lastObjectiveCatagory.getObjectiveCatagoryId() + 1);
+            objectiveCatagory.setObjectiveCatagoryId(nextKey);
 
             objectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
             objectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
@@ -88,15 +74,11 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setCreatedOn(date);
             objectiveCatagory.setObjectivesId("[]");
             objectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
-            apprisalTypeRepository.save(objectiveCatagory);
+            dbManager.save(objectiveCatagory);
 
             AppraisalDetail appraisalDetail = new AppraisalDetail();
             if (appraisalAndCategoryDTO.getAppraisalDetailId() == 0) {
-                var lastAppraisalDetail = appraisalDetailRepository.getLastAppraisalDetail();
-                if (lastAppraisalDetail == null)
-                    appraisalDetail.setAppraisalDetailId(1);
-                else
-                    appraisalDetail.setAppraisalDetailId(lastAppraisalDetail.getAppraisalDetailId() + 1);
+                appraisalDetail.setAppraisalDetailId(dbManager.nextIntPrimaryKey(AppraisalDetail.class));
                 List<Integer> objectiveIds = new ArrayList<>();
                 objectiveIds.add(objectiveCatagory.getObjectiveCatagoryId());
                 appraisalDetail.setObjectiveCatagoryId(objectMapper.writeValueAsString(objectiveIds));
@@ -117,17 +99,16 @@ public class ApprisalTypeService implements IApprisalTyeService {
                 appraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
                 appraisalDetail.setActiveCycle(false);
             } else  {
-                var appraisalDetailData = appraisalDetailRepository.findById(appraisalAndCategoryDTO.getAppraisalDetailId());
-                if (appraisalDetailData.isEmpty())
-                    throw new Exception("Appraisal detail not found");
 
-                appraisalDetail = appraisalDetailData.get();
+                appraisalDetail = dbManager.getById(appraisalAndCategoryDTO.getAppraisalDetailId(), AppraisalDetail.class);
+                if (appraisalDetail == null)
+                    throw new Exception("Appraisal detail not found");
                 List<Integer> objectCategoryId = objectMapper.readValue(appraisalDetail.getObjectiveCatagoryId(), new TypeReference<List<Integer>>() {});
                 objectCategoryId.add(objectiveCatagory.getObjectiveCatagoryId());
                 appraisalDetail.setObjectiveCatagoryId(objectMapper.writeValueAsString(objectCategoryId));
             }
 
-            appraisalDetailRepository.save(appraisalDetail);
+            dbManager.save(appraisalDetail);
         } catch (Exception ex) {
             throw  ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
         }
@@ -145,29 +126,24 @@ public class ApprisalTypeService implements IApprisalTyeService {
         filterModel.setPageIndex(1);
         return this.getAppraisalTypeByFilter(filterModel);
     }
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     private void updateCtegoryAndAppraisalDeatil(AppraisalAndCategoryDTO appraisalAndCategoryDTO, int objectiveCatagoryId) {
         try {
             java.util.Date utilDate = new java.util.Date();
             var date = new java.sql.Timestamp(utilDate.getTime());
-            var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
-            if (existObjectiveCatagoryData.isEmpty())
-                throw new Exception("Objective category not found");
-
-            ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
+            ObjectiveCatagory existObjectiveCatagory = dbManager.getById(objectiveCatagoryId, ObjectiveCatagory.class);
             existObjectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
             existObjectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
             existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
             existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
             existObjectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             existObjectiveCatagory.setUpdatedOn(date);
-            apprisalTypeRepository.save(existObjectiveCatagory);
+            dbManager.save(existObjectiveCatagory);
 
-            var existAppraisalDetailData = appraisalDetailRepository.findById(appraisalAndCategoryDTO.getAppraisalDetailId());
-            if (existAppraisalDetailData.isEmpty())
+            AppraisalDetail existingAppraisalDetail = dbManager.getById(appraisalAndCategoryDTO.getAppraisalDetailId(), AppraisalDetail.class);
+            if (existingAppraisalDetail == null)
                 throw new Exception("Appraisal details not found");
 
-            AppraisalDetail existingAppraisalDetail = existAppraisalDetailData.get();
             existingAppraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
             existingAppraisalDetail.setAppraisalCycleEndDate((appraisalAndCategoryDTO.getAppraisalCycleEndDate()));
             existingAppraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
@@ -181,7 +157,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
             existingAppraisalDetail.setSelfAppraisalEndDate(appraisalAndCategoryDTO.getSelfAppraisalEndDate());
             existingAppraisalDetail.setSelectionPeriodStartDate(appraisalAndCategoryDTO.getSelectionPeriodStartDate());
             existingAppraisalDetail.setSelectionPeriodEndDate(appraisalAndCategoryDTO.getSelectionPeriodEndDate());
-            appraisalDetailRepository.save(existingAppraisalDetail);
+            dbManager.save(existingAppraisalDetail);
         } catch (Exception ex) {
             throw ApplicationException.ThrowBadRequest(ex.getMessage(), ex);
         }
@@ -236,19 +212,18 @@ public class ApprisalTypeService implements IApprisalTyeService {
         if (objectiveCatagoryId == 0)
             throw new Exception("Invalid appraisal selected");
 
-        // validateApprisalType(objectiveCatagory);
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
-        var existObjectiveCatagoryData = apprisalTypeRepository.findById(objectiveCatagoryId);
-        if (existObjectiveCatagoryData.isEmpty())
+        ObjectiveCatagory existObjectiveCatagory = dbManager.getById(objectiveCatagoryId, ObjectiveCatagory.class);
+
+        if (existObjectiveCatagory == null)
             throw new Exception("Objective category not found");
 
-        ObjectiveCatagory existObjectiveCatagory = existObjectiveCatagoryData.get();
         if (objectiveCatagory.getObjectiveIds() != null)
             existObjectiveCatagory.setObjectivesId(objectMapper.writeValueAsString(objectiveCatagory.getObjectiveIds()));
 
         existObjectiveCatagory.setUpdatedOn(date);
-        apprisalTypeRepository.save(existObjectiveCatagory);
+        dbManager.save(existObjectiveCatagory);
         return "successful";
     }
 
@@ -256,20 +231,14 @@ public class ApprisalTypeService implements IApprisalTyeService {
         if (objectiveCategotyId == 0)
             throw new Exception("Invalid objective selected.");
 
-        List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategotyId, Types.INTEGER));
-        var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_role", dbParameters);
-        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveDetail>>() {});
+        return apprisalTypeRepository.getObjectiveByCategoryIdRepository(objectiveCategotyId);
     }
 
     public List<AppraisalAndCategoryDTO> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception {
         if (objectiveCategoryId == 0)
             throw new Exception("Invalid objective category id");
 
-        List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategoryId, Types.INTEGER));
-        var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_appraisal_detail_byid", dbParameters);
-        List<AppraisalAndCategoryDTO> result =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference< List<AppraisalAndCategoryDTO>>() {});
+        List<AppraisalAndCategoryDTO> result =apprisalTypeRepository.getAppraisalDetailAndCategoryRepository(objectiveCategoryId);
         result.forEach(x -> {
             try {
                 x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
@@ -277,6 +246,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
                 throw new RuntimeException(e);
             }
         });
+
         return  result;
     }
 

@@ -1,4 +1,4 @@
-package com.bot.performance.repository;
+package com.bot.performance.db.utils;
 
 import com.bot.performance.model.DbParameters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +14,10 @@ import java.util.Map;
 @Component
 public class LowLevelExecution {
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    Template template;
 
     public <T> Map<String, Object> executeProcedure(String procedureName, List<DbParameters> sqlParams) {
+        JdbcTemplate jdbcTemplate = template.getTemplate();
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName(procedureName);
 

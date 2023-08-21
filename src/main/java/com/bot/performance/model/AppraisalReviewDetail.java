@@ -1,13 +1,15 @@
 package com.bot.performance.model;
 
-import jakarta.persistence.*;
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
+import com.bot.performance.db.annotations.Transient;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@Entity
 @Table(name = "appraisal_review_detail")
 public class AppraisalReviewDetail {
     @Column(name = "EmployeeId")

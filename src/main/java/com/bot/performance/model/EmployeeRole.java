@@ -1,12 +1,12 @@
 package com.bot.performance.model;
 
-import jakarta.persistence.*;
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
 
-@Entity
 @Table(name = "employee_roles")
 public class EmployeeRole {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     @Column(name = "RoleId")
     Long roleId;
     @Column(name = "RoleName")

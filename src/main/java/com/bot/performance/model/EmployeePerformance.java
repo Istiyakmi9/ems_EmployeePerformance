@@ -1,12 +1,14 @@
 package com.bot.performance.model;
 
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
+import com.bot.performance.db.annotations.Transient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 
 import java.util.Date;
 
-@Entity
 @Table(name = "employee_performance")
 public class EmployeePerformance {
     @Id

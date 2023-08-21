@@ -1,6 +1,8 @@
 package com.bot.performance.repository;
 
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.Meeting;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -10,11 +12,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-@EnableJpaRepositories()
-public interface MeetingReppository extends JpaRepository<Meeting, Long> {
-    @Query(nativeQuery = true, value = "select e.* from employee_meeting e order by e.MeetingId desc limit 1")
-    Meeting getLastEmployeeMeeting();
+public class MeetingReppository {
+    @Autowired
+    DbManager dbManager;
 
-    @Query(value = "select m from Meeting m where m.createdBy = :employeeId")
-    List<Meeting> getMeetingByEmpId(@Param("employeeId") Long employeeId);
+    public void deleteMeetingByIdRepository(long meetingId) {
+        dbManager.execute("delete from employee_meeting where MeetingId = " + meetingId);
+    }
+
+    public List<Meeting> getMeetingByEmpIdRepository(long meetingId) {
+        return dbManager.queryList("select * from employee_meeting where CreatedBy = " + meetingId, Meeting.class);
+    }
 }
