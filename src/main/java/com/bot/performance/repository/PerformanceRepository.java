@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class PerformanceRepository {
@@ -30,7 +31,8 @@ public class PerformanceRepository {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_ReportingManagerId", objectiveCategotyId, Types.BIGINT));
         var dataSet = lowLevelExecution.executeProcedure("sp_employee_performance_by_managerid_get", dbParameters);
-        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<Map<String, Object>>>() {});
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<Map<String, Object>>>() {
+        });
     }
 
     public Map<String, Object> getEmployeeNObjectivesRepository(long employeeId) throws Exception {
@@ -57,7 +59,9 @@ public class PerformanceRepository {
     }
 
     public List<EmployeePerformance> getEmployeePerformanceByIdRepository(long employeeId) {
-        String query = "select p from EmployeePerformance p where p.employeeId = :empId";
-        return dbManager.queryList(query, EmployeePerformance.class);
+        String query = "select p.* from employee_performance p where p.employeeId  =" + employeeId;
+        var result = dbManager.queryList(query, EmployeePerformance.class);
+        return objectMapper.convertValue(result, new TypeReference<List<EmployeePerformance>>() {
+        });
     }
 }

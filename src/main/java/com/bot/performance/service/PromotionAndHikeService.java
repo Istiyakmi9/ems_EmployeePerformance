@@ -28,13 +28,11 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
     @Transactional
     public AppraisalReviewDetail addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetails) throws Exception {
-        long appraisalReviewId = 0;
         List<AppraisalReviewerComment> appraisalReviewerComments = new ArrayList<AppraisalReviewerComment>();
         java.util.Date utilDate = new java.util.Date();
         var date = new java.sql.Timestamp(utilDate.getTime());
-        appraisalReviewId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class);
-
-        long appraisalReviewerCommentsId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class);
+        long appraisalReviewId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class) - 1;
+        long appraisalReviewerCommentsId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class) - 1;
         var activeAppraisalDetails = appraisalDetailRepository.getActiveAppraisalDetailRepository();
         if (activeAppraisalDetails == null)
             throw new Exception("Appraisal detail not found");
