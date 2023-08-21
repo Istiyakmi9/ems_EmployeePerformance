@@ -75,14 +75,22 @@ public class DbManager {
 
     public <T> T getById(long id, Class<T> type) throws Exception {
         String query = dbUtils.getById(id, type);
-        Map<String, Object> result = jdbcTemplate.queryForMap(query);
-        return mapper.convertValue(result, type);
+        try {
+            Map<String, Object> result = jdbcTemplate.queryForMap(query);
+            return mapper.convertValue(result, type);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public <T> T getById(int id, Class<T> type) throws Exception {
         String query = dbUtils.getById(id, type);
-        Map<String, Object> result = jdbcTemplate.queryForMap(query);
-        return mapper.convertValue(result, type);
+        try {
+            Map<String, Object> result = jdbcTemplate.queryForMap(query);
+            return mapper.convertValue(result, type);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public <T> T queryRaw(String query, Class<T> type) {

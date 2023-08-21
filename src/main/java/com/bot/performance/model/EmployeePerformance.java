@@ -6,10 +6,12 @@ import com.bot.performance.db.annotations.Table;
 import com.bot.performance.db.annotations.Transient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import java.util.Date;
 
 @Table(name = "employee_performance")
+@Data
 public class EmployeePerformance {
     @Id
     @Column(name = "EmployeePerformanceId")
@@ -71,123 +73,43 @@ public class EmployeePerformance {
     @JsonProperty("AppraisalDetailId")
     int appraisalDetailId;
 
-    public Long getEmployeePerformanceId() {
-        return employeePerformanceId;
-    }
-
-    public void setEmployeePerformanceId(Long employeePerformanceId) {
+    public EmployeePerformance() {}
+    public EmployeePerformance(Long employeePerformanceId, Long objectiveId, Long employeeId, int companyId, double currentValue, int status, String comments, String performanceDetail, Long updatedBy, int projectId, Date updatedOn, double targetValue, double rating, int performanceStatus, int appraisalDetailId) {
         this.employeePerformanceId = employeePerformanceId;
-    }
-
-    public Long getObjectiveId() {
-        return objectiveId;
-    }
-
-    public void setObjectiveId(Long objectiveId) {
         this.objectiveId = objectiveId;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
-    }
-
-    public int getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(int companyId) {
         this.companyId = companyId;
-    }
-
-    public double getCurrentValue() {
-        return currentValue;
-    }
-
-    public void setCurrentValue(double currentValue) {
         this.currentValue = currentValue;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
         this.status = status;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
         this.comments = comments;
-    }
-
-    public String getPerformanceDetail() {
-        return performanceDetail;
-    }
-
-    public void setPerformanceDetail(String performanceDetail) {
         this.performanceDetail = performanceDetail;
-    }
-
-    public Long getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
-    }
-
-    public Date getUpdatedOn() {
-        return updatedOn;
-    }
-
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
-    }
-
-    public double getTargetValue() {
-        return targetValue;
-    }
-
-    public void setTargetValue(double targetValue) {
-        this.targetValue = targetValue;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public int getPerformanceStatus() {
-        return performanceStatus;
-    }
-
-    public int getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(int projectId) {
         this.projectId = projectId;
-    }
-
-    public int getAppraisalDetailId() {
-        return appraisalDetailId;
-    }
-
-    public void setAppraisalDetailId(int appraisalDetailId) {
+        this.updatedOn = updatedOn;
+        this.targetValue = targetValue;
+        this.rating = rating;
+        this.performanceStatus = performanceStatus;
         this.appraisalDetailId = appraisalDetailId;
     }
 
-    public void setPerformanceStatus(int performanceStatus) {
-        this.performanceStatus = performanceStatus;
+    @Override
+    public String toString() {
+        return "EmployeePerformance{" +
+                "employeePerformanceId=" + employeePerformanceId +
+                ", objectiveId=" + objectiveId +
+                ", employeeId=" + employeeId +
+                ", companyId=" + companyId +
+                ", currentValue=" + currentValue +
+                ", status=" + status +
+                ", comments='" + comments + '\'' +
+                ", performanceDetail='" + performanceDetail + '\'' +
+                ", updatedBy=" + updatedBy +
+                ", projectId=" + projectId +
+                ", updatedOn=" + updatedOn +
+                ", targetValue=" + targetValue +
+                ", rating=" + rating +
+                ", performanceStatus=" + performanceStatus +
+                ", appraisalDetailId=" + appraisalDetailId +
+                '}';
     }
 }
