@@ -1,13 +1,14 @@
 package com.bot.performance.model;
 
+import com.bot.performance.db.annotations.Column;
+import com.bot.performance.db.annotations.Id;
+import com.bot.performance.db.annotations.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 
-@Entity
 @Data
 @Table(name = "appraisal_detail")
 public class AppraisalDetail {
