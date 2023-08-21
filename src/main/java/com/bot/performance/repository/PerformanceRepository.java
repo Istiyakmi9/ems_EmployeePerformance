@@ -2,13 +2,13 @@ package com.bot.performance.repository;
 
 import com.bot.performance.db.service.DbManager;
 import com.bot.performance.db.utils.LowLevelExecution;
-import com.bot.performance.model.*;
+import com.bot.performance.model.DbParameters;
+import com.bot.performance.model.EmployeePerformance;
+import com.bot.performance.model.FilterModel;
+import com.bot.performance.model.PerfomanceObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Types;
