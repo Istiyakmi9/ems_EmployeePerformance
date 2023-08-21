@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PerformanceService implements IPerformanceService {
@@ -150,8 +151,9 @@ public class PerformanceService implements IPerformanceService {
 
         existEmpPerformance = dbManager.getById(employeePerformance.getEmployeePerformanceId(), EmployeePerformance.class);
         if (existEmpPerformance == null) {
-            dbManager.nextLongPrimaryKey(EmployeePerformance.class);
-            existEmpPerformance.setEmployeePerformanceId(dbManager.nextLongPrimaryKey(EmployeePerformance.class));
+            existEmpPerformance = employeePerformance;
+             var performanceId = dbManager.nextLongPrimaryKey(EmployeePerformance.class);
+            existEmpPerformance.setEmployeePerformanceId(performanceId);
             performanceDetail.setComments(employeePerformance.getComments());
             performanceDetail.setIndex(0);
         } else {
@@ -249,8 +251,13 @@ public class PerformanceService implements IPerformanceService {
         if (performances.size() == 0)
             throw new Exception("No performance found. Please contact to admin");
 
-        var submittedPerformance = performances.stream().filter(x -> x.getPerformanceStatus() == ApplicationConstant.Submitted).toList();
-        if (submittedPerformance.size() > 0)
+        boolean isSubmitted = false;
+        for (int i=0; i < performances.size(); i++) {
+            if (performances.get(i).getPerformanceStatus() == ApplicationConstant.Submitted)
+                isSubmitted = true;
+        }
+
+        if (isSubmitted)
             throw new Exception("You already submitted your performance");
 
         performances.forEach(x -> {

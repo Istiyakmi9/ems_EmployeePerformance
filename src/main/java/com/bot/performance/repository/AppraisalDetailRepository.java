@@ -11,6 +11,6 @@ public class AppraisalDetailRepository {
     DbManager dbManager;
 
     public AppraisalDetail getActiveAppraisalDetailRepository() {
-        return dbManager.queryRaw("select o from AppraisalDetail o where o.isActiveCycle = 1", AppraisalDetail.class);
+        return dbManager.queryRaw("select o.* from appraisal_detail o where o.IsActiveCycle = 1", AppraisalDetail.class);
     }
 }

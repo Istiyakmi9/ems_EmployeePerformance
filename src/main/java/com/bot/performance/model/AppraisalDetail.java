@@ -14,34 +14,56 @@ import java.util.Date;
 public class AppraisalDetail {
     @Id
     @Column(name = "AppraisalDetailId")
+    @JsonProperty("AppraisalDetailId")
     int AppraisalDetailId;
     @Column(name = "ObjectiveCatagoryId")
+    @JsonProperty("ObjectiveCatagoryId")
     String ObjectiveCatagoryId;
     @Column(name = "AppraisalCycleStartDate")
+    @JsonProperty("AppraisalCycleStartDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date AppraisalCycleStartDate;
     @Column(name = "AppraisalCycleEndDate")
+    @JsonProperty("AppraisalCycleEndDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date AppraisalCycleEndDate;
     @Column(name = "StartedBy")
+    @JsonProperty("StartedBy")
     long StartedBy;
     @Column(name = "StartedOn")
+    @JsonProperty("StartedOn")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date StartedOn;
     @Column(name = "IsSelfAppraisal")
+    @JsonProperty("IsSelfAppraisal")
     boolean IsSelfAppraisal;
     @Column(name = "IsRequiredRatersFeedback")
+    @JsonProperty("IsRequiredRatersFeedback")
     boolean IsRequiredRatersFeedback;
     @Column(name = "IsRaterSelectedByManager")
+    @JsonProperty("IsRaterSelectedByManager")
     boolean IsRaterSelectedByManager;
     @Column(name = "RatersRequired")
+    @JsonProperty("RatersRequired")
     boolean RatersRequired;
     @Column(name = "CanRaterViewAppraisal")
+    @JsonProperty("CanRaterViewAppraisal")
     boolean CanRaterViewAppraisal;
     @Column(name = "MultiraterFeedBackStartDate")
+    @JsonProperty("MultiraterFeedBackStartDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date MultiraterFeedBackStartDate;
     @Column(name = "MultiraterFeedBackEndDate")
+    @JsonProperty("MultiraterFeedBackEndDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date MultiraterFeedBackEndDate;
     @Column(name = "ReviewStartDate")
+    @JsonProperty("ReviewStartDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date ReviewStartDate;
     @Column(name = "ReviewEndDate")
+    @JsonProperty("ReviewEndDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date ReviewEndDate;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty("SelfAppraisalStartDate")
