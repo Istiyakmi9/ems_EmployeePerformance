@@ -28,53 +28,14 @@ public class RequestFilter implements Filter {
     ObjectMapper objectMapper;
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        String headerToken = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-        if(headerToken == null || !headerToken.startsWith("Bearer")) {
-            // throw new RuntimeException("Invalid toke.");
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
-        }
-
-        headerToken = headerToken.substring(7);
         try {
-            String secret = "SchoolInMind_secret_key_is__bottomhalf@mi9_01";
-            byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-            SecretKey key = Keys.hmacShaKeyFor(keyBytes);
-
-            Object user1 = httpServletRequest.getAttribute("userDetail");
-            Object sid1 = httpServletRequest.getAttribute("sid");
-            Object role1 = httpServletRequest.getAttribute("role");
-            Object companyCode1 = httpServletRequest.getAttribute("companyCode");
-
-            Claims claims = Jwts.parser()
-                    .setSigningKey(key)
-                    .parseClaimsJws(headerToken)
-                    .getBody();
-
-            String sid = claims.get("sid", String.class);
-            String user = claims.get("JBot", String.class);
-            var userData = objectMapper.readValue(user, UserDetail.class);
-            userDetail.setUserDetail(userData);
-            var roleName = claims.get("role", String.class);
-            switch (roleName) {
-                case "Admin":
-                    userDetail.getUserDetail().setRoleId(1);
-                    break;
-                case "Employee":
-                    userDetail.getUserDetail().setRoleId(2);
-                    break;
-                case "Candidate":
-                    userDetail.getUserDetail().setRoleId(3);
-                    break;
-                case "Client":
-                    userDetail.getUserDetail().setRoleId(4);
-                    break;
-                default:
-                    userDetail.getUserDetail().setRoleId(5);
-                    break;
+            Object headerUserDetail = ((HttpServletRequest) servletRequest).getHeader("userDetail");
+            if(headerUserDetail == null || headerUserDetail.toString().isEmpty()) {
+                throw new Exception("Invalid token");
             }
 
+            var userData = objectMapper.readValue(headerUserDetail.toString(), UserDetail.class);
+            userDetail.setUserDetail(userData);
             if (userDetail.getUserDetail() == null)
                 throw new Exception("Invalid token found. Please contact to admin.");
 
@@ -82,12 +43,7 @@ public class RequestFilter implements Filter {
                     || userDetail.getUserDetail().getCompanyId() <= 0)
                 throw new Exception("Invalid Organization id or Company id. Please contact to admin.");
 
-            if (sid == null)
-                throw new Exception("Invalid employee id used. Please contact to admin.");
-
-            userDetail.getUserDetail().setFullName(userDetail.getUserDetail().getFirstName() + " " +
-                                                    userDetail.getUserDetail().getLastName());
-            userDetail.getUserDetail().setUserId(Long.parseLong(sid));
+            userDetail.getUserDetail().setUserId(userData.getUserId());
 
         } catch (ExpiredJwtException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Your session got expired");
