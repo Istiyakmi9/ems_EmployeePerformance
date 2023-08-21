@@ -42,6 +42,11 @@ public class RequestFilter implements Filter {
             byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
             SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
+            Object user1 = httpServletRequest.getAttribute("userDetail");
+            Object sid1 = httpServletRequest.getAttribute("sid");
+            Object role1 = httpServletRequest.getAttribute("role");
+            Object companyCode1 = httpServletRequest.getAttribute("companyCode");
+
             Claims claims = Jwts.parser()
                     .setSigningKey(key)
                     .parseClaimsJws(headerToken)
