@@ -1,5 +1,6 @@
 package com.bot.performance.model;
 
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -7,7 +8,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 @Component
-@RequestScope
+@RequestScope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class CurrentSession {
     Date timeZoneNow;
     UserDetail userDetail;
