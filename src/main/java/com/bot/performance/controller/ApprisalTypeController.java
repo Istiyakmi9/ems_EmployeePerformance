@@ -17,7 +17,7 @@ public class ApprisalTypeController extends BaseController {
     IApprisalTyeService apprisalTypeService;
 
     @RequestMapping(value = "get", method = RequestMethod.POST)
-    public ResponseEntity<?> getAppraisalTypeFilter(@RequestBody FilterModel filter) {
+    public ResponseEntity<?> getAppraisalTypeFilter(@RequestBody FilterModel filter) throws Exception {
         var result = this.apprisalTypeService.getAppraisalTypeByFilter(filter);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }

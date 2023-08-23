@@ -50,7 +50,7 @@ public class EmployeePerformanceController extends BaseController {
     }
 
     @GetMapping("getemployeebymanagerid/{managerId}")
-    public ResponseEntity<List<?>> getallEmpPerformance(@PathVariable("managerId") long managerId) {
+    public ResponseEntity<List<?>> getallEmpPerformance(@PathVariable("managerId") long managerId) throws Exception {
         var result = performanceService.getEmployeeByManagerId(managerId);
         return ResponseEntity.ok(result);
     }

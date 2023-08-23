@@ -20,7 +20,7 @@ public class ApprisalTypeRepository {
     @Autowired
     ObjectMapper objectMapper;
 
-    public List<ObjectiveCatagory> getAppraisalTypeByFilterRepository(FilterModel filter) {
+    public List<ObjectiveCatagory> getAppraisalTypeByFilterRepository(FilterModel filter) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
 
         dbParameters.add(new DbParameters("_sortBy", filter.getSortBy(), Types.VARCHAR));
@@ -34,7 +34,7 @@ public class ApprisalTypeRepository {
         return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() { });
     }
 
-    public List<ObjectiveDetail> getObjectiveByCategoryIdRepository(int objectiveCategotyId) {
+    public List<ObjectiveDetail> getObjectiveByCategoryIdRepository(int objectiveCategotyId) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCategotyId, Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_objective_get_by_role", dbParameters);

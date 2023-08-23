@@ -37,7 +37,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
     DbManager dbManager;
 
     @Override
-    public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) {
+    public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         if (filter.getObjectiveCatagoryType() == null && filter.getTypeDescription() == null &&
                 (Objects.equals(filter.getRolesId(), "null") || filter.getRolesId() == null)) {

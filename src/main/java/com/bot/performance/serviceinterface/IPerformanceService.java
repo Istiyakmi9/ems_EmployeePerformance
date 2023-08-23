@@ -12,7 +12,7 @@ public interface IPerformanceService {
     EmployeePerformance UpdateEmployeeObjectiveService(EmployeePerformance employeePerformance) throws Exception;
     List<PerfomanceObjective> GetEmployeeObjectiveService(int designationId, int companyId, long employeeId) throws Exception;
     List<PerfomanceObjective> GetPerformanceObjectiveService(FilterModel filterModel) throws Exception;
-    List<?> getEmployeeByManagerId(long managerId);
+    List<?> getEmployeeByManagerId(long managerId) throws Exception;
     String submitEmployeeObjectiveService(Long employeeId) throws Exception;
     String changeEmployeeObjectiveStatusService(Long employeeId, int status) throws Exception;
 }

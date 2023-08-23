@@ -8,7 +8,7 @@ import com.bot.performance.model.AppraisalAndCategoryDTO;
 import java.util.List;
 
 public interface IApprisalTyeService {
-    List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter);
+    List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) throws Exception;
     List<ObjectiveCatagory> addAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO) throws Exception;
     List<ObjectiveCatagory> updateAppraisalTypeService(AppraisalAndCategoryDTO appraisalAndCategoryDTO, int objectiveCatagoryId) throws Exception;
     String manageAppraisalCycleService(ObjectiveCatagory objectiveCatagory, int objectiveCatagoryId) throws Exception;

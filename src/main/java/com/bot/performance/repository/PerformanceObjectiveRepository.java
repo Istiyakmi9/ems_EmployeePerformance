@@ -20,7 +20,7 @@ public class PerformanceObjectiveRepository {
     @Autowired
     ObjectMapper objectMapper;
 
-    public List<ObjectiveDetail> getObjectiveByCatagoryIdRepository(int catagoryId, int companyId) {
+    public List<ObjectiveDetail> getObjectiveByCatagoryIdRepository(int catagoryId, int companyId) throws Exception {
         List<DbParameters> params = Arrays.asList(
                 new DbParameters("_ObjectiveCatagoryId", catagoryId, Types.INTEGER),
                 new DbParameters("_CompanyId", companyId, Types.INTEGER)

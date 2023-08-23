@@ -27,7 +27,7 @@ public class PerformanceRepository {
     @Autowired
     DbManager dbManager;
 
-    public List<?> getEmployeeByManagerIdRepository(long objectiveCategotyId) {
+    public List<?> getEmployeeByManagerIdRepository(long objectiveCategotyId) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_ReportingManagerId", objectiveCategotyId, Types.BIGINT));
         var dataSet = lowLevelExecution.executeProcedure("sp_employee_performance_by_managerid_get", dbParameters);

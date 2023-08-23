@@ -36,7 +36,7 @@ public class PerformanceService implements IPerformanceService {
         return dbManager.queryList("select * from performance_objective", EmployeePerformance.class);
     }
 
-    public List<?> getEmployeeByManagerId(long managerId) {
+    public List<?> getEmployeeByManagerId(long managerId) throws Exception {
         return this.performanceRepository.getEmployeeByManagerIdRepository(managerId);
     }
 
