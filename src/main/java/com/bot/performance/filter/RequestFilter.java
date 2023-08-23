@@ -4,7 +4,6 @@ import com.bot.performance.model.CurrentSession;
 import com.bot.performance.db.utils.DatabaseConfiguration;
 import com.bot.performance.model.UserDetail;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +62,6 @@ public class RequestFilter implements Filter {
                 databaseConfiguration.setMinPoolSize(dbResult.getMinPoolSize());
                 databaseConfiguration.setMaxPoolSize(dbResult.getMaxPoolSize());
             }
-
-        } catch (ExpiredJwtException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Your session got expired");
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unauthorized access. Please try with valid token.");
         }
