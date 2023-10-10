@@ -18,4 +18,6 @@ public final class ApplicationConstant {
     public static final int AutoPromoted = 14;
     public static final int FinalLevel = 1;
     public  static final String IST = "IST";
+    public static final int Admin = 1;
+    public static final int Manager = 7;
 }

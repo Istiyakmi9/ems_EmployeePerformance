@@ -5,5 +5,5 @@ import com.bot.performance.model.AppraisalReviewDetail;
 import java.util.List;
 
 public interface IPromotionAndHikeService {
-    AppraisalReviewDetail addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetail) throws Exception;
+    List<AppraisalReviewDetail> addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetail) throws Exception;
 }

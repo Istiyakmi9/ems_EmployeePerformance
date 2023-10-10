@@ -4,12 +4,16 @@ import com.bot.performance.db.annotations.Column;
 import com.bot.performance.db.annotations.Id;
 import com.bot.performance.db.annotations.Table;
 import com.bot.performance.db.annotations.Transient;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "appraisal_review_detail")
 public class AppraisalReviewDetail {
     @Column(name = "EmployeeId")
@@ -35,16 +39,10 @@ public class AppraisalReviewDetail {
     BigDecimal previousSalary;
     @Column(name = "AppraisalCycleStartDate")
     Date appraisalCycleStartDate;
-    @Transient
-    long appraisalReviewerCommentsId;
-    @Transient
-    long reviewerId;
-    @Transient
+    @Column(name = "Comments")
     String comments;
-    @Transient
-    Date reactedOn;
-    @Transient
+    @Column(name = "Reviewers")
+    String reviewers;
+    @Column(name = "Rating")
     BigDecimal rating;
-    @Transient
-    int reviewStatus;
 }
