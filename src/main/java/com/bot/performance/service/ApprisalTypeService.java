@@ -3,7 +3,6 @@ package com.bot.performance.service;
 import com.bot.performance.config.ApplicationException;
 import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.*;
-import com.bot.performance.model.AppraisalAndCategoryDTO;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,15 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Types;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -70,6 +63,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
             objectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             objectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
+            objectiveCatagory.setApprovalWorkflowId(appraisalAndCategoryDTO.getApprovalWorkflowId());
             objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
             objectiveCatagory.setCreatedOn(date);
             objectiveCatagory.setObjectivesId("[]");
@@ -138,6 +132,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
             existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
             existObjectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             existObjectiveCatagory.setUpdatedOn(date);
+            existObjectiveCatagory.setApprovalWorkflowId(appraisalAndCategoryDTO.getApprovalWorkflowId());
             dbManager.save(existObjectiveCatagory);
 
             AppraisalDetail existingAppraisalDetail = dbManager.getById(appraisalAndCategoryDTO.getAppraisalDetailId(), AppraisalDetail.class);
@@ -205,6 +200,9 @@ public class ApprisalTypeService implements IApprisalTyeService {
 
         if (objectiveCatagory.getRoleIds().size() == 0)
             throw new Exception("Please select tag roles");
+
+        if (objectiveCatagory.getApprovalWorkflowId() == 0)
+            throw new Exception("Please select approval work flow");
     }
 
     @Override
@@ -234,34 +232,8 @@ public class ApprisalTypeService implements IApprisalTyeService {
         return apprisalTypeRepository.getObjectiveByCategoryIdRepository(objectiveCategotyId);
     }
 
-    public List<AppraisalAndCategoryDTO> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception {
-        if (objectiveCategoryId == 0)
-            throw new Exception("Invalid objective category id");
-
-        List<AppraisalAndCategoryDTO> result =apprisalTypeRepository.getAppraisalDetailAndCategoryRepository(objectiveCategoryId);
-        result.forEach(x -> {
-            try {
-                x.setRoleIds(objectMapper.readValue(x.getRolesId(), new TypeReference<List<Integer>>() {}));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
+    public Map<String, Object> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception {
+        var result =apprisalTypeRepository.getAppraisalDetailAndCategoryRepository(objectiveCategoryId);
         return  result;
-    }
-
-    private Date utcToIstTimeZone(Date date) {
-        // Step 1: Parse the UTC time string to LocalDateTime
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime utcTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        // Step 2: Convert to IST
-        ZoneId istZone = ZoneId.of("Asia/Kolkata");
-        ZonedDateTime istTime = utcTime.atZone(ZoneOffset.UTC).withZoneSameInstant(istZone);
-
-        // Step 3: Format the IST time
-        String formattedIstTime = istTime.format(formatter);
-        Date convertDate = (Date) formatter.parse(formattedIstTime);
-        return java.sql.Date.valueOf(formattedIstTime);
     }
 }

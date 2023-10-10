@@ -2,24 +2,21 @@ package com.bot.performance.service;
 
 import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.AppraisalReviewDetail;
-import com.bot.performance.model.AppraisalReviewerComment;
-import com.bot.performance.model.CurrentSession;
 import com.bot.performance.model.EmployeeSalaryDetail;
 import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.serviceinterface.IPromotionAndHikeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class PromotionAndHikeService implements IPromotionAndHikeService {
     @Autowired
-    CurrentSession currentUserDetail;
+    ObjectMapper objectMapper;
     @Autowired
     AppraisalDetailRepository appraisalDetailRepository;
 
@@ -27,12 +24,9 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     DbManager dbManager;
 
     @Transactional
-    public AppraisalReviewDetail addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetails) throws Exception {
-        List<AppraisalReviewerComment> appraisalReviewerComments = new ArrayList<AppraisalReviewerComment>();
+    public List<AppraisalReviewDetail> addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetails) throws Exception {
         java.util.Date utilDate = new java.util.Date();
-        var date = new java.sql.Timestamp(utilDate.getTime());
         long appraisalReviewId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class) - 1;
-        long appraisalReviewerCommentsId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class) - 1;
         var activeAppraisalDetails = appraisalDetailRepository.getActiveAppraisalDetailRepository();
         if (activeAppraisalDetails == null)
             throw new Exception("Appraisal detail not found");
@@ -41,44 +35,23 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             if (promotionDetail.getEmployeeId() == 0)
                 throw new Exception("Invalid employee selected");
 
-            promotionDetail.setAppraisalDetailId(activeAppraisalDetails.getAppraisalDetailId());
-            promotionDetail.setAppraisalCycleStartDate(activeAppraisalDetails.getAppraisalCycleStartDate());
-
             appraisalReviewId = appraisalReviewId + 1;
             var employeeSalaryDetail = dbManager.getById(promotionDetail.getEmployeeId(), EmployeeSalaryDetail.class);
+            promotionDetail.setAppraisalDetailId(activeAppraisalDetails.getAppraisalDetailId());
             validateHikeDetail(promotionDetail, employeeSalaryDetail);
+            promotionDetail.setAppraisalCycleStartDate(activeAppraisalDetails.getAppraisalCycleStartDate());
             promotionDetail.setAppraisalReviewId(appraisalReviewId);
             promotionDetail.setPreviousSalary(employeeSalaryDetail.getCTC());
-            promotionDetail.setAppraisalReviewId(appraisalReviewId);
-            if (!promotionDetail.getComments().isEmpty() || promotionDetail.getRating().signum() > 0) {
-                appraisalReviewerCommentsId = appraisalReviewerCommentsId + 1;
-                appraisalReviewerComments.add(addAppraisalReviewerComment(promotionDetail, date, appraisalReviewerCommentsId));
-            }
+
+            var result = appraisalDetailRepository.getApprovalChainRepository(promotionDetail.getEmployeeId());
+            promotionDetail.setReviewers(objectMapper.writeValueAsString(result));
         }
 
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);
-        if (appraisalReviewerComments.size() > 0)
-            dbManager.saveAll(appraisalReviewerComments, AppraisalReviewerComment.class);
-
-        return null;
-    }
-
-    private AppraisalReviewerComment addAppraisalReviewerComment(AppraisalReviewDetail appraisalReviewDetail, Date date,
-                                                                 long appraisalReviewerCommentsId) {
-        AppraisalReviewerComment appraisalReviewerComment = new AppraisalReviewerComment();
-        appraisalReviewerComment.setComments(appraisalReviewDetail.getComments());
-        appraisalReviewerComment.setRating(appraisalReviewDetail.getRating());
-        appraisalReviewerComment.setReactedOn(date);
-        appraisalReviewerComment.setAppraisalReviewId(appraisalReviewDetail.getAppraisalReviewId());
-        appraisalReviewerComment.setReviewerId(currentUserDetail.getUserDetail().getUserId());
-        appraisalReviewerComment.setAppraisalReviewerCommentsId(appraisalReviewerCommentsId);
-        return appraisalReviewerComment;
+        return appraisalReviewDetails;
     }
 
     private void validateHikeDetail(AppraisalReviewDetail appraisalReviewDetail, EmployeeSalaryDetail employeeSalaryDetail) throws Exception {
-        if (appraisalReviewDetail.getAppraisalDetailId() == 0)
-            throw new Exception("Invalid appraisal selected");
-
         BigDecimal proposedHikeAmount = (employeeSalaryDetail.getCTC().multiply(appraisalReviewDetail.getHikePercentage()))
                 .divide(new BigDecimal(100));
         proposedHikeAmount = proposedHikeAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
@@ -94,5 +67,8 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
         if (appraisalReviewDetail.getHikeAmount().signum() < 0)
             throw new Exception("Hike amount is invalid");
+
+        if (appraisalReviewDetail.getEmployeeId() <= 0)
+            throw new Exception("Employee detail not found");
     }
 }

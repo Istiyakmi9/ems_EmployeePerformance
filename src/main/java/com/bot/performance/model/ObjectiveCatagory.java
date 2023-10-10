@@ -57,6 +57,9 @@ public class ObjectiveCatagory {
     @Column(name = "Status")
     @JsonProperty("Status")
     public String status;
+    @Column(name = "ApprovalWorkflowId")
+    @JsonProperty("ApprovalWorkflowId")
+    public int approvalWorkflowId;
     @Transient
     @JsonProperty("Total")
     int total;
@@ -77,5 +80,8 @@ public class ObjectiveCatagory {
     @JsonProperty("AppraisalCycleEndDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date appraisalCycleEndDate;
+    @Transient
+    @JsonProperty("IsActiveCycle")
+    boolean isActiveCycle;
 }
 
