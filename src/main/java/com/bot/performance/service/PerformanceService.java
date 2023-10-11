@@ -181,6 +181,11 @@ public class PerformanceService implements IPerformanceService {
         existEmpPerformance.setAppraisalDetailId(employeePerformance.getAppraisalDetailId());
 
         dbManager.save(existEmpPerformance);
+        existEmpPerformance.setPerformanceDetail(objectMapper.writeValueAsString(
+                performanceDetails.stream()
+                        .sorted((a, b) -> {
+                            return b.getUpdatedOn().compareTo(a.getUpdatedOn());
+                        }).toList()));
         return existEmpPerformance;
     }
 
@@ -318,5 +323,11 @@ public class PerformanceService implements IPerformanceService {
 
         if (date.before(appraisalDetail.getAppraisalCycleStartDate()))
             throw new Exception("Appraisal cycle date has not come");
+
+        if (employeePerformance.getComments().isEmpty())
+            throw new Exception("Please enter objective description");
+
+        if (employeePerformance.getComments().length() > 500)
+            throw new Exception("Detail must be less than 500 character");
     }
 }

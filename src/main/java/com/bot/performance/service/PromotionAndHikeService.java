@@ -44,7 +44,6 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             promotionDetail.setPreviousSalary(employeeSalaryDetail.getCTC());
 
             var result = appraisalDetailRepository.getApprovalChainRepository(promotionDetail.getEmployeeId());
-            promotionDetail.setReviewers(objectMapper.writeValueAsString(result));
         }
 
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);

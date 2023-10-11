@@ -83,5 +83,11 @@ public class ObjectiveCatagory {
     @Transient
     @JsonProperty("IsActiveCycle")
     boolean isActiveCycle;
+    @Transient
+    @JsonProperty("AppraisalDetailId")
+    int appraisalDetailId;
+    @Transient
+    @JsonProperty("AppraisalName")
+    String appraisalName;
 }
 

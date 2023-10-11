@@ -25,6 +25,10 @@ public class AppraisalDetailRepository {
         return dbManager.queryRaw("select o.* from appraisal_detail o where o.IsActiveCycle = 1", AppraisalDetail.class);
     }
 
+    public List<AppraisalDetail> getAppraisalDetailRepository() {
+        return dbManager.queryList("select o.* from appraisal_detail o", AppraisalDetail.class);
+    }
+
     public List<EmployeeWithRoles> getApprovalChainRepository(long employeeId) throws Exception {
         String designationId = objectMapper.writeValueAsString(Arrays.asList((int) ApplicationConstant.Admin, (int) ApplicationConstant.Manager));
         var dataSet = lowLevelExecution.executeProcedure("sp_workflow_chain_by_emp_id",
