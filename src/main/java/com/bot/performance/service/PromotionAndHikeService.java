@@ -2,6 +2,7 @@ package com.bot.performance.service;
 
 import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.AppraisalReviewDetail;
+import com.bot.performance.model.AppraisalReviewFinalizerStatus;
 import com.bot.performance.model.EmployeeSalaryDetail;
 import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.serviceinterface.IPromotionAndHikeService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,6 +33,8 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
         if (activeAppraisalDetails == null)
             throw new Exception("Appraisal detail not found");
 
+        List<AppraisalReviewFinalizerStatus> appraisalReviewFinalizer = new ArrayList<>();
+        int AppraisalFinalizer = dbManager.nextIntPrimaryKey(AppraisalReviewFinalizerStatus.class) - 1;;
         for (var promotionDetail: appraisalReviewDetails) {
             if (promotionDetail.getEmployeeId() == 0)
                 throw new Exception("Invalid employee selected");
@@ -44,9 +48,33 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             promotionDetail.setPreviousSalary(employeeSalaryDetail.getCTC());
 
             var result = appraisalDetailRepository.getApprovalChainRepository(promotionDetail.getEmployeeId());
-        }
+            long finalAppraisalReviewId = appraisalReviewId;
+            int i = 0;
+            while (i < result.size()) {
+                AppraisalFinalizer = AppraisalFinalizer + 1;
+                var reviewerDetail = new AppraisalReviewFinalizerStatus();
+                reviewerDetail.setAppraisalFinalizer(AppraisalFinalizer);
+                reviewerDetail.setAppraisalReviewId(finalAppraisalReviewId);
+                reviewerDetail.setReviwerId(result.get(i).getEmployeeUid());
+                reviewerDetail.setEmail(result.get(i).getEmail());
+                reviewerDetail.setFullName(result.get(i).getName());
+                reviewerDetail.setActionRequired(result.get(i).isRequired());
+                if (i+1 == 1) {
+                    reviewerDetail.setStatus(9);
+                    reviewerDetail.setReactedOn(utilDate);
+                } else if (i+1 == 2) {
+                    reviewerDetail.setStatus(2);
+                } else  {
+                    reviewerDetail.setStatus(0);
+                }
 
+                reviewerDetail.setApprovalLevel(i+1);
+                appraisalReviewFinalizer.add( reviewerDetail);
+                i++;
+            }
+        }
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);
+        dbManager.saveAll(appraisalReviewFinalizer, AppraisalReviewFinalizerStatus.class);
         return appraisalReviewDetails;
     }
 
