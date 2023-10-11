@@ -13,6 +13,8 @@ public class AppraisalAndCategoryDTO {
     int objectiveCatagoryId;
     @JsonProperty("ObjectiveCatagoryType")
     public String objectiveCatagoryType;
+    @JsonProperty("AppraisalName")
+    public String appraisalName;
     @JsonProperty("TypeDescription")
     public String typeDescription;
     @JsonProperty("RolesId")

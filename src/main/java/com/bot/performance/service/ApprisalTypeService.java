@@ -3,6 +3,7 @@ package com.bot.performance.service;
 import com.bot.performance.config.ApplicationException;
 import com.bot.performance.db.service.DbManager;
 import com.bot.performance.model.*;
+import com.bot.performance.repository.AppraisalDetailRepository;
 import com.bot.performance.repository.ApprisalTypeRepository;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +29,8 @@ public class ApprisalTypeService implements IApprisalTyeService {
     ObjectMapper objectMapper;
     @Autowired
     DbManager dbManager;
+    @Autowired
+    AppraisalDetailRepository appraisalDetailRepository;
 
     @Override
     public List<ObjectiveCatagory> getAppraisalTypeByFilter(FilterModel filter) throws Exception {
@@ -75,12 +78,13 @@ public class ApprisalTypeService implements IApprisalTyeService {
                 appraisalDetail.setAppraisalDetailId(dbManager.nextIntPrimaryKey(AppraisalDetail.class));
                 List<Integer> objectiveIds = new ArrayList<>();
                 objectiveIds.add(objectiveCatagory.getObjectiveCatagoryId());
+                appraisalDetail.setAppraisalName(appraisalAndCategoryDTO.getAppraisalName());
                 appraisalDetail.setObjectiveCatagoryId(objectMapper.writeValueAsString(objectiveIds));
                 appraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
                 appraisalDetail.setAppraisalCycleEndDate(appraisalAndCategoryDTO.getAppraisalCycleEndDate());
-                appraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
-                appraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
-                appraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
+                appraisalDetail.setSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
+                appraisalDetail.setRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
+                appraisalDetail.setRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
                 appraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
                 appraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
                 appraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
@@ -139,11 +143,12 @@ public class ApprisalTypeService implements IApprisalTyeService {
             if (existingAppraisalDetail == null)
                 throw new Exception("Appraisal details not found");
 
+            existingAppraisalDetail.setAppraisalName(appraisalAndCategoryDTO.getAppraisalName());
             existingAppraisalDetail.setAppraisalCycleStartDate(appraisalAndCategoryDTO.getAppraisalCycleStartDate());
             existingAppraisalDetail.setAppraisalCycleEndDate((appraisalAndCategoryDTO.getAppraisalCycleEndDate()));
-            existingAppraisalDetail.setIsSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
-            existingAppraisalDetail.setIsRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
-            existingAppraisalDetail.setIsRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
+            existingAppraisalDetail.setSelfAppraisal(appraisalAndCategoryDTO.isIsSelfAppraisal());
+            existingAppraisalDetail.setRequiredRatersFeedback(appraisalAndCategoryDTO.isIsRequiredRatersFeedback());
+            existingAppraisalDetail.setRaterSelectedByManager(appraisalAndCategoryDTO.isIsRaterSelectedByManager());
             existingAppraisalDetail.setRatersRequired(appraisalAndCategoryDTO.isRatersRequired());
             existingAppraisalDetail.setCanRaterViewAppraisal(appraisalAndCategoryDTO.isCanRaterViewAppraisal());
             existingAppraisalDetail.setMultiraterFeedBackStartDate(appraisalAndCategoryDTO.getMultiraterFeedBackStartDate());
@@ -160,6 +165,9 @@ public class ApprisalTypeService implements IApprisalTyeService {
     private void validateApprisalType(AppraisalAndCategoryDTO objectiveCatagory) throws Exception {
         if (objectiveCatagory.getObjectiveCatagoryType().isEmpty())
             throw new Exception("Please enter objective category first");
+
+        if (objectiveCatagory.getAppraisalName().isEmpty())
+            throw new Exception("Please enter appraisal name first");
 
         if (objectiveCatagory.getTypeDescription().isEmpty())
             throw new Exception("Please enter description first");
@@ -235,5 +243,30 @@ public class ApprisalTypeService implements IApprisalTyeService {
     public Map<String, Object> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception {
         var result =apprisalTypeRepository.getAppraisalDetailAndCategoryRepository(objectiveCategoryId);
         return  result;
+    }
+
+    public List<ObjectiveCatagory> manageAppraisalCategoryStatus(AppraisalDetail appraisalDetail) throws Exception {
+        if (appraisalDetail.getAppraisalDetailId() <= 0)
+            throw new Exception("Select appraisal first");
+
+        List<AppraisalDetail> appraisalDetails = appraisalDetailRepository.getAppraisalDetailRepository();
+        appraisalDetails = objectMapper.convertValue(appraisalDetails, new TypeReference<List<AppraisalDetail>>() {});
+        if (appraisalDetail.isActiveCycle()) {
+            appraisalDetails.forEach(x -> {
+                if (x.getAppraisalDetailId() == appraisalDetail.getAppraisalDetailId())
+                    x.setActiveCycle(true);
+                else
+                    x.setActiveCycle(false);
+            });
+        } else {
+            var appraisal = appraisalDetails.stream().filter(x -> x.getAppraisalDetailId() == appraisalDetail.getAppraisalDetailId()).findFirst();
+            if (appraisal.isEmpty())
+                throw new Exception("Appraisal detail not found");
+            appraisal.get().setActiveCycle(false);
+        }
+
+        dbManager.saveAll(appraisalDetails, AppraisalDetail.class);
+        FilterModel filterModel = new FilterModel();
+        return getAppraisalTypeByFilter(filterModel);
     }
 }

@@ -1,9 +1,6 @@
 package com.bot.performance.serviceinterface;
 
-import com.bot.performance.model.FilterModel;
-import com.bot.performance.model.ObjectiveCatagory;
-import com.bot.performance.model.ObjectiveDetail;
-import com.bot.performance.model.AppraisalAndCategoryDTO;
+import com.bot.performance.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -15,4 +12,5 @@ public interface IApprisalTyeService {
     String manageAppraisalCycleService(ObjectiveCatagory objectiveCatagory, int objectiveCatagoryId) throws Exception;
     List<ObjectiveDetail> getObjectiveByCategoryIdService(int objectiveCategoryId) throws Exception;
     Map<String, Object> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception;
+    List<ObjectiveCatagory> manageAppraisalCategoryStatus(AppraisalDetail appraisalDetail) throws Exception;
 }

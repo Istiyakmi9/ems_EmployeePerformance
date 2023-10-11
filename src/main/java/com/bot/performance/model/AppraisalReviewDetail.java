@@ -41,8 +41,6 @@ public class AppraisalReviewDetail {
     Date appraisalCycleStartDate;
     @Column(name = "Comments")
     String comments;
-    @Column(name = "Reviewers")
-    String reviewers;
     @Column(name = "Rating")
     BigDecimal rating;
 }

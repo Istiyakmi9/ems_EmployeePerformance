@@ -15,56 +15,59 @@ public class AppraisalDetail {
     @Id
     @Column(name = "AppraisalDetailId")
     @JsonProperty("AppraisalDetailId")
-    int AppraisalDetailId;
+    int appraisalDetailId;
     @Column(name = "ObjectiveCatagoryId")
     @JsonProperty("ObjectiveCatagoryId")
-    String ObjectiveCatagoryId;
+    String objectiveCatagoryId;
+    @Column(name = "AppraisalName")
+    @JsonProperty("AppraisalName")
+    String appraisalName;
     @Column(name = "AppraisalCycleStartDate")
     @JsonProperty("AppraisalCycleStartDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date AppraisalCycleStartDate;
+    Date appraisalCycleStartDate;
     @Column(name = "AppraisalCycleEndDate")
     @JsonProperty("AppraisalCycleEndDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date AppraisalCycleEndDate;
+    Date appraisalCycleEndDate;
     @Column(name = "StartedBy")
     @JsonProperty("StartedBy")
-    long StartedBy;
+    long startedBy;
     @Column(name = "StartedOn")
     @JsonProperty("StartedOn")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date StartedOn;
+    Date startedOn;
     @Column(name = "IsSelfAppraisal")
     @JsonProperty("IsSelfAppraisal")
-    boolean IsSelfAppraisal;
+    boolean isSelfAppraisal;
     @Column(name = "IsRequiredRatersFeedback")
     @JsonProperty("IsRequiredRatersFeedback")
-    boolean IsRequiredRatersFeedback;
+    boolean isRequiredRatersFeedback;
     @Column(name = "IsRaterSelectedByManager")
     @JsonProperty("IsRaterSelectedByManager")
-    boolean IsRaterSelectedByManager;
+    boolean isRaterSelectedByManager;
     @Column(name = "RatersRequired")
     @JsonProperty("RatersRequired")
-    boolean RatersRequired;
+    boolean ratersRequired;
     @Column(name = "CanRaterViewAppraisal")
     @JsonProperty("CanRaterViewAppraisal")
-    boolean CanRaterViewAppraisal;
+    boolean canRaterViewAppraisal;
     @Column(name = "MultiraterFeedBackStartDate")
     @JsonProperty("MultiraterFeedBackStartDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date MultiraterFeedBackStartDate;
+    Date multiraterFeedBackStartDate;
     @Column(name = "MultiraterFeedBackEndDate")
     @JsonProperty("MultiraterFeedBackEndDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date MultiraterFeedBackEndDate;
+    Date multiraterFeedBackEndDate;
     @Column(name = "ReviewStartDate")
     @JsonProperty("ReviewStartDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date ReviewStartDate;
+    Date reviewStartDate;
     @Column(name = "ReviewEndDate")
     @JsonProperty("ReviewEndDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date ReviewEndDate;
+    Date reviewEndDate;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty("SelfAppraisalStartDate")
     @Column(name = "SelfAppraisalStartDate")

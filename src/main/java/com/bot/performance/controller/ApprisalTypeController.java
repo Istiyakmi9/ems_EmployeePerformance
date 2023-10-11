@@ -1,9 +1,6 @@
 package com.bot.performance.controller;
 
-import com.bot.performance.model.ApiResponse;
-import com.bot.performance.model.FilterModel;
-import com.bot.performance.model.ObjectiveCatagory;
-import com.bot.performance.model.AppraisalAndCategoryDTO;
+import com.bot.performance.model.*;
 import com.bot.performance.serviceinterface.IApprisalTyeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +48,12 @@ public class ApprisalTypeController extends BaseController {
     @GetMapping("getCategoryByCategoryId/{objectiveCategotyId}")
     public ResponseEntity<ApiResponse> getCategoryByCategoryId(@PathVariable int objectiveCategotyId) throws Exception {
         var result = this.apprisalTypeService.getAppraisalDetailAndCategoryService(objectiveCategotyId);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @PostMapping("manageAppraisalCategory")
+    public ResponseEntity<ApiResponse> manageAppraisalCategory(@RequestBody AppraisalDetail appraisalDetail) throws Exception {
+        var result = this.apprisalTypeService.manageAppraisalCategoryStatus(appraisalDetail);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }
