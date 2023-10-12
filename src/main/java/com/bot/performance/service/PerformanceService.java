@@ -248,7 +248,7 @@ public class PerformanceService implements IPerformanceService {
         }
     }
 
-    public String submitEmployeeObjectiveService(Long employeeId) throws Exception {
+    public List<EmployeePerformance> submitEmployeeObjectiveService(Long employeeId) throws Exception {
         if (employeeId == 0)
             throw new Exception("Invalid employee performance selected");
 
@@ -270,7 +270,7 @@ public class PerformanceService implements IPerformanceService {
         });
 
         dbManager.saveAll(performances, EmployeePerformance.class);
-        return "Performance submitted successfully";
+        return performances;
     }
 
     public String changeEmployeeObjectiveStatusService(Long employeeId, int status) throws Exception {
