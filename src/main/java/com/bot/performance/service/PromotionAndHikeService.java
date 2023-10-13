@@ -1,12 +1,10 @@
 package com.bot.performance.service;
 
 import com.bot.performance.db.service.DbManager;
-import com.bot.performance.model.AppraisalReviewDetail;
-import com.bot.performance.model.AppraisalReviewFinalizerStatus;
-import com.bot.performance.model.EmployeeSalaryDetail;
+import com.bot.performance.model.*;
 import com.bot.performance.repository.AppraisalDetailRepository;
+import com.bot.performance.repository.PromotionAndHikeRepository;
 import com.bot.performance.serviceinterface.IPromotionAndHikeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +16,7 @@ import java.util.List;
 @Service
 public class PromotionAndHikeService implements IPromotionAndHikeService {
     @Autowired
-    ObjectMapper objectMapper;
+    PromotionAndHikeRepository promotionAndHikeRepository;
     @Autowired
     AppraisalDetailRepository appraisalDetailRepository;
 
@@ -97,5 +95,16 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
         if (appraisalReviewDetail.getEmployeeId() <= 0)
             throw new Exception("Employee detail not found");
+    }
+
+    public List<AppraisalReviewDetailDTO> getPromotionAndHikeService(long employeeId) throws Exception {
+        if (employeeId <= 0)
+            throw new Exception("Invalid employee id");
+
+        return  promotionAndHikeRepository.getPromotionAndHikeRepository(employeeId);
+    }
+
+    public List<TeamMemberAndAppraisalFinalizer> getApprovePromotionAndHikeService() throws Exception {
+        return promotionAndHikeRepository.getApprovePromotionAndHikeRepository();
     }
 }
