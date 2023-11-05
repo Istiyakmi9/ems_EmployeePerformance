@@ -32,4 +32,10 @@ public class PromotionAndHikeController {
         var result = iPromotionAndHikeService.getApprovePromotionAndHikeService();
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
+
+    @RequestMapping(value = "reOpenAppraisalObjective/{userId}", method = RequestMethod.PUT)
+    public ResponseEntity<ApiResponse> reOpenAppraisalObjective(@PathVariable("userId") Long userId, @RequestBody List<Integer> reviewIds) throws Exception {
+        var result = iPromotionAndHikeService.reOpenAppraisalObjectiveService(userId, reviewIds);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
+    }
 }
