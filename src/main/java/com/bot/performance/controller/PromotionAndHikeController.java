@@ -38,4 +38,11 @@ public class PromotionAndHikeController {
         var result = iPromotionAndHikeService.reOpenAppraisalObjectiveService(userId, reviewIds);
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
+
+    @RequestMapping(value = "reOpenEmployeeObjective/{employeeId}/{appraisalReviewDetail}", method = RequestMethod.GET)
+    public ResponseEntity<ApiResponse> reOpenEmployeeObjective(@PathVariable("employeeId") Long employeeId,
+                                                               @PathVariable("appraisalReviewDetail") int appraisalReviewDetail) throws Exception {
+        var result = iPromotionAndHikeService.reOpenEmployeeObjectiveService(employeeId, appraisalReviewDetail);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
+    }
 }

@@ -11,4 +11,5 @@ public interface IPromotionAndHikeService {
     List<AppraisalReviewDetailDTO> getPromotionAndHikeService(long employeeId) throws Exception;
     List<TeamMemberAndAppraisalFinalizer> getApprovePromotionAndHikeService() throws Exception;
     String reOpenAppraisalObjectiveService(Long userId, List<Integer> reviewIds) throws Exception;
+    String reOpenEmployeeObjectiveService(Long employeeId, int appraisalReviewDetail) throws Exception;
 }

@@ -150,4 +150,29 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
         }
         return status;
     }
+
+    public String reOpenEmployeeObjectiveService(Long employeeId, int appraisalDetailId) throws Exception {
+        if (employeeId <= 0)
+            throw new IllegalArgumentException("Invalid employee id passed");
+
+        if (appraisalDetailId <= 0)
+            throw new IllegalArgumentException("Invalid appraisal detail id passed");
+
+        String status = "fail";
+        try {
+            Map<String, Object> result = lowLevelExecution.executeProcedure("sp_employee_performance_reopen", List.of(
+                    new DbParameters("_EmployeeId", employeeId, Types.BIGINT),
+                    new DbParameters("_AppraisalDetailId", appraisalDetailId, Types.INTEGER)
+            ));
+
+            if (result == null)
+                throw new RuntimeException("Fail to update the record(s)");
+
+            if (result.containsKey("_ProcessingResult"))
+                status = result.get("_ProcessingResult").toString();
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+        return status;
+    }
 }
