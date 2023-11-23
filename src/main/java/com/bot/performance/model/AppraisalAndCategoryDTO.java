@@ -92,5 +92,6 @@ public class AppraisalAndCategoryDTO {
     public Date selectionPeriodEndDate;
     @JsonProperty("ApprovalWorkflowId")
     int approvalWorkflowId;
-
+    @JsonProperty("ApprovalWorkflow")
+    String approvalWorkflow;
 }
