@@ -50,4 +50,26 @@ public class AppraisalDetailRepository {
 
         return employeeWithRoles;
     }
+
+    public ObjectiveCatagory getObjectiveCategoryByEmpIdRepository(long employeeId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
+        var dataSet = lowLevelExecution.executeProcedure("sp_objective_catagory_by_emp_id", dbParameters);
+        var result = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ObjectiveCatagory>>() {});
+        return  result.get(0);
+    }
+
+    public EmployeeWithRoles getEmployeeByRoleIdRepository(int roleId, long employeeId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
+        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
+        var dataSet = lowLevelExecution.executeProcedure("sp_employee_by_role_id", dbParameters);
+        var result = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<EmployeeWithRoles>>() {});
+        return  result.get(0);
+    }
+
+    public List<AppraisalReviewFinalizerStatus> getAppraisalFinalizerReviewRepository(long appraisalReviewId) {
+        String query = String.format("select p.* from appraisal_review_finalizer_status p where p.AppraisalReviewId = %d", appraisalReviewId);
+        return dbManager.queryList(query, AppraisalReviewFinalizerStatus.class);
+    }
 }

@@ -92,5 +92,8 @@ public class ObjectiveCatagory {
     @Transient
     @JsonProperty("AppraisalName")
     String appraisalName;
+    @Transient
+    @JsonProperty("RoleId")
+    int roleId;
 }
 

@@ -51,5 +51,6 @@ public class AppraisalReviewDetailDTO {
     @Transient
     @JsonProperty("LastName")
     String lastName;
-
+    @JsonProperty("Status")
+    int status;
 }
