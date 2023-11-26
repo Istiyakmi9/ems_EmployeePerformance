@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping(value = "/api/eps/apprisalcatagory/")
@@ -54,6 +56,12 @@ public class ApprisalTypeController extends BaseController {
     @PostMapping("manageAppraisalCategory")
     public ResponseEntity<ApiResponse> manageAppraisalCategory(@RequestBody AppraisalDetail appraisalDetail) throws Exception {
         var result = this.apprisalTypeService.manageAppraisalCategoryStatus(appraisalDetail);
+        return ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @PostMapping("manageAppraisalLevel")
+    public ResponseEntity<ApiResponse> manageAppraisalLevel(@RequestBody List<AppraisalLevel> appraisalLevels) throws Exception {
+        var result = this.apprisalTypeService.manageAppraisalLevel(appraisalLevels);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }

@@ -60,6 +60,9 @@ public class ObjectiveCatagory {
     @Column(name = "ApprovalWorkflowId")
     @JsonProperty("ApprovalWorkflowId")
     public int approvalWorkflowId;
+    @Column(name = "ApprovalWorkflow")
+    @JsonProperty("ApprovalWorkflow")
+    String approvalWorkflow;
     @Transient
     @JsonProperty("Total")
     int total;
@@ -89,5 +92,8 @@ public class ObjectiveCatagory {
     @Transient
     @JsonProperty("AppraisalName")
     String appraisalName;
+    @Transient
+    @JsonProperty("RoleId")
+    int roleId;
 }
 

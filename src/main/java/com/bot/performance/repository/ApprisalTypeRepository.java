@@ -58,14 +58,14 @@ public class ApprisalTypeRepository {
             });
         }
     List<ObjectiveCatagory> objectiveCatagories = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference< List<ObjectiveCatagory>>() {});
-    List<ApprovalWorkFlow> approvalWorkFlows = objectMapper.convertValue(dataSet.get("#result-set-3"), new TypeReference< List<ApprovalWorkFlow>>() {});
+    List<OrgHierarchyModel> approvalWorkFlows = objectMapper.convertValue(dataSet.get("#result-set-3"), new TypeReference< List<OrgHierarchyModel>>() {});
     if (approvalWorkFlows.size() == 0)
-        throw new Exception("Approval work flow not found. Please contact to admin");
+        throw new Exception("Organization chain detail not found");
 
     Map<String, Object> response = new HashMap<>();
     response.put("AppraisalCategory", result);
     response.put("ObjectiveCategory", objectiveCatagories);
-    response.put("ApprovalWorkflow", approvalWorkFlows);
+    response.put("OrganizationChain", approvalWorkFlows);
     return  response;
     }
 }
