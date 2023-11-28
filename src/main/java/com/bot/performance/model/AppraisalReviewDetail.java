@@ -4,6 +4,8 @@ import com.bot.performance.db.annotations.Column;
 import com.bot.performance.db.annotations.Id;
 import com.bot.performance.db.annotations.Table;
 import com.bot.performance.db.annotations.Transient;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,36 +18,57 @@ import java.util.Date;
 @NoArgsConstructor
 @Table(name = "appraisal_review_detail")
 public class AppraisalReviewDetail {
-    @Column(name = "EmployeeId")
+    @Column(name = "AppraisalReviewId")
+    @JsonProperty("AppraisalReviewId")
     @Id
+    long appraisalReviewId;
+    @Column(name = "EmployeeId")
+    @JsonProperty("EmployeeId")
     Long employeeId;
     @Column(name = "PromotedDesignation")
+    @JsonProperty("PromotedDesignation")
     int promotedDesignation;
     @Column(name = "HikePercentage")
+    @JsonProperty("HikePercentage")
     BigDecimal hikePercentage;
     @Column(name = "HikeAmount")
+    @JsonProperty("HikeAmount")
     BigDecimal hikeAmount;
     @Column(name = "EstimatedSalary")
+    @JsonProperty("EstimatedSalary")
     BigDecimal estimatedSalary;
     @Column(name = "CompanyId")
+    @JsonProperty("CompanyId")
     int companyId;
     @Column(name = "AppraisalDetailId")
+    @JsonProperty("AppraisalDetailId")
     int appraisalDetailId;
     @Column(name = "ProjectId")
+    @JsonProperty("ProjectId")
     int projectId;
-    @Column(name = "AppraisalReviewId")
-    long appraisalReviewId;
     @Column(name = "PreviousSalary")
+    @JsonProperty("PreviousSalary")
     BigDecimal previousSalary;
     @Column(name = "AppraisalCycleStartDate")
+    @JsonProperty("AppraisalCycleStartDate")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date appraisalCycleStartDate;
     @Column(name = "Comments")
+    @JsonProperty("Comments")
     String comments;
     @Column(name = "Rating")
+    @JsonProperty("Rating")
     BigDecimal rating;
     @Transient
+    @JsonProperty("FirstName")
     String firstName;
     @Transient
+    @JsonProperty("LastName")
     String lastName;
-
+    @Transient
+    @JsonProperty("DesignationId")
+    int designationId;
+    @Transient
+    @JsonProperty("ObjectiveCategoryId")
+    int objectiveCategoryId;
 }

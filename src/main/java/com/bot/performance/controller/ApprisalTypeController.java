@@ -60,7 +60,7 @@ public class ApprisalTypeController extends BaseController {
     }
 
     @PostMapping("manageAppraisalLevel")
-    public ResponseEntity<ApiResponse> manageAppraisalLevel(@RequestBody List<AppraisalLevel> appraisalLevels) throws Exception {
+    public ResponseEntity<ApiResponse> manageAppraisalLevel(@RequestBody List<AppraisalChainLevel> appraisalLevels) throws Exception {
         var result = this.apprisalTypeService.manageAppraisalLevel(appraisalLevels);
         return ResponseEntity.ok(ApiResponse.Ok(result));
     }

@@ -1,5 +1,6 @@
 package com.bot.performance.repository;
 
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.db.utils.LowLevelExecution;
 import com.bot.performance.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +22,8 @@ public class ApprisalTypeRepository {
 
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    DbManager dbManager;
 
     public List<ObjectiveCatagory> getAppraisalTypeByFilterRepository(FilterModel filter) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
@@ -57,15 +60,30 @@ public class ApprisalTypeRepository {
                 }
             });
         }
-    List<ObjectiveCatagory> objectiveCatagories = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference< List<ObjectiveCatagory>>() {});
-    List<OrgHierarchyModel> approvalWorkFlows = objectMapper.convertValue(dataSet.get("#result-set-3"), new TypeReference< List<OrgHierarchyModel>>() {});
-    if (approvalWorkFlows.size() == 0)
-        throw new Exception("Organization chain detail not found");
+        List<ObjectiveCatagory> objectiveCatagories = objectMapper.convertValue(dataSet.get("#result-set-2"), new TypeReference< List<ObjectiveCatagory>>() {});
+        List<OrgHierarchyModel> approvalWorkFlows = objectMapper.convertValue(dataSet.get("#result-set-3"), new TypeReference< List<OrgHierarchyModel>>() {});
+        List<AppraisalChainLevel> appraisalChainLevels = objectMapper.convertValue(dataSet.get("#result-set-4"), new TypeReference< List<AppraisalChainLevel>>() {});
+        if (approvalWorkFlows.size() == 0)
+            throw new Exception("Organization chain detail not found");
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("AppraisalCategory", result);
-    response.put("ObjectiveCategory", objectiveCatagories);
-    response.put("OrganizationChain", approvalWorkFlows);
-    return  response;
+        Map<String, Object> response = new HashMap<>();
+        response.put("AppraisalCategory", result);
+        response.put("ObjectiveCategory", objectiveCatagories);
+        response.put("OrganizationChain", approvalWorkFlows);
+        response.put("AppraisalChainLevel", appraisalChainLevels);
+        return  response;
+    }
+
+    public AppraisalChainLevel getAppraisalChainLevelRepository(int objectiveCatagoryId, int roleId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCatagoryId, Types.INTEGER));
+        dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
+
+        var dataSet = lowLevelExecution.executeProcedure("sp_appraisal_chain_levelby_role_obj_id", dbParameters);
+        var data =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalChainLevel>>() {});
+        if (data.size() > 0)
+            return  data.get(0);
+        else
+            return  null;
     }
 }

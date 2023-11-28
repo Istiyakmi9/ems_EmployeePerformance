@@ -1,10 +1,8 @@
 package com.bot.performance.repository;
 
+import com.bot.performance.db.service.DbManager;
 import com.bot.performance.db.utils.LowLevelExecution;
-import com.bot.performance.model.ApplicationConstant;
-import com.bot.performance.model.AppraisalReviewDetailDTO;
-import com.bot.performance.model.DbParameters;
-import com.bot.performance.model.TeamMemberAndAppraisalFinalizer;
+import com.bot.performance.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,8 @@ public class PromotionAndHikeRepository {
     LowLevelExecution lowLevelExecution;
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    DbManager dbManager;
 
     public List<AppraisalReviewDetailDTO> getPromotionAndHikeRepository(long employeeId) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
@@ -35,5 +35,14 @@ public class PromotionAndHikeRepository {
         var dataSet = lowLevelExecution.executeProcedure("sp_project_appraisal_detai_finalize", dbParameters);
         return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<TeamMemberAndAppraisalFinalizer>>() {
         });
+    }
+
+    public List<AppraisalChainLevel> getAppraisalChainLevelRepository(int objectiveCatagoryId, int roleId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCatagoryId, Types.INTEGER));
+        dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
+
+        var dataSet = lowLevelExecution.executeProcedure("sp_appraisal_chain_levelby_role_obj_id", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalChainLevel>>() {});
     }
 }
