@@ -66,7 +66,6 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             objectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
             objectiveCatagory.setApprovalWorkflowId(appraisalAndCategoryDTO.getApprovalWorkflowId());
-            objectiveCatagory.setApprovalWorkflow("[]");
             objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
             objectiveCatagory.setCreatedOn(date);
             objectiveCatagory.setObjectivesId("[]");
@@ -136,7 +135,6 @@ public class ApprisalTypeService implements IApprisalTyeService {
             existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
             existObjectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             existObjectiveCatagory.setUpdatedOn(date);
-            existObjectiveCatagory.setApprovalWorkflow(appraisalAndCategoryDTO.getApprovalWorkflow());
             dbManager.save(existObjectiveCatagory);
 
             AppraisalDetail existingAppraisalDetail = dbManager.getById(appraisalAndCategoryDTO.getAppraisalDetailId(), AppraisalDetail.class);
@@ -268,64 +266,48 @@ public class ApprisalTypeService implements IApprisalTyeService {
         return getAppraisalTypeByFilter(filterModel);
     }
 
-    public String manageAppraisalLevel(List<AppraisalLevel> appraisalLevel) throws Exception {
+    public String manageAppraisalLevel(List<AppraisalChainLevel> appraisalLevel) throws Exception {
         validateAppraisalLevel(appraisalLevel);
 
-        var result = getAppraisalDetailAndCategoryService(appraisalLevel.get(0).getObjectiveCatagoryId());
-        List<AppraisalAndCategoryDTO> datas = (List<AppraisalAndCategoryDTO>) result.get("AppraisalCategory");
-        var data = datas.get(0);
-        if (data == null)
-            throw new Exception("Appraisal detail not found");
+        var nextKey = dbManager.nextIntPrimaryKey(AppraisalChainLevel.class);
+        int i = 0;
+        while (i < appraisalLevel.size()) {
+            var result = apprisalTypeRepository.getAppraisalChainLevelRepository(appraisalLevel.get(i).getObjectiveCatagoryId(), appraisalLevel.get(i).getRoleId());
+            if (result == null)
+                appraisalLevel.get(i).setAppraisalChainLevelId(nextKey+i);
+            else
+                appraisalLevel.get(i).setAppraisalChainLevelId(result.getAppraisalChainLevelId());
 
-        if (data.getApprovalWorkflow().equals("[]"))
-            data.setApprovalWorkflow(objectMapper.writeValueAsString(appraisalLevel));
-        else {
-            List<AppraisalLevel> level = objectMapper.convertValue(data.getApprovalWorkflow(), new TypeReference< List<AppraisalLevel>>() {});
-            level.addAll(appraisalLevel);
-            data.setApprovalWorkflow(objectMapper.writeValueAsString(level));
+            i++;
         }
 
-        ObjectiveCatagory objectiveCatalog = new ObjectiveCatagory();
-        objectiveCatalog.setObjectiveCatagoryId(data.getObjectiveCatagoryId());
-        objectiveCatalog.setObjectiveCatagoryType(data.getObjectiveCatagoryType());
-        objectiveCatalog.setTypeDescription(data.getTypeDescription());
-        objectiveCatalog.setRolesId(data.getRolesId());
-        objectiveCatalog.setObjectivesId(data.getObjectivesId());
-        objectiveCatalog.setHikeApproval(data.isHikeApproval());
-        objectiveCatalog.setApprovalWorkflowId(data.getApprovalWorkflowId());
-        objectiveCatalog.setApprovalWorkflow(data.getApprovalWorkflow());
-        objectiveCatalog.setStatus(data.getStatus());
-        objectiveCatalog.setCreatedBy(1L);
-        objectiveCatalog.setUpdatedBy(1L);
-        objectiveCatalog.setCreatedOn(data.getCreatedOn());
-        objectiveCatalog.setUpdatedOn(data.getCreatedOn());
-
-        dbManager.save(objectiveCatalog);
-        return null;
+        dbManager.saveAll(appraisalLevel, AppraisalChainLevel.class);
+        return "Chain save successfully";
     }
 
-    private void validateAppraisalLevel(List<AppraisalLevel> appraisalLevel) {
+    private void validateAppraisalLevel(List<AppraisalChainLevel> appraisalLevel) {
         appraisalLevel.forEach(x -> {
-            if (x.getObjectiveCatagoryId() == 0)
+            if (x.getObjectiveCatagoryId() == 0) {
                 try {
                     throw new Exception("Please select or save appraisal first");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-
-            if (x.getRoleId() == 0)
+            }
+            if (x.getRoleId() == 0) {
                 try {
                     throw new Exception("Invalid role id");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-
-            if (x.getChain().size() == 0)
+            }
+            if (x.getApprovalRoleId() == 0) {
                 try {
-                    throw new Exception("CHain detail not found");
+                    throw new Exception("Invalid role id");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }
         });
     }
 

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     LowLevelExecution lowLevelExecution;
 
     @Transactional
-    public List<AppraisalReviewDetail> addPromotionAndHike(List<AppraisalReviewDetail> appraisalReviewDetails) throws Exception {
+    public List<AppraisalReviewDetail> addPromotionAndHike(List<AppraisalReviewDetail> appraisalReview) throws Exception {
         java.util.Date utilDate = new java.util.Date();
         long appraisalReviewId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class) - 1;
         var activeAppraisalDetails = appraisalDetailRepository.getActiveAppraisalDetailRepository();
@@ -45,58 +46,94 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
         List<AppraisalReviewFinalizerStatus> appraisalReviewFinalizer = new ArrayList<>();
         int AppraisalFinalizer = dbManager.nextIntPrimaryKey(AppraisalReviewFinalizerStatus.class) - 1;
+        List<AppraisalReviewDetail> appraisalReviewDetails = new ArrayList<>();
 
-        for (var promotionDetail : appraisalReviewDetails) {
+        for (var promotionDetail : appraisalReview) {
             if (promotionDetail.getEmployeeId() == 0)
                 throw new Exception("Invalid employee selected");
 
-            appraisalReviewId = appraisalReviewId + 1;
+            var appraisalReviewDetail = appraisalDetailRepository.getAppraisalReviewDetailRepository(promotionDetail.getAppraisalReviewId());
             var employeeSalaryDetail = dbManager.getById(promotionDetail.getEmployeeId(), EmployeeSalaryDetail.class);
-            promotionDetail.setAppraisalDetailId(activeAppraisalDetails.getAppraisalDetailId());
-            validateHikeDetail(promotionDetail, employeeSalaryDetail);
-             promotionDetail.setAppraisalCycleStartDate(activeAppraisalDetails.getAppraisalCycleStartDate());
-            promotionDetail.setAppraisalReviewId(appraisalReviewId);
-            promotionDetail.setPreviousSalary(employeeSalaryDetail.getCTC());
-
-            //var result = appraisalDetailRepository.getApprovalChainRepository(promotionDetail.getEmployeeId());
-            var data = getAppraisalLevel(promotionDetail.getEmployeeId());
-            long finalAppraisalReviewId = appraisalReviewId;
-            int i = 0;
-            while (i < data.size()) {
-                var employee = appraisalDetailRepository.getEmployeeByRoleIdRepository(data.get(i).getRoleId(), promotionDetail.getEmployeeId());
-                AppraisalFinalizer = AppraisalFinalizer + 1;
-                var reviewerDetail = new AppraisalReviewFinalizerStatus();
-                reviewerDetail.setAppraisalFinalizer(AppraisalFinalizer);
-                reviewerDetail.setAppraisalReviewId(finalAppraisalReviewId);
-                reviewerDetail.setReviwerId(employee.getEmployeeUid());
-                reviewerDetail.setEmail(employee.getEmail());
-                reviewerDetail.setFullName(employee.getName());
-                reviewerDetail.setActionRequired(true);
-                if (i + 1 == 1) {
-                    reviewerDetail.setStatus(9);
-                    reviewerDetail.setReactedOn(utilDate);
-                } else if (i + 1 == 2) {
-                    reviewerDetail.setStatus(2);
-                } else {
-                    reviewerDetail.setStatus(0);
-                }
-
-                reviewerDetail.setApprovalLevel(i + 1);
-                appraisalReviewFinalizer.add(reviewerDetail);
-                i++;
+            if (appraisalReviewDetail == null) {
+                appraisalReviewDetail = promotionDetail;
+                appraisalReviewId = appraisalReviewId + 1;
+                appraisalReviewDetail.setAppraisalDetailId(activeAppraisalDetails.getAppraisalDetailId());
+                validateHikeDetail(promotionDetail, employeeSalaryDetail);
+                appraisalReviewDetail.setAppraisalCycleStartDate(activeAppraisalDetails.getAppraisalCycleStartDate());
+                appraisalReviewDetail.setAppraisalReviewId(appraisalReviewId);
+                appraisalReviewDetail.setPreviousSalary(employeeSalaryDetail.getCTC());
+            } else  {
+                appraisalReviewDetail.setEstimatedSalary(promotionDetail.getEstimatedSalary());
+                appraisalReviewDetail.setHikePercentage(promotionDetail.getHikePercentage());
+                appraisalReviewDetail.setHikeAmount(promotionDetail.getHikeAmount());
+                appraisalReviewDetail.setComments(promotionDetail.getComments());
+                appraisalReviewDetail.setRating(promotionDetail.getRating());
+                appraisalReviewDetail.setPromotedDesignation(promotionDetail.getPromotedDesignation());
             }
+            appraisalReviewDetails.add(appraisalReviewDetail);
+
+            var existingappraisalReviewFinalizer = appraisalDetailRepository.getAppraisalReviewFinalizerRepository(appraisalReviewDetail.getAppraisalReviewId());
+            if (existingappraisalReviewFinalizer.size()==0) {
+                var data = getAppraisalLevel(appraisalReviewDetail.getDesignationId(), appraisalReviewDetail.getObjectiveCategoryId());
+                long finalAppraisalReviewId = appraisalReviewId;
+
+                int i = 0;
+                while (i < data.size()) {
+                    var reviewerDetail = new AppraisalReviewFinalizerStatus();
+                    var employee = appraisalDetailRepository.getEmployeeByRoleIdRepository(data.get(i).getApprovalRoleId(), appraisalReviewDetail.getProjectId());
+                    AppraisalFinalizer = AppraisalFinalizer + 1;
+
+                    reviewerDetail.setAppraisalFinalizer(AppraisalFinalizer);
+                    reviewerDetail.setAppraisalReviewId(finalAppraisalReviewId);
+                    reviewerDetail.setReviwerId(employee.getEmployeeUid());
+                    reviewerDetail.setEmail(employee.getEmail());
+                    reviewerDetail.setFullName(employee.getName());
+                    reviewerDetail.setActionRequired(true);
+                    if (i + 1 == 1) {
+                        reviewerDetail.setStatus(9);
+                        reviewerDetail.setReactedOn(utilDate);
+                    } else if (i + 1 == 2) {
+                        reviewerDetail.setStatus(2);
+                    } else {
+                        reviewerDetail.setStatus(0);
+                    }
+
+                    reviewerDetail.setApprovalLevel(i + 1);
+                    appraisalReviewFinalizer.add(reviewerDetail);
+                    i++;
+                }
+            } else {
+                var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
+                        .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
+                currentApprailsalReview.setStatus(ApplicationConstant.Approved);
+                currentApprailsalReview.setReactedOn(utilDate);
+
+                var nextAppraisalReview = existingappraisalReviewFinalizer.stream()
+                        .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel()+1).toList();
+                if (nextAppraisalReview.size() > 0)
+                    nextAppraisalReview.get(0).setStatus(ApplicationConstant.Pending);
+
+                appraisalReviewFinalizer.addAll(existingappraisalReviewFinalizer);
+            }
+
         }
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);
         dbManager.saveAll(appraisalReviewFinalizer, AppraisalReviewFinalizerStatus.class);
         return appraisalReviewDetails;
     }
 
-    private List<ChainDetail> getAppraisalLevel(long employeeId) throws Exception {
-        var objectCategory = appraisalDetailRepository.getObjectiveCategoryByEmpIdRepository(employeeId);
-        List<AppraisalLevel> appraisalLevels = objectMapper.readValue(objectCategory.getApprovalWorkflow(), new TypeReference<List<AppraisalLevel>>() {});
-        var appraisalLevel = appraisalLevels.stream().filter(x -> x.getRoleId() == objectCategory.getRoleId()).toList();
-        var chainDetail = appraisalLevels.get(0).getChain().stream().filter(ChainDetail::getIsActive).collect(Collectors.toList());
-        return  chainDetail;
+
+    private List<AppraisalChainLevel> getAppraisalLevel(int designationId, int objectiveCategoryId) throws Exception {
+        if (designationId == 0)
+            throw new Exception("Invalid designation");
+
+        if (objectiveCategoryId == 0)
+            throw new Exception("Invalid objective category");
+
+        var result = promotionAndHikeRepository.getAppraisalChainLevelRepository(objectiveCategoryId, designationId);
+        Collections.reverse(result);
+        result = result.stream().filter(AppraisalChainLevel::getIsActive).toList();
+        return  result;
     }
 
     private void validateHikeDetail(AppraisalReviewDetail appraisalReviewDetail, EmployeeSalaryDetail employeeSalaryDetail) throws Exception {

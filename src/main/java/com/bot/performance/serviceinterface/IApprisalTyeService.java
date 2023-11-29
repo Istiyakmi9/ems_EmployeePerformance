@@ -13,5 +13,5 @@ public interface IApprisalTyeService {
     List<ObjectiveDetail> getObjectiveByCategoryIdService(int objectiveCategoryId) throws Exception;
     Map<String, Object> getAppraisalDetailAndCategoryService(int objectiveCategoryId) throws Exception;
     List<ObjectiveCatagory> manageAppraisalCategoryStatus(AppraisalDetail appraisalDetail) throws Exception;
-    String manageAppraisalLevel(List<AppraisalLevel> appraisalLevel) throws Exception;
+    String manageAppraisalLevel(List<AppraisalChainLevel> appraisalLevel) throws Exception;
 }

@@ -59,17 +59,37 @@ public class AppraisalDetailRepository {
         return  result.get(0);
     }
 
-    public EmployeeWithRoles getEmployeeByRoleIdRepository(int roleId, long employeeId) throws Exception {
+    public EmployeeWithRoles getEmployeeByRoleIdRepository(int roleId, int projectId) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
         dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
-        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
+        dbParameters.add(new DbParameters("_ProjectId", projectId, Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_employee_by_role_id", dbParameters);
         var result = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<EmployeeWithRoles>>() {});
-        return  result.get(0);
+        return result.get(0);
     }
 
     public List<AppraisalReviewFinalizerStatus> getAppraisalFinalizerReviewRepository(long appraisalReviewId) {
         String query = String.format("select p.* from appraisal_review_finalizer_status p where p.AppraisalReviewId = %d", appraisalReviewId);
         return dbManager.queryList(query, AppraisalReviewFinalizerStatus.class);
+    }
+
+    public AppraisalReviewDetail getAppraisalReviewDetailRepository(long appraisalReviewId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_AppraisalReviewId", appraisalReviewId, Types.BIGINT));
+
+        var dataSet = lowLevelExecution.executeProcedure("sp_appraisal_review_detail_by_id", dbParameters);
+        List<AppraisalReviewDetail> data =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalReviewDetail>>() {});
+        if (data.size() > 0)
+            return  data.get(0);
+        else
+            return  null;
+    }
+
+    public List<AppraisalReviewFinalizerStatus> getAppraisalReviewFinalizerRepository(long appraisalReviewId) throws Exception {
+        List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_AppraisalReviewId", appraisalReviewId, Types.BIGINT));
+
+        var dataSet = lowLevelExecution.executeProcedure("sp_appraisal_review_finalaizer_status_by_id", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalReviewFinalizerStatus>>() {});
     }
 }
