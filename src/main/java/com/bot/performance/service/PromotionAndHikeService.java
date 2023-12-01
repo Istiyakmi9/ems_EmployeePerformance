@@ -14,11 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class PromotionAndHikeService implements IPromotionAndHikeService {
@@ -26,7 +22,6 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     PromotionAndHikeRepository promotionAndHikeRepository;
     @Autowired
     AppraisalDetailRepository appraisalDetailRepository;
-
     @Autowired
     DbManager dbManager;
     @Autowired
@@ -99,6 +94,9 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                     }
 
                     reviewerDetail.setApprovalLevel(i + 1);
+                    if (data.size() == 1)
+                        manageHikeSalaryService(appraisalReviewDetail);
+
                     appraisalReviewFinalizer.add(reviewerDetail);
                     i++;
                 }
@@ -112,10 +110,11 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                         .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel()+1).toList();
                 if (nextAppraisalReview.size() > 0)
                     nextAppraisalReview.get(0).setStatus(ApplicationConstant.Pending);
+                else
+                    manageHikeSalaryService(appraisalReviewDetail);
 
                 appraisalReviewFinalizer.addAll(existingappraisalReviewFinalizer);
             }
-
         }
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);
         dbManager.saveAll(appraisalReviewFinalizer, AppraisalReviewFinalizerStatus.class);
@@ -226,13 +225,11 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     @Transactional
     public List<AppraisalReviewFinalizerStatus> approveAppraisalReviewDetailService(List<AppraisalReviewDetailDTO> appraisalReviewDetailDTOS) throws Exception {
         return manageAppraisalReviewDetailService(appraisalReviewDetailDTOS, ApplicationConstant.Approved);
-
     }
     @Transactional
     public List<AppraisalReviewFinalizerStatus> rejectAppraisalReviewDetailService(List<AppraisalReviewDetailDTO> appraisalReviewDetailDTOS) throws Exception {
         return manageAppraisalReviewDetailService(appraisalReviewDetailDTOS, ApplicationConstant.Rejected);
     }
-
 
     private List<AppraisalReviewFinalizerStatus> manageAppraisalReviewDetailService(List<AppraisalReviewDetailDTO> appraisalReviewDetailDTOS, int status) throws Exception {
         java.util.Date utilDate = new java.util.Date();
@@ -262,5 +259,58 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
         }
         dbManager.saveAll(appraisalReviewFinalizers, AppraisalReviewFinalizerStatus.class);
         return appraisalReviewFinalizers;
+    }
+
+    @Transactional
+    private void manageHikeSalaryService(AppraisalReviewDetail appraisalReviewDetails) throws Exception {
+        if (appraisalReviewDetails != null) {
+            long hikeBonusSalaryAdhocId = dbManager.nextLongPrimaryKey(HikeBonusSalaryAdhoc.class);
+            HikeBonusSalaryAdhoc hikeBonusSalaryAdhoc = new HikeBonusSalaryAdhoc();
+            hikeBonusSalaryAdhoc.setSalaryAdhocId(hikeBonusSalaryAdhocId);
+            hikeBonusSalaryAdhoc.setEmployeeId(appraisalReviewDetails.getEmployeeId());
+            hikeBonusSalaryAdhoc.setOrganizationId(currentUserDetail.getUserDetail().getOrganizationId());
+            hikeBonusSalaryAdhoc.setCompanyId(currentUserDetail.getUserDetail().getCompanyId());
+            hikeBonusSalaryAdhoc.setIsPaidByCompany(true);
+            hikeBonusSalaryAdhoc.setIsFine(false);
+            hikeBonusSalaryAdhoc.setIsHikeInSalary(true);
+            hikeBonusSalaryAdhoc.setIsBonus(false);
+            hikeBonusSalaryAdhoc.setDescription(null);
+            hikeBonusSalaryAdhoc.setAmount(appraisalReviewDetails.getHikeAmount());
+            hikeBonusSalaryAdhoc.setApprovedBy(currentUserDetail.getUserDetail().getUserId());
+            hikeBonusSalaryAdhoc.setStartDate(nextMonthDate(true));
+            hikeBonusSalaryAdhoc.setEndDate(nextMonthDate(false));
+            hikeBonusSalaryAdhoc.setIsForSpecificPeriod(false);
+            hikeBonusSalaryAdhoc.setSequenceStartDate(null);
+            hikeBonusSalaryAdhoc.setSequenceEndDate(null);
+            hikeBonusSalaryAdhoc.setSequencePeriodOrder(0);
+            hikeBonusSalaryAdhoc.setIsActive(true);
+            hikeBonusSalaryAdhoc.setIsRepeatJob(false);
+            dbManager.save(hikeBonusSalaryAdhoc);
+        }
+    }
+    private Date nextMonthDate(Boolean isNextMonthStartDate) {
+        Date currentDate = new Date();
+
+        // Create a Calendar instance and set it to the current date
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+
+        // Move to the next month
+        calendar.add(Calendar.MONTH, 1);
+
+        // Set the day of the month to the first day
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+        // Get the first day of the next month
+        Date nextMonthStartDate = calendar.getTime();
+        if (isNextMonthStartDate)
+            return nextMonthStartDate;
+
+        // Move to the last day of the next month
+        calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+
+        // Get the last day of the next month
+        return calendar.getTime();
     }
 }
