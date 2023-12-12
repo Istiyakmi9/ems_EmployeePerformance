@@ -25,4 +25,7 @@ public class AppraisalChainLevel {
     @JsonProperty("IsActive")
     @Column(name = "isActive")
     Boolean isActive;
+    @JsonProperty("IsOptional")
+    @Column(name = "IsOptional")
+    Boolean isOptional;
 }

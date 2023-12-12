@@ -69,28 +69,28 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
             var existingappraisalReviewFinalizer = appraisalDetailRepository.getAppraisalReviewFinalizerRepository(appraisalReviewDetail.getAppraisalReviewId());
             if (existingappraisalReviewFinalizer.size()==0) {
-                var data = getAppraisalLevel(appraisalReviewDetail.getDesignationId(), appraisalReviewDetail.getObjectiveCategoryId());
+                var data = getAppraisalLevel(appraisalReviewDetail.getProjectId(), appraisalReviewDetail.getEmployeeId(),
+                        appraisalReviewDetail.getObjectiveCategoryId(), appraisalReviewDetail.getCompanyId());
                 long finalAppraisalReviewId = appraisalReviewId;
 
                 int i = 0;
                 while (i < data.size()) {
                     var reviewerDetail = new AppraisalReviewFinalizerStatus();
-                    var employee = appraisalDetailRepository.getEmployeeByRoleIdRepository(data.get(i).getApprovalRoleId(), appraisalReviewDetail.getProjectId());
                     AppraisalFinalizer = AppraisalFinalizer + 1;
 
                     reviewerDetail.setAppraisalFinalizer(AppraisalFinalizer);
                     reviewerDetail.setAppraisalReviewId(finalAppraisalReviewId);
-                    reviewerDetail.setReviwerId(employee.getEmployeeUid());
-                    reviewerDetail.setEmail(employee.getEmail());
-                    reviewerDetail.setFullName(employee.getName());
-                    reviewerDetail.setActionRequired(true);
+                    reviewerDetail.setReviwerId(data.get(i).getEmployeeId());
+                    reviewerDetail.setEmail(data.get(i).getEmail());
+                    reviewerDetail.setFullName(data.get(i).getFullName());
+                    reviewerDetail.setActionRequired(!data.get(i).isOptional());
                     if (i + 1 == 1) {
-                        reviewerDetail.setStatus(9);
+                        reviewerDetail.setStatus(ApplicationConstant.Approved);
                         reviewerDetail.setReactedOn(utilDate);
                     } else if (i + 1 == 2) {
-                        reviewerDetail.setStatus(2);
+                        reviewerDetail.setStatus(ApplicationConstant.Pending);
                     } else {
-                        reviewerDetail.setStatus(0);
+                        reviewerDetail.setStatus(ApplicationConstant.NotSubmitted);
                     }
 
                     reviewerDetail.setApprovalLevel(i + 1);
@@ -103,6 +103,13 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             } else {
                 var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
                         .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
+                var previousAppraisalReview = existingappraisalReviewFinalizer.stream()
+                        .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel()-1).toList().get(0);
+                if (previousAppraisalReview != null) {
+                    if (previousAppraisalReview.isActionRequired() && previousAppraisalReview.getStatus() != ApplicationConstant.Approved) {
+                        throw new Exception(String.format("%s is not approved the appraisal", previousAppraisalReview.getFullName()));
+                    }
+                }
                 currentApprailsalReview.setStatus(ApplicationConstant.Approved);
                 currentApprailsalReview.setReactedOn(utilDate);
 
@@ -122,17 +129,20 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     }
 
 
-    private List<AppraisalChainLevel> getAppraisalLevel(int designationId, int objectiveCategoryId) throws Exception {
-        if (designationId == 0)
-            throw new Exception("Invalid designation");
+    private List<ApprovalChainDetail> getAppraisalLevel(int projectId, long employeeId, int objectiveCategoryId, int companyId) throws Exception {
+        if (companyId == 0)
+            throw new Exception("Invalid company id");
 
         if (objectiveCategoryId == 0)
             throw new Exception("Invalid objective category");
 
-        var result = promotionAndHikeRepository.getAppraisalChainLevelRepository(objectiveCategoryId, designationId);
-        Collections.reverse(result);
-        result = result.stream().filter(AppraisalChainLevel::getIsActive).toList();
-        return  result;
+        if (employeeId == 0)
+            throw new Exception("Invalid employee id");
+
+        if (projectId == 0)
+            throw new Exception("Invalid projectId");
+
+        return promotionAndHikeRepository.getAppraisalChainLevelRepository(objectiveCategoryId, employeeId, companyId, projectId);
     }
 
     private void validateHikeDetail(AppraisalReviewDetail appraisalReviewDetail, EmployeeSalaryDetail employeeSalaryDetail) throws Exception {

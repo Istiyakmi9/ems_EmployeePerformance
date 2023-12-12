@@ -37,12 +37,15 @@ public class PromotionAndHikeRepository {
         });
     }
 
-    public List<AppraisalChainLevel> getAppraisalChainLevelRepository(int objectiveCatagoryId, int roleId) throws Exception {
+    public List<ApprovalChainDetail> getAppraisalChainLevelRepository(int objectiveCatagoryId, long employeeId, int companyId, int projectId) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_EmployeeId", employeeId, Types.BIGINT));
+        dbParameters.add(new DbParameters("_FindParents", true, Types.BIT));
+        dbParameters.add(new DbParameters("_CompanyId", companyId, Types.INTEGER));
+        dbParameters.add(new DbParameters("_ProjectId", projectId, Types.INTEGER));
         dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCatagoryId, Types.INTEGER));
-        dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
 
-        var dataSet = lowLevelExecution.executeProcedure("sp_appraisal_chain_levelby_role_obj_id", dbParameters);
-        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalChainLevel>>() {});
+        var dataSet = lowLevelExecution.executeProcedure("sp_org_hierarchy_chail_discover", dbParameters);
+        return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<ApprovalChainDetail>>() {});
     }
 }

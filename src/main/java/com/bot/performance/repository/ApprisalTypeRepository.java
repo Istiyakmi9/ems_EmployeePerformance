@@ -74,10 +74,11 @@ public class ApprisalTypeRepository {
         return  response;
     }
 
-    public AppraisalChainLevel getAppraisalChainLevelRepository(int objectiveCatagoryId, int roleId) throws Exception {
+    public AppraisalChainLevel getAppraisalChainLevelRepository(int rolrId, int objectiveCatagoryId, int approvalRoleId) throws Exception {
         List<DbParameters> dbParameters = new ArrayList<>();
+        dbParameters.add(new DbParameters("_RoleId", rolrId, Types.INTEGER));
         dbParameters.add(new DbParameters("_ObjectiveCatagoryId", objectiveCatagoryId, Types.INTEGER));
-        dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
+        dbParameters.add(new DbParameters("_ApprovalRoleId", approvalRoleId, Types.INTEGER));
 
         var dataSet = lowLevelExecution.executeProcedure("sp_appraisal_chain_levelby_role_obj_id", dbParameters);
         var data =  objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<AppraisalChainLevel>>() {});
