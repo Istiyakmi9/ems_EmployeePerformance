@@ -266,23 +266,29 @@ public class ApprisalTypeService implements IApprisalTyeService {
         return getAppraisalTypeByFilter(filterModel);
     }
 
-    public String manageAppraisalLevel(List<AppraisalChainLevel> appraisalLevel) throws Exception {
+    public List<AppraisalChainLevel> manageAppraisalLevel(List<AppraisalChainLevel> appraisalLevel) throws Exception {
         validateAppraisalLevel(appraisalLevel);
 
         var nextKey = dbManager.nextIntPrimaryKey(AppraisalChainLevel.class);
+        List<AppraisalChainLevel> appraisalChainLevels = new ArrayList<>();
         int i = 0;
         while (i < appraisalLevel.size()) {
-            var result = apprisalTypeRepository.getAppraisalChainLevelRepository(appraisalLevel.get(i).getObjectiveCatagoryId(), appraisalLevel.get(i).getRoleId());
-            if (result == null)
+            var result = apprisalTypeRepository.getAppraisalChainLevelRepository(appraisalLevel.get(i).getRoleId(),
+                    appraisalLevel.get(i).getObjectiveCatagoryId(), appraisalLevel.get(i).getApprovalRoleId());
+            if (result == null) {
                 appraisalLevel.get(i).setAppraisalChainLevelId(nextKey+i);
-            else
-                appraisalLevel.get(i).setAppraisalChainLevelId(result.getAppraisalChainLevelId());
-
+                appraisalChainLevels.add(appraisalLevel.get(i));
+            }
+            else {
+                result.setIsActive(appraisalLevel.get(i).getIsActive());
+                result.setIsOptional(appraisalLevel.get(i).getIsOptional());
+                appraisalChainLevels.add(result);
+            }
             i++;
         }
 
-        dbManager.saveAll(appraisalLevel, AppraisalChainLevel.class);
-        return "Chain save successfully";
+        dbManager.saveAll(appraisalChainLevels, AppraisalChainLevel.class);
+        return appraisalChainLevels;
     }
 
     private void validateAppraisalLevel(List<AppraisalChainLevel> appraisalLevel) {

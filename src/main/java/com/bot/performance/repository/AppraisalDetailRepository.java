@@ -59,15 +59,6 @@ public class AppraisalDetailRepository {
         return  result.get(0);
     }
 
-    public EmployeeWithRoles getEmployeeByRoleIdRepository(int roleId, int projectId) throws Exception {
-        List<DbParameters> dbParameters = new ArrayList<>();
-        dbParameters.add(new DbParameters("_RoleId", roleId, Types.INTEGER));
-        dbParameters.add(new DbParameters("_ProjectId", projectId, Types.INTEGER));
-        var dataSet = lowLevelExecution.executeProcedure("sp_employee_by_role_id", dbParameters);
-        var result = objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<EmployeeWithRoles>>() {});
-        return result.get(0);
-    }
-
     public List<AppraisalReviewFinalizerStatus> getAppraisalFinalizerReviewRepository(long appraisalReviewId) {
         String query = String.format("select p.* from appraisal_review_finalizer_status p where p.AppraisalReviewId = %d", appraisalReviewId);
         return dbManager.queryList(query, AppraisalReviewFinalizerStatus.class);

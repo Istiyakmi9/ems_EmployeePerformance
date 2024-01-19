@@ -15,4 +15,5 @@ public interface IPromotionAndHikeService {
     String reOpenEmployeeObjectiveService(Long employeeId, int appraisalReviewDetail) throws Exception;
     List<AppraisalReviewFinalizerStatus> approveAppraisalReviewDetailService(List<AppraisalReviewDetailDTO> appraisalReviewDetailDTOS) throws Exception;
     List<AppraisalReviewFinalizerStatus> rejectAppraisalReviewDetailService(List<AppraisalReviewDetailDTO> appraisalReviewDetailDTOS) throws Exception;
+    List<AppraisalReviewFinalizerStatus> revisedAppraisalService(List<AppraisalReviewFinalizerStatus> appraisalReviewFinalizerStatus) throws Exception;
 }
