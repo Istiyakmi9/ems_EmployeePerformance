@@ -31,9 +31,9 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     @Autowired
     LowLevelExecution lowLevelExecution;
 
-    @Transactional
     public List<AppraisalReviewDetail> addPromotionAndHike(List<AppraisalReviewDetail> appraisalReview) throws Exception {
         java.util.Date utilDate = new java.util.Date();
+        validateAppraisalReview(appraisalReview);
         long appraisalReviewId = dbManager.nextLongPrimaryKey(AppraisalReviewDetail.class) - 1;
         var activeAppraisalDetails = appraisalDetailRepository.getActiveAppraisalDetailRepository();
         if (activeAppraisalDetails == null)
@@ -57,18 +57,41 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                 appraisalReviewDetail.setAppraisalCycleStartDate(activeAppraisalDetails.getAppraisalCycleStartDate());
                 appraisalReviewDetail.setAppraisalReviewId(appraisalReviewId);
                 appraisalReviewDetail.setPreviousSalary(employeeSalaryDetail.getCTC());
+                List<AppraisalComment> appraisalComments = new ArrayList<>();
+                AppraisalComment appraisalComment = new AppraisalComment();
+                appraisalComment.setComments(promotionDetail.getComments());
+                appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName()+ " "+currentUserDetail.getUserDetail().getLastName());
+                appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                appraisalComment.setCommentedOn(utilDate);
+                appraisalComments.add(appraisalComment);
+                var comment = objectMapper.writeValueAsString(appraisalComments);
+                appraisalReviewDetail.setComments(comment);
             } else  {
-                appraisalReviewDetail.setEstimatedSalary(promotionDetail.getEstimatedSalary());
-                appraisalReviewDetail.setHikePercentage(promotionDetail.getHikePercentage());
-                appraisalReviewDetail.setHikeAmount(promotionDetail.getHikeAmount());
-                appraisalReviewDetail.setComments(promotionDetail.getComments());
-                appraisalReviewDetail.setRating(promotionDetail.getRating());
-                appraisalReviewDetail.setPromotedDesignation(promotionDetail.getPromotedDesignation());
+                if (promotionDetail.isActive()) {
+                    appraisalReviewDetail.setEstimatedSalary(promotionDetail.getEstimatedSalary());
+                    appraisalReviewDetail.setHikePercentage(promotionDetail.getHikePercentage());
+                    appraisalReviewDetail.setHikeAmount(promotionDetail.getHikeAmount());
+                    appraisalReviewDetail.setRating(promotionDetail.getRating());
+                    appraisalReviewDetail.setPromotedDesignation(promotionDetail.getPromotedDesignation());
+                    if (promotionDetail.getAppraisalStatus() == ApplicationConstant.Revised) {
+                        if (!promotionDetail.getComments().contains("[")) {
+                            var comments = objectMapper.readValue(appraisalReviewDetail.getComments(), new TypeReference<List<AppraisalComment>>() {
+                            });
+                            AppraisalComment appraisalComment = new AppraisalComment();
+                            appraisalComment.setComments(promotionDetail.getComments());
+                            appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName() + " " + currentUserDetail.getUserDetail().getLastName());
+                            appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                            appraisalComment.setCommentedOn(utilDate);
+                            comments.add(appraisalComment);
+                            appraisalReviewDetail.setComments(objectMapper.writeValueAsString(comments));
+                        }
+                    }
+                }
             }
             appraisalReviewDetails.add(appraisalReviewDetail);
 
             var existingappraisalReviewFinalizer = appraisalDetailRepository.getAppraisalReviewFinalizerRepository(appraisalReviewDetail.getAppraisalReviewId());
-            if (existingappraisalReviewFinalizer.size()==0) {
+            if (existingappraisalReviewFinalizer.size() == 0) {
                 var data = getAppraisalLevel(appraisalReviewDetail.getProjectId(), appraisalReviewDetail.getEmployeeId(),
                         appraisalReviewDetail.getObjectiveCategoryId(), appraisalReviewDetail.getCompanyId());
                 long finalAppraisalReviewId = appraisalReviewId;
@@ -85,10 +108,10 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                     reviewerDetail.setFullName(data.get(i).getFullName());
                     reviewerDetail.setActionRequired(!data.get(i).isOptional());
                     if (i + 1 == 1) {
-                        reviewerDetail.setStatus(ApplicationConstant.Approved);
+                        reviewerDetail.setStatus(appraisalReviewDetail.isActive() ? ApplicationConstant.Approved : ApplicationConstant.NotSubmitted);
                         reviewerDetail.setReactedOn(utilDate);
                     } else if (i + 1 == 2) {
-                        reviewerDetail.setStatus(ApplicationConstant.Pending);
+                        reviewerDetail.setStatus(appraisalReviewDetail.isActive() ? ApplicationConstant.Pending : ApplicationConstant.NotSubmitted);
                     } else {
                         reviewerDetail.setStatus(ApplicationConstant.NotSubmitted);
                     }
@@ -101,26 +124,30 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                     i++;
                 }
             } else {
-                var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
-                        .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
-                var previousAppraisalReview = existingappraisalReviewFinalizer.stream()
-                        .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel()-1).toList().get(0);
-                if (previousAppraisalReview != null) {
-                    if (previousAppraisalReview.isActionRequired() && previousAppraisalReview.getStatus() != ApplicationConstant.Approved) {
-                        throw new Exception(String.format("%s is not approved the appraisal", previousAppraisalReview.getFullName()));
+                if (appraisalReviewDetail.isActive()) {
+                    var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
+                            .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
+                    if (currentApprailsalReview.getApprovalLevel() > 1) {
+                        var previousAppraisalReview = existingappraisalReviewFinalizer.stream()
+                                .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() - 1).toList().get(0);
+                        if (previousAppraisalReview != null) {
+                            if (previousAppraisalReview.isActionRequired() && previousAppraisalReview.getStatus() != ApplicationConstant.Approved) {
+                                throw new Exception(String.format("%s is not approved the appraisal", previousAppraisalReview.getFullName()));
+                            }
+                        }
                     }
+                    currentApprailsalReview.setStatus(ApplicationConstant.Approved);
+                    currentApprailsalReview.setReactedOn(utilDate);
+
+                    var nextAppraisalReview = existingappraisalReviewFinalizer.stream()
+                            .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() + 1).toList();
+                    if (nextAppraisalReview.size() > 0)
+                        nextAppraisalReview.get(0).setStatus(ApplicationConstant.Pending);
+                    else
+                        manageHikeSalaryService(appraisalReviewDetail);
+
+                    appraisalReviewFinalizer.addAll(existingappraisalReviewFinalizer);
                 }
-                currentApprailsalReview.setStatus(ApplicationConstant.Approved);
-                currentApprailsalReview.setReactedOn(utilDate);
-
-                var nextAppraisalReview = existingappraisalReviewFinalizer.stream()
-                        .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel()+1).toList();
-                if (nextAppraisalReview.size() > 0)
-                    nextAppraisalReview.get(0).setStatus(ApplicationConstant.Pending);
-                else
-                    manageHikeSalaryService(appraisalReviewDetail);
-
-                appraisalReviewFinalizer.addAll(existingappraisalReviewFinalizer);
             }
         }
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);
@@ -128,6 +155,15 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
         return appraisalReviewDetails;
     }
 
+    private void validateAppraisalReview(List<AppraisalReviewDetail> appraisalReviews) throws Exception {
+        if (appraisalReviews == null || appraisalReviews.size() == 0)
+            throw new Exception("Invalid appraisal detail");
+
+        for (var appraisalReview : appraisalReviews) {
+            if (appraisalReview.getObjectiveStatus() == ApplicationConstant.NotSubmitted && appraisalReview.isActive())
+                throw new Exception("Selected employee's objective are not submitted");
+        }
+    }
 
     private List<ApprovalChainDetail> getAppraisalLevel(int projectId, long employeeId, int objectiveCategoryId, int companyId) throws Exception {
         if (companyId == 0)
@@ -164,6 +200,9 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
         if (appraisalReviewDetail.getEmployeeId() <= 0)
             throw new Exception("Employee detail not found");
+
+        if (appraisalReviewDetail.getComments() == null)
+            throw new Exception("Comments is not found");
     }
 
     public List<AppraisalReviewDetailDTO> getPromotionAndHikeService(long employeeId) throws Exception {
@@ -231,6 +270,34 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             throw new Exception(ex.getMessage());
         }
         return status;
+    }
+
+    public List<AppraisalReviewFinalizerStatus> revisedAppraisalService(List<AppraisalReviewFinalizerStatus> appraisalReviewFinalizerStatus) throws Exception {
+        List<AppraisalReviewFinalizerStatus> revisedAppraisal = new ArrayList<>();
+        for (AppraisalReviewFinalizerStatus finalizerStatus : appraisalReviewFinalizerStatus) {
+           if (finalizerStatus.getAppraisalReviewId() == 0)
+               throw new Exception("Appraisal review id is invalid");
+
+           if (finalizerStatus.getApprovalLevel() == 0)
+               throw new Exception("Invalid approval level");
+
+            var existingappraisalReviewFinalizer = appraisalDetailRepository.getAppraisalReviewFinalizerRepository(finalizerStatus.getAppraisalReviewId());
+            if (existingappraisalReviewFinalizer == null || existingappraisalReviewFinalizer.size() == 0)
+                throw new Exception("Review detail not found");
+
+            var previousReviewFinalizer = existingappraisalReviewFinalizer.stream().filter(x -> x.getApprovalLevel() == (finalizerStatus.getApprovalLevel()-1)).findFirst().orElse(null);
+            if (previousReviewFinalizer != null) {
+                previousReviewFinalizer.setStatus(ApplicationConstant.Revised);
+                revisedAppraisal.add(previousReviewFinalizer);
+            }
+            var currentReviewFinalizer = existingappraisalReviewFinalizer.stream().filter(x -> x.getApprovalLevel() == finalizerStatus.getApprovalLevel()).findFirst().orElse(null);
+            if (currentReviewFinalizer != null) {
+                currentReviewFinalizer.setStatus(ApplicationConstant.Pending);
+                revisedAppraisal.add(currentReviewFinalizer);
+            }
+        }
+        dbManager.saveAll(revisedAppraisal, AppraisalReviewFinalizerStatus.class);
+        return revisedAppraisal;
     }
     @Transactional
     public List<AppraisalReviewFinalizerStatus> approveAppraisalReviewDetailService(List<AppraisalReviewDetailDTO> appraisalReviewDetailDTOS) throws Exception {

@@ -3,6 +3,7 @@ package com.bot.performance.controller;
 import com.bot.performance.model.ApiResponse;
 import com.bot.performance.model.AppraisalReviewDetail;
 import com.bot.performance.model.AppraisalReviewDetailDTO;
+import com.bot.performance.model.AppraisalReviewFinalizerStatus;
 import com.bot.performance.serviceinterface.IPromotionAndHikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,12 @@ public class PromotionAndHikeController {
     @RequestMapping(value = "rejectAppraisalReviewDetail", method = RequestMethod.POST)
     public ResponseEntity<ApiResponse> rejectAppraisalReviewDetail(@RequestBody List<AppraisalReviewDetailDTO> appraisalReviewDetails) throws Exception {
         var result = iPromotionAndHikeService.rejectAppraisalReviewDetailService(appraisalReviewDetails);
+        return  ResponseEntity.ok(ApiResponse.Ok(result));
+    }
+
+    @RequestMapping(value = "revisedAppraisal", method = RequestMethod.POST)
+    public ResponseEntity<ApiResponse> revisedAppraisal(@RequestBody List<AppraisalReviewFinalizerStatus> appraisalReviewFinalizerStatus) throws Exception {
+        var result = iPromotionAndHikeService.revisedAppraisalService(appraisalReviewFinalizerStatus);
         return  ResponseEntity.ok(ApiResponse.Ok(result));
     }
 }

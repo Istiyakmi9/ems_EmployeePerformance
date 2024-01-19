@@ -11,12 +11,7 @@ public final class ApplicationConstant {
     public static final int Raised = 7;
     public static final int Submitted = 8;
     public static final int Approved = 9;
-    public static final int Present = 10;
-    public static final int Absent = 11;
-    public static final int MissingAttendanceRequest = 12;
-    public static final int Saved = 13;
-    public static final int AutoPromoted = 14;
-    public static final int FinalLevel = 1;
+    public static final int Revised = 10;
     public  static final String IST = "IST";
     public static final int Admin = 1;
     public static final int Manager = 7;
