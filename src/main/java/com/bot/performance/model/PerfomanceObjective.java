@@ -81,8 +81,8 @@ public class PerfomanceObjective {
     @JsonProperty("Total")
     Long total;
     @Transient
-    @JsonProperty("Index")
-    Long index;
+    @JsonProperty("RowIndex")
+    Long rowIndex;
 
     @Transient
     @JsonProperty("Status")
