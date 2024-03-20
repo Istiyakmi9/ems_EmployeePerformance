@@ -64,8 +64,8 @@ public class ObjectiveCatagory {
     @JsonProperty("Total")
     int total;
     @Transient
-    @JsonProperty("Index")
-    int index;
+    @JsonProperty("RowIndex")
+    int rowIndex;
     @Transient
     @JsonProperty("ObjectiveIds")
     List<Integer> objectiveIds;
