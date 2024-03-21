@@ -37,8 +37,8 @@ public class AppraisalAndCategoryDTO {
     public String status;
     @JsonProperty("Total")
     int total;
-    @JsonProperty("Index")
-    int index;
+    @JsonProperty("RowIndex")
+    int rowIndex;
     @JsonProperty("ObjectiveIds")
     List<Integer> objectiveIds;
     @JsonProperty("RoleIds")
