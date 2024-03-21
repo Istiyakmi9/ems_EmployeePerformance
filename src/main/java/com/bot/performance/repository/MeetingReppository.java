@@ -19,4 +19,5 @@ public class MeetingReppository {
     public List<Meeting> getMeetingByEmpIdRepository(long meetingId) {
         return dbManager.queryList("select * from employee_meeting where CreatedBy = " + meetingId, Meeting.class);
     }
+
 }

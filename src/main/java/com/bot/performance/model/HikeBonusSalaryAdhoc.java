@@ -93,4 +93,48 @@ public class HikeBonusSalaryAdhoc {
     @Column(name = "IsActive")
     @JsonProperty("IsActive")
     Boolean isActive;
+
+    @JsonProperty("DOJ")
+    @Column(name = "DOJ")
+    Date dOJ;
+
+    @JsonProperty("LWD")
+    @Column(name = "LWD")
+    Date lWD;
+
+    @JsonProperty("DOR")
+    @Column(name = "DOR")
+    Date dOR;
+
+    @JsonProperty("NoOfDays")
+    @Column(name = "NoOfDays")
+    Integer noOfDays;
+
+    @JsonProperty("PaymentActionType")
+    @Column(name = "PaymentActionType")
+    String paymentActionType;
+
+    @JsonProperty("Reason")
+    @Column(name = "Reason")
+    String reason;
+
+    @JsonProperty("Comments")
+    @Column(name = "Comments")
+    String comments;
+
+    @JsonProperty("Status")
+    @Column(name = "Status")
+    Integer status;
+
+    @JsonProperty("ForYear")
+    @Column(name = "ForYear")
+    Integer forYear;
+
+    @JsonProperty("ForMonth")
+    @Column(name = "ForMonth")
+    Integer forMonth;
+
+    @JsonProperty("WorkedMinutes")
+    @Column(name = "WorkedMinutes")
+    BigDecimal workedMinutes;
 }

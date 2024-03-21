@@ -362,6 +362,11 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             hikeBonusSalaryAdhoc.setSequencePeriodOrder(0);
             hikeBonusSalaryAdhoc.setIsActive(true);
             hikeBonusSalaryAdhoc.setIsRepeatJob(false);
+            hikeBonusSalaryAdhoc.setNoOfDays(0);
+            hikeBonusSalaryAdhoc.setStatus(0);
+            hikeBonusSalaryAdhoc.setForYear(0);
+            hikeBonusSalaryAdhoc.setForMonth(0);
+            hikeBonusSalaryAdhoc.setWorkedMinutes(BigDecimal.ZERO);
             dbManager.save(hikeBonusSalaryAdhoc);
         }
     }

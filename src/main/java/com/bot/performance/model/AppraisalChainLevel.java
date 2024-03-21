@@ -23,7 +23,7 @@ public class AppraisalChainLevel {
     @Column(name = "ApprovalRoleId")
     int approvalRoleId;
     @JsonProperty("IsActive")
-    @Column(name = "isActive")
+    @Column(name = "IsActive")
     Boolean isActive;
     @JsonProperty("IsOptional")
     @Column(name = "IsOptional")
