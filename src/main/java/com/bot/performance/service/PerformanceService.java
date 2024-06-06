@@ -200,6 +200,7 @@ public class PerformanceService implements IPerformanceService {
             objective.setObjectiveId(dbManager.nextLongPrimaryKey(PerfomanceObjective.class));
             objective.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
             objective.setCreatedOn(date);
+            objective.setDefaultObjective(false);
         } else {
             objective.setObjective(objectiveDetail.getObjective());
             objective.setStartValue(objectiveDetail.getStartValue());
@@ -210,6 +211,7 @@ public class PerformanceService implements IPerformanceService {
             objective.setDescription(objectiveDetail.getDescription());
             objective.setTagRole(objectiveDetail.getTagRole());
             objective.setUpdatedOn(date);
+            objective.setDefaultObjective(false);
             objective.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
         }
 

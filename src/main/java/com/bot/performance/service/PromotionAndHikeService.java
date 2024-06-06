@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Types;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -47,6 +49,9 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             if (promotionDetail.getEmployeeId() == 0)
                 throw new Exception("Invalid employee selected");
 
+            if (!promotionDetail.isActive())
+                continue;
+
             var appraisalReviewDetail = appraisalDetailRepository.getAppraisalReviewDetailRepository(promotionDetail.getAppraisalReviewId());
             var employeeSalaryDetail = dbManager.getById(promotionDetail.getEmployeeId(), EmployeeSalaryDetail.class);
             if (appraisalReviewDetail == null) {
@@ -73,18 +78,26 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                     appraisalReviewDetail.setHikeAmount(promotionDetail.getHikeAmount());
                     appraisalReviewDetail.setRating(promotionDetail.getRating());
                     appraisalReviewDetail.setPromotedDesignation(promotionDetail.getPromotedDesignation());
-                    if (promotionDetail.getAppraisalStatus() == ApplicationConstant.Revised) {
-                        if (!promotionDetail.getComments().contains("[")) {
-                            var comments = objectMapper.readValue(appraisalReviewDetail.getComments(), new TypeReference<List<AppraisalComment>>() {
-                            });
-                            AppraisalComment appraisalComment = new AppraisalComment();
-                            appraisalComment.setComments(promotionDetail.getComments());
-                            appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName() + " " + currentUserDetail.getUserDetail().getLastName());
-                            appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
-                            appraisalComment.setCommentedOn(utilDate);
-                            comments.add(appraisalComment);
-                            appraisalReviewDetail.setComments(objectMapper.writeValueAsString(comments));
-                        }
+                    if (promotionDetail.getAppraisalStatus() == ApplicationConstant.Revised && !promotionDetail.getComments().contains("[")) {
+                        var comments = objectMapper.readValue(appraisalReviewDetail.getComments(), new TypeReference<List<AppraisalComment>>() {
+                        });
+                        AppraisalComment appraisalComment = new AppraisalComment();
+                        appraisalComment.setComments(promotionDetail.getComments());
+                        appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName() + " " + currentUserDetail.getUserDetail().getLastName());
+                        appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                        appraisalComment.setCommentedOn(utilDate);
+                        comments.add(appraisalComment);
+                        appraisalReviewDetail.setComments(objectMapper.writeValueAsString(comments));
+                    } else if (promotionDetail.getComments().contains("[")) {
+                        var comments = objectMapper.readValue(appraisalReviewDetail.getComments(), new TypeReference<List<AppraisalComment>>() {
+                        });
+                        AppraisalComment appraisalComment = new AppraisalComment();
+                        appraisalComment.setComments("");
+                        appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName() + " " + currentUserDetail.getUserDetail().getLastName());
+                        appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                        appraisalComment.setCommentedOn(utilDate);
+                        comments.add(appraisalComment);
+                        appraisalReviewDetail.setComments(objectMapper.writeValueAsString(comments));
                     }
                 }
             }
@@ -124,30 +137,28 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                     i++;
                 }
             } else {
-                if (appraisalReviewDetail.isActive()) {
-                    var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
-                            .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
-                    if (currentApprailsalReview.getApprovalLevel() > 1) {
-                        var previousAppraisalReview = existingappraisalReviewFinalizer.stream()
-                                .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() - 1).toList().get(0);
-                        if (previousAppraisalReview != null) {
-                            if (previousAppraisalReview.isActionRequired() && previousAppraisalReview.getStatus() != ApplicationConstant.Approved) {
-                                throw new Exception(String.format("%s is not approved the appraisal", previousAppraisalReview.getFullName()));
-                            }
+                var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
+                        .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
+                if (currentApprailsalReview.getApprovalLevel() > 1) {
+                    var previousAppraisalReview = existingappraisalReviewFinalizer.stream()
+                            .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() - 1).toList().get(0);
+                    if (previousAppraisalReview != null) {
+                        if (previousAppraisalReview.isActionRequired() && previousAppraisalReview.getStatus() != ApplicationConstant.Approved) {
+                            throw new Exception(String.format("%s is not approved the appraisal", previousAppraisalReview.getFullName()));
                         }
                     }
-                    currentApprailsalReview.setStatus(ApplicationConstant.Approved);
-                    currentApprailsalReview.setReactedOn(utilDate);
-
-                    var nextAppraisalReview = existingappraisalReviewFinalizer.stream()
-                            .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() + 1).toList();
-                    if (nextAppraisalReview.size() > 0)
-                        nextAppraisalReview.get(0).setStatus(ApplicationConstant.Pending);
-                    else
-                        manageHikeSalaryService(appraisalReviewDetail);
-
-                    appraisalReviewFinalizer.addAll(existingappraisalReviewFinalizer);
                 }
+                currentApprailsalReview.setStatus(ApplicationConstant.Approved);
+                currentApprailsalReview.setReactedOn(utilDate);
+
+                var nextAppraisalReview = existingappraisalReviewFinalizer.stream()
+                        .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() + 1).toList();
+                if (nextAppraisalReview.size() > 0)
+                    nextAppraisalReview.get(0).setStatus(ApplicationConstant.Pending);
+                else
+                    manageHikeSalaryService(appraisalReviewDetail);
+
+                appraisalReviewFinalizer.addAll(existingappraisalReviewFinalizer);
             }
         }
         dbManager.saveAll(appraisalReviewDetails, AppraisalReviewDetail.class);
@@ -341,6 +352,7 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     @Transactional
     private void manageHikeSalaryService(AppraisalReviewDetail appraisalReviewDetails) throws Exception {
         if (appraisalReviewDetails != null) {
+            ZonedDateTime utcDateTime = ZonedDateTime.now(ZoneOffset.UTC);
             long hikeBonusSalaryAdhocId = dbManager.nextLongPrimaryKey(HikeBonusSalaryAdhoc.class);
             HikeBonusSalaryAdhoc hikeBonusSalaryAdhoc = new HikeBonusSalaryAdhoc();
             hikeBonusSalaryAdhoc.setSalaryAdhocId(hikeBonusSalaryAdhocId);
@@ -351,22 +363,21 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             hikeBonusSalaryAdhoc.setIsFine(false);
             hikeBonusSalaryAdhoc.setIsHikeInSalary(true);
             hikeBonusSalaryAdhoc.setIsBonus(false);
-            hikeBonusSalaryAdhoc.setDescription(null);
+            hikeBonusSalaryAdhoc.setProcessStepId(0);
+            hikeBonusSalaryAdhoc.setFinancialYear(utcDateTime.getYear());
+            hikeBonusSalaryAdhoc.setIsPaidByEmployee(false);
+            hikeBonusSalaryAdhoc.setIsReimbursment(false);
+            hikeBonusSalaryAdhoc.setIsSalaryOnHold(false);
+            hikeBonusSalaryAdhoc.setIsArrear(false);
+            hikeBonusSalaryAdhoc.setIsOvertime(false);
+            hikeBonusSalaryAdhoc.setIsCompOff(false);
             hikeBonusSalaryAdhoc.setAmount(appraisalReviewDetails.getHikeAmount());
-            hikeBonusSalaryAdhoc.setApprovedBy(currentUserDetail.getUserDetail().getUserId());
-            hikeBonusSalaryAdhoc.setStartDate(nextMonthDate(true));
-            hikeBonusSalaryAdhoc.setEndDate(nextMonthDate(false));
-            hikeBonusSalaryAdhoc.setIsForSpecificPeriod(false);
-            hikeBonusSalaryAdhoc.setSequenceStartDate(null);
-            hikeBonusSalaryAdhoc.setSequenceEndDate(null);
-            hikeBonusSalaryAdhoc.setSequencePeriodOrder(0);
+            hikeBonusSalaryAdhoc.setAmountInPercentage(BigDecimal.ZERO);
             hikeBonusSalaryAdhoc.setIsActive(true);
-            hikeBonusSalaryAdhoc.setIsRepeatJob(false);
-            hikeBonusSalaryAdhoc.setNoOfDays(0);
-            hikeBonusSalaryAdhoc.setStatus(0);
-            hikeBonusSalaryAdhoc.setForYear(0);
-            hikeBonusSalaryAdhoc.setForMonth(0);
-            hikeBonusSalaryAdhoc.setWorkedMinutes(BigDecimal.ZERO);
+            hikeBonusSalaryAdhoc.setStatus(ApplicationConstant.Approved);
+            hikeBonusSalaryAdhoc.setForYear(utcDateTime.getYear());
+            hikeBonusSalaryAdhoc.setForMonth(utcDateTime.getMonthValue());
+            hikeBonusSalaryAdhoc.setProgressState(ApplicationConstant.Approved);
             dbManager.save(hikeBonusSalaryAdhoc);
         }
     }

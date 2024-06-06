@@ -71,17 +71,17 @@ public class AppraisalReviewDetail {
     @Transient
     @JsonProperty("ObjectiveCategoryId")
     int objectiveCategoryId;
-    @Column(name = "AppraisalEffectedDate")
+    @Transient
     @JsonProperty("AppraisalEffectedDate")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     Date appraisalEffectedDate;
     @Transient
     @JsonProperty("AppraisalStatus")
     int appraisalStatus;
-    @Column(name = "IsActive")
+    @Transient
     @JsonProperty("IsActive")
     boolean isActive;
-    @Column(name = "Status")
+    @Transient
     @JsonProperty("Status")
     int status;
     @Transient
