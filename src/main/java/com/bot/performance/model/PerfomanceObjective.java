@@ -47,6 +47,10 @@ public class PerfomanceObjective {
     @JsonProperty("TargetValue")
     double targetValue;
 
+    @Column(name = "IsDefaultObjective")
+    @JsonProperty("IsDefaultObjective")
+    boolean isDefaultObjective;
+
     @Column(name = "CompanyId")
     @JsonProperty("CompanyId")
     int companyId;

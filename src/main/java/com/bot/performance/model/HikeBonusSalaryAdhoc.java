@@ -3,12 +3,10 @@ package com.bot.performance.model;
 import com.bot.performance.db.annotations.Column;
 import com.bot.performance.db.annotations.Id;
 import com.bot.performance.db.annotations.Table;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 @Data
 @Table(name = "hike_bonus_salary_adhoc")
@@ -22,6 +20,14 @@ public class HikeBonusSalaryAdhoc {
     @JsonProperty("EmployeeId")
     Long employeeId;
 
+    @Column(name = "ProcessStepId")
+    @JsonProperty("ProcessStepId")
+    int processStepId;
+
+    @Column(name = "FinancialYear")
+    @JsonProperty("FinancialYear")
+    int financialYear;
+
     @Column(name = "OrganizationId")
     @JsonProperty("OrganizationId")
     Integer organizationId;
@@ -33,6 +39,10 @@ public class HikeBonusSalaryAdhoc {
     @Column(name = "IsPaidByCompany")
     @JsonProperty("IsPaidByCompany")
     Boolean isPaidByCompany;
+
+    @Column(name = "IsPaidByEmployee")
+    @JsonProperty("IsPaidByEmployee")
+    Boolean isPaidByEmployee;
 
     @Column(name = "IsFine")
     @JsonProperty("IsFine")
@@ -46,95 +56,63 @@ public class HikeBonusSalaryAdhoc {
     @JsonProperty("IsBonus")
     Boolean isBonus;
 
-    @Column(name = "Description")
-    @JsonProperty("Description")
-    String description;
+    @Column(name = "IsReimbursment")
+    @JsonProperty("IsReimbursment")
+    Boolean isReimbursment;
+
+    @Column(name = "IsSalaryOnHold")
+    @JsonProperty("IsSalaryOnHold")
+    Boolean isSalaryOnHold;
+
+    @Column(name = "IsArrear")
+    @JsonProperty("IsArrear")
+    Boolean isArrear;
+
+    @Column(name = "IsOvertime")
+    @JsonProperty("IsOvertime")
+    Boolean isOvertime;
+
+    @Column(name = "IsCompOff")
+    @JsonProperty("IsCompOff")
+    Boolean isCompOff;
+
+    @Column(name = "OTCalculatedOn")
+    @JsonProperty("OTCalculatedOn")
+    String oTCalculatedOn;
 
     @Column(name = "Amount")
     @JsonProperty("Amount")
     BigDecimal amount;
 
-    @Column(name = "ApprovedBy")
-    @JsonProperty("ApprovedBy")
-    Long approvedBy;
-
-    @Column(name = "IsRepeatJob")
-    @JsonProperty("IsRepeatJob")
-    Boolean isRepeatJob;
-
-    @Column(name = "StartDate")
-    @JsonProperty("StartDate")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date startDate;
-
-    @Column(name = "EndDate")
-    @JsonProperty("EndDate")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date endDate;
-
-    @Column(name = "IsForSpecificPeriod")
-    @JsonProperty("IsForSpecificPeriod")
-    Boolean isForSpecificPeriod;
-
-    @Column(name = "SequenceStartDate")
-    @JsonProperty("SequenceStartDate")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date sequenceStartDate;
-
-    @Column(name = "SequencePeriodOrder")
-    @JsonProperty("SequencePeriodOrder")
-    Integer sequencePeriodOrder;
-
-    @Column(name = "SequenceEndDate")
-    @JsonProperty("SequenceEndDate")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    Date sequenceEndDate;
+    @Column(name = "AmountInPercentage")
+    @JsonProperty("AmountInPercentage")
+    BigDecimal amountInPercentage;
 
     @Column(name = "IsActive")
     @JsonProperty("IsActive")
     Boolean isActive;
 
-    @JsonProperty("DOJ")
-    @Column(name = "DOJ")
-    Date dOJ;
-
-    @JsonProperty("LWD")
-    @Column(name = "LWD")
-    Date lWD;
-
-    @JsonProperty("DOR")
-    @Column(name = "DOR")
-    Date dOR;
-
-    @JsonProperty("NoOfDays")
-    @Column(name = "NoOfDays")
-    Integer noOfDays;
-
-    @JsonProperty("PaymentActionType")
     @Column(name = "PaymentActionType")
+    @JsonProperty("PaymentActionType")
     String paymentActionType;
 
-    @JsonProperty("Reason")
-    @Column(name = "Reason")
-    String reason;
-
-    @JsonProperty("Comments")
     @Column(name = "Comments")
+    @JsonProperty("Comments")
     String comments;
 
-    @JsonProperty("Status")
     @Column(name = "Status")
+    @JsonProperty("Status")
     Integer status;
 
-    @JsonProperty("ForYear")
     @Column(name = "ForYear")
+    @JsonProperty("ForYear")
     Integer forYear;
 
-    @JsonProperty("ForMonth")
     @Column(name = "ForMonth")
+    @JsonProperty("ForMonth")
     Integer forMonth;
 
-    @JsonProperty("WorkedMinutes")
-    @Column(name = "WorkedMinutes")
-    BigDecimal workedMinutes;
+    @Column(name = "ProgressState")
+    @JsonProperty("ProgressState")
+    Integer progressState;
 }

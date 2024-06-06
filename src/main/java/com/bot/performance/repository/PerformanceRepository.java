@@ -53,7 +53,7 @@ public class PerformanceRepository {
         dbParameters.add(new DbParameters("_pageSize", filterModel.getPageSize(), Types.INTEGER));
         var dataSet = lowLevelExecution.executeProcedure("sp_performance_objective_getby_filter", dbParameters);
         if (dataSet == null || dataSet.size() != 2)
-            throw new Exception("Fail to get objectives. Please contact to admin.");
+            return new ArrayList<>();
         return objectMapper.convertValue(dataSet.get("#result-set-1"), new TypeReference<List<PerfomanceObjective>>() {
         });
     }
