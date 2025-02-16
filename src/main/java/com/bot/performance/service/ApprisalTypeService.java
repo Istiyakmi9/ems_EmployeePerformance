@@ -170,11 +170,12 @@ public class ApprisalTypeService implements IApprisalTyeService {
         if (objectiveCatagory.getTypeDescription().isEmpty())
             throw new Exception("Please enter description first");
 
-        if (objectiveCatagory.getReviewStartDate() == null)
-            throw new Exception("Please select a valid review from date");
+        if (objectiveCatagory.getAppraisalCycleStartDate() == null)
+            throw new Exception("Please select a valid appraisal cycle from date");
 
-        if (objectiveCatagory.getReviewEndDate() == null)
-            throw new Exception("Please select a valid review to date");
+        if (objectiveCatagory.getAppraisalCycleEndDate() == null)
+            throw new Exception("Please select a valid appraisal cycle to date");
+
 
         if (objectiveCatagory.isIsRequiredRatersFeedback()) {
             if (objectiveCatagory.getSelectionPeriodStartDate() == null)
@@ -191,17 +192,17 @@ public class ApprisalTypeService implements IApprisalTyeService {
         }
 
         if (objectiveCatagory.isIsSelfAppraisal()) {
-            if (objectiveCatagory.getAppraisalCycleStartDate() == null)
-                throw new Exception("Please select a valid appraisal cycle from date");
-
-            if (objectiveCatagory.getAppraisalCycleEndDate() == null)
-                throw new Exception("Please select a valid appraisal cycle to date");
-
             if (objectiveCatagory.getSelfAppraisalStartDate() == null)
                 throw new Exception("Please select a valid self appraisal from date");
 
             if (objectiveCatagory.getSelfAppraisalEndDate() == null)
                 throw new Exception("Please select a valid self appraisal to date");
+
+            if (objectiveCatagory.getReviewStartDate() == null)
+                throw new Exception("Please select a valid review from date");
+
+            if (objectiveCatagory.getReviewEndDate() == null)
+                throw new Exception("Please select a valid review to date");
         }
 
         if (objectiveCatagory.getRoleIds().size() == 0)
