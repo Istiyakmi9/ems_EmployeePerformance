@@ -1,5 +1,7 @@
 package com.bot.performance.controller;
 
+import com.bot.performance.model.GitConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,14 +15,8 @@ import java.util.List;
 @RequestMapping("/api/eps/test/")
 public class TestController {
 
-    @Value("${file.folder:#{null}}")
-    private String targetFolder;
-
-    @Value("${env.folder:na}")
-    private String devFolder;
-
-    @Value("${service.name:no service}")
-    private String serviceName;
+    @Autowired
+    GitConfiguration gitConfiguration;
 
     @GetMapping("get")
     public ResponseEntity<List<String>> get() {
@@ -31,9 +27,8 @@ public class TestController {
         names.add("Tester");
         names.add("Manager");
         names.add("Developer");
-        names.add(targetFolder);
-        names.add(devFolder);
-        names.add(serviceName);
+        names.add(gitConfiguration.getName());
+        names.add(gitConfiguration.getFolder());
 
         return ResponseEntity.ok(names);
     }
