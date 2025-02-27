@@ -15,4 +15,5 @@ public final class ApplicationConstant {
     public  static final String IST = "IST";
     public static final int Admin = 1;
     public static final int Manager = 7;
+    public static final String EmstumFileService = "emstum";
 }

@@ -16,3 +16,11 @@ eureka:
     enabled: true
     serviceUrl:
       defaultZone: http://localhost:8080/eureka
+
+file:
+  saver:
+    service:
+      url: http://localhost:5010/bt/s1/api/
+
+app:
+  resourceBaseUrl: "http://localhost:5000/bts/resources/"
