@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Types;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -33,6 +34,7 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     @Autowired
     LowLevelExecution lowLevelExecution;
 
+    @Transactional(rollbackFor = Exception.class)
     public List<AppraisalReviewDetail> addPromotionAndHike(List<AppraisalReviewDetail> appraisalReview) throws Exception {
         java.util.Date utilDate = new java.util.Date();
         validateAppraisalReview(appraisalReview);
@@ -195,9 +197,11 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
     private void validateHikeDetail(AppraisalReviewDetail appraisalReviewDetail, EmployeeSalaryDetail employeeSalaryDetail) throws Exception {
         BigDecimal proposedHikeAmount = (employeeSalaryDetail.getCTC().multiply(appraisalReviewDetail.getHikePercentage()))
                 .divide(new BigDecimal(100));
-        proposedHikeAmount = proposedHikeAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+        proposedHikeAmount = proposedHikeAmount.setScale(2, RoundingMode.HALF_EVEN);
 
-        if (!proposedHikeAmount.equals(appraisalReviewDetail.getHikeAmount().setScale(2, BigDecimal.ROUND_HALF_EVEN)))
+        var hikePercentage = appraisalReviewDetail.getHikeAmount().multiply(new BigDecimal(100)).divide(employeeSalaryDetail.getCTC(), 2, RoundingMode.HALF_EVEN);
+        if (!proposedHikeAmount.equals(appraisalReviewDetail.getHikeAmount().setScale(2, RoundingMode.HALF_EVEN))
+            && !hikePercentage.equals(appraisalReviewDetail.getHikePercentage()))
             throw new Exception("Proposed hike amount calculation mismatched");
 
         if (appraisalReviewDetail.getEstimatedSalary().subtract(employeeSalaryDetail.getCTC()).signum() < 0)
