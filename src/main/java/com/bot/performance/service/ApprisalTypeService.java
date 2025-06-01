@@ -63,7 +63,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
             objectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             objectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
             objectiveCatagory.setApprovalWorkflowId(appraisalAndCategoryDTO.getApprovalWorkflowId());
-            objectiveCatagory.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
+            objectiveCatagory.setCreatedBy(currentUserDetail.getUserId());
             objectiveCatagory.setCreatedOn(date);
             objectiveCatagory.setObjectivesId("[]");
             objectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
@@ -129,7 +129,7 @@ public class ApprisalTypeService implements IApprisalTyeService {
             existObjectiveCatagory.setObjectiveCatagoryType(appraisalAndCategoryDTO.getObjectiveCatagoryType());
             existObjectiveCatagory.setHikeApproval(appraisalAndCategoryDTO.isHikeApproval());
             existObjectiveCatagory.setRolesId(objectMapper.writeValueAsString(appraisalAndCategoryDTO.getRoleIds()));
-            existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+            existObjectiveCatagory.setUpdatedBy(currentUserDetail.getUserId());
             existObjectiveCatagory.setTypeDescription(appraisalAndCategoryDTO.getTypeDescription());
             existObjectiveCatagory.setUpdatedOn(date);
             dbManager.save(existObjectiveCatagory);
