@@ -45,7 +45,7 @@ public class MeetingService implements IMeetingService {
             existMeeting = meeting;
             existMeeting.setMeetingId(dbManager.nextLongPrimaryKey(Meeting.class));
             existMeeting.setCreatedOn(date);
-            existMeeting.setCreatedBy(currentSession.getUserDetail().getUserId());
+            existMeeting.setCreatedBy(currentSession.getUserId());
         } else  {
             existMeeting.setMeetingDate(meeting.getMeetingDate());
             existMeeting.setMeetingFrequency(meeting.getMeetingFrequency());
@@ -54,7 +54,7 @@ public class MeetingService implements IMeetingService {
             existMeeting.setEndTime(meeting.getEndTime());
             existMeeting.setStartTime(meeting.getStartTime());
             existMeeting.setUpdatedOn(date);
-            existMeeting.setUpdatedBy(currentSession.getUserDetail().getUserId());
+            existMeeting.setUpdatedBy(currentSession.getUserId());
         }
 
         String documentPath = Paths.get(currentSession.getCompanyCode(), "oneonemeeting").toString();
@@ -82,7 +82,7 @@ public class MeetingService implements IMeetingService {
         else            existMeeting.setStatus(NotSubmitted);
 
         dbManager.save(existMeeting);
-        return this.getMeetingByEmpIdService(currentSession.getUserDetail().getUserId());
+        return this.getMeetingByEmpIdService(currentSession.getUserId());
     }
 
     private Files saveTextFile(TextFileFolderDetail textFileFolderDetail) throws Exception {
@@ -111,11 +111,11 @@ public class MeetingService implements IMeetingService {
         else
             throw new Exception("Invalid status selected");
 
-        meeting.setUpdatedBy(currentSession.getUserDetail().getUserId());
+        meeting.setUpdatedBy(currentSession.getUserId());
         meeting.setUpdatedOn(date);
         dbManager.save(meeting);
 
-        return this.getMeetingByEmpIdService(currentSession.getUserDetail().getUserId());
+        return this.getMeetingByEmpIdService(currentSession.getUserId());
     }
 
     public List<Meeting> deleteMeetingService(Long meetingId) throws Exception {
@@ -123,7 +123,7 @@ public class MeetingService implements IMeetingService {
             throw new Exception("Invalid meeting selected. Please select a valid email");
 
         meetingRepository.deleteMeetingByIdRepository(meetingId);
-        return this.getMeetingByEmpIdService(currentSession.getUserDetail().getUserId());
+        return this.getMeetingByEmpIdService(currentSession.getUserId());
     }
 
     private void validateMeeting(Meeting meeting) throws Exception {
