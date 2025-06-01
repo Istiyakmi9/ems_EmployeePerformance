@@ -174,7 +174,7 @@ public class PerformanceService implements IPerformanceService {
         performanceDetail.setUpdatedOn(date);
         performanceDetails.add(performanceDetail);
         existEmpPerformance.setPerformanceDetail(objectMapper.writeValueAsString(performanceDetails));
-        existEmpPerformance.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+        existEmpPerformance.setUpdatedBy(currentUserDetail.getUserId());
         existEmpPerformance.setPerformanceStatus(ApplicationConstant.Pending);
         existEmpPerformance.setRating(employeePerformance.getRating());
         existEmpPerformance.setUpdatedOn(date);
@@ -198,7 +198,7 @@ public class PerformanceService implements IPerformanceService {
             dbManager.nextLongPrimaryKey(PerfomanceObjective.class);
             objective = objectiveDetail;
             objective.setObjectiveId(dbManager.nextLongPrimaryKey(PerfomanceObjective.class));
-            objective.setCreatedBy(currentUserDetail.getUserDetail().getUserId());
+            objective.setCreatedBy(currentUserDetail.getUserId());
             objective.setCreatedOn(date);
             objective.setDefaultObjective(false);
         } else {
@@ -212,7 +212,7 @@ public class PerformanceService implements IPerformanceService {
             objective.setTagRole(objectiveDetail.getTagRole());
             objective.setUpdatedOn(date);
             objective.setDefaultObjective(false);
-            objective.setUpdatedBy(currentUserDetail.getUserDetail().getUserId());
+            objective.setUpdatedBy(currentUserDetail.getUserId());
         }
 
         dbManager.save(objective);
@@ -273,7 +273,7 @@ public class PerformanceService implements IPerformanceService {
 
         dbManager.saveAll(performances, EmployeePerformance.class);
 
-        return GetEmployeeObjectiveService(currentUserDetail.getUserDetail().getDesignationId(), currentUserDetail.getUserDetail().getCompanyId(),employeeId);
+        return GetEmployeeObjectiveService(currentUserDetail.getDesignationId(), currentUserDetail.getCompanyId(),employeeId);
     }
 
     public String changeEmployeeObjectiveStatusService(Long employeeId, int status) throws Exception {
