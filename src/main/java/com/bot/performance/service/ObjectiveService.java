@@ -19,6 +19,6 @@ public class ObjectiveService {
         if (catagoryId <= 0)
             throw new Exception("Invalid catagory id used");
 
-        return performanceObjectiveRepository.getObjectiveByCatagoryIdRepository(catagoryId, userDetail.getUserDetail().getCompanyId());
+        return performanceObjectiveRepository.getObjectiveByCatagoryIdRepository(catagoryId, userDetail.getCompanyId());
     }
 }

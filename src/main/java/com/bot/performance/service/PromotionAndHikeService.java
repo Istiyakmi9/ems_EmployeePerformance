@@ -67,8 +67,8 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                 List<AppraisalComment> appraisalComments = new ArrayList<>();
                 AppraisalComment appraisalComment = new AppraisalComment();
                 appraisalComment.setComments(promotionDetail.getComments());
-                appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName()+ " "+currentUserDetail.getUserDetail().getLastName());
-                appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                appraisalComment.setName(currentUserDetail.getFullName());
+                appraisalComment.setId(currentUserDetail.getUserId());
                 appraisalComment.setCommentedOn(utilDate);
                 appraisalComments.add(appraisalComment);
                 var comment = objectMapper.writeValueAsString(appraisalComments);
@@ -85,8 +85,8 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                         });
                         AppraisalComment appraisalComment = new AppraisalComment();
                         appraisalComment.setComments(promotionDetail.getComments());
-                        appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName() + " " + currentUserDetail.getUserDetail().getLastName());
-                        appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                        appraisalComment.setName(currentUserDetail.getFullName());
+                        appraisalComment.setId(currentUserDetail.getUserId());
                         appraisalComment.setCommentedOn(utilDate);
                         comments.add(appraisalComment);
                         appraisalReviewDetail.setComments(objectMapper.writeValueAsString(comments));
@@ -95,8 +95,8 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                         });
                         AppraisalComment appraisalComment = new AppraisalComment();
                         appraisalComment.setComments("");
-                        appraisalComment.setName(currentUserDetail.getUserDetail().getFirstName() + " " + currentUserDetail.getUserDetail().getLastName());
-                        appraisalComment.setId(currentUserDetail.getUserDetail().getUserId());
+                        appraisalComment.setName(currentUserDetail.getFullName());
+                        appraisalComment.setId(currentUserDetail.getUserId());
                         appraisalComment.setCommentedOn(utilDate);
                         comments.add(appraisalComment);
                         appraisalReviewDetail.setComments(objectMapper.writeValueAsString(comments));
@@ -140,7 +140,7 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
                 }
             } else {
                 var currentApprailsalReview = existingappraisalReviewFinalizer.stream()
-                        .filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList().get(0);
+                        .filter(x -> x.getReviwerId() == currentUserDetail.getUserId()).toList().get(0);
                 if (currentApprailsalReview.getApprovalLevel() > 1) {
                     var previousAppraisalReview = existingappraisalReviewFinalizer.stream()
                             .filter(x -> x.getApprovalLevel() == currentApprailsalReview.getApprovalLevel() - 1).toList().get(0);
@@ -336,7 +336,7 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
 
             var result = appraisalDetailRepository.getAppraisalFinalizerReviewRepository(appraisalDetail.getAppraisalReviewId());
             result = objectMapper.convertValue(result, new TypeReference<List<AppraisalReviewFinalizerStatus>>() {});
-            var finalizerReview = result.stream().filter(x -> x.getReviwerId() == currentUserDetail.getUserDetail().getUserId()).toList();
+            var finalizerReview = result.stream().filter(x -> x.getReviwerId() == currentUserDetail.getUserId()).toList();
             if (finalizerReview.get(0).getStatus() == ApplicationConstant.NotSubmitted ||
                 finalizerReview.get(0).getStatus() == ApplicationConstant.Pending) {
                 finalizerReview.get(0).setStatus(status);
@@ -361,8 +361,8 @@ public class PromotionAndHikeService implements IPromotionAndHikeService {
             HikeBonusSalaryAdhoc hikeBonusSalaryAdhoc = new HikeBonusSalaryAdhoc();
             hikeBonusSalaryAdhoc.setSalaryAdhocId(hikeBonusSalaryAdhocId);
             hikeBonusSalaryAdhoc.setEmployeeId(appraisalReviewDetails.getEmployeeId());
-            hikeBonusSalaryAdhoc.setOrganizationId(currentUserDetail.getUserDetail().getOrganizationId());
-            hikeBonusSalaryAdhoc.setCompanyId(currentUserDetail.getUserDetail().getCompanyId());
+            hikeBonusSalaryAdhoc.setOrganizationId(currentUserDetail.getOrganizationId());
+            hikeBonusSalaryAdhoc.setCompanyId(currentUserDetail.getCompanyId());
             hikeBonusSalaryAdhoc.setIsPaidByCompany(true);
             hikeBonusSalaryAdhoc.setIsFine(false);
             hikeBonusSalaryAdhoc.setIsHikeInSalary(true);

@@ -32,7 +32,7 @@ public class EmployeePerformanceController extends BaseController {
     @GetMapping("get")
     @CircuitBreaker(name = "countryList", fallbackMethod = "handleOnNoService")
     public ResponseEntity<List<String>> getDetail() {
-        System.out.println(userDetail.getUserDetail().toString());
+        System.out.println(userDetail.toString());
         List<String> names = new ArrayList<>();
         names.add("India");
         names.add("America");
