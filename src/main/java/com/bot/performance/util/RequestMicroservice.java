@@ -36,7 +36,7 @@ public class RequestMicroservice {
         //headers.setBearerAuth(microserviceRequest.getToken());
 
         DbConfigModal dbConfigModal = discretConnectionString(microserviceRequest.connectionString);
-        headers.put("database", mapper.writeValueAsString(dbConfigModal));
+        headers.put("database", microserviceRequest.connectionString);
         headers.put("companyCode", microserviceRequest.getCompanyCode());
 
         return headers;
